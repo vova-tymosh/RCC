@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+.DS_Store
+
+
+# WiFi and other secret creadentials
+RubyCredentials.h
