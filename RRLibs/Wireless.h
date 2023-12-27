@@ -8,12 +8,11 @@
 class Wireless {
   private:
     static const int RF_NAME_LENGTH = 6;
-    static const int MAX_NAME_LENGTH = 7;
+    static const int MAX_NAME_LENGTH = 12;
     static const int RF24_PACKET_LEN = 32;
-    static const int MAX_FIELD_COUNT = 4;
-    static const int MAX_FLIP = 50;
-    static const int ID_NAMES = 0x00;
-    static const int ID_FIELDS = 0x80;
+    static const int MAX_FIELD_COUNT = (RF24_PACKET_LEN - 1) / sizeof(float);
+    static const int ID_NAMES = 0x80;
+    static const int ID_FIELDS = 0x00;
 
     uint8_t radioName[RF_NAME_LENGTH];
     char fieldNames[MAX_NAME_LENGTH * MAX_FIELD_COUNT];
