@@ -31,6 +31,7 @@ class Wireless {
     void setCallback(Callback callback);
     float getLostRate();
     int getSentCount();
+    void print();
     void setup();
     void loop();
   private:
