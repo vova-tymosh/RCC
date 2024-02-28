@@ -3,35 +3,37 @@
  * 
  *  
  */
+#include <RF24.h>
+#include <RF24Network.h>
 #include "Timer.h"
 
 class Wireless {
   private:
-    static const int RF_NAME_LENGTH = 6;
-    static const int MAX_NAME_LENGTH = 12;
-    static const int RF24_PACKET_LEN = 32;
-    static const int MAX_FIELD_COUNT = (RF24_PACKET_LEN - 1) / sizeof(float);
-    static const int ID_NAMES = 0x80;
-    static const int ID_FIELDS = 0x00;
-
-    uint8_t radioName[RF_NAME_LENGTH];
-    char fieldNames[MAX_NAME_LENGTH * MAX_FIELD_COUNT];
-    float fieldValues[MAX_FIELD_COUNT];
-    uint8_t packet[RF24_PACKET_LEN];
-    int fieldCount;
+    static const char PACKET_REG = 'r';
+    static const char PACKET_NORM = 'n';
+    static const int MAX_FIELD_COUNT = 10;
     Timer timer;
     int sent;
     int lost;
-    int flip;
+    RF24 radio;
+    RF24Network network;
+    float fieldValues[MAX_FIELD_COUNT];
+    uint16_t node;
+    int fieldCount;
+
+    uint16_t read(void* payload, uint16_t size);
+    bool write(const void* payload, uint16_t size);
+    void sendNormal();
   public:
     typedef void (* Callback)(char code, float value);
-    Wireless(int fieldCount, char* radioName, int cePin, int csnPin);
-    void setFieldName(int index, char *name);
-    void setFieldValue(int index, float value);
+    Wireless(int node, int fieldCount, int cePin, int csnPin) : 
+      node(node), fieldCount(fieldCount), radio(cePin, csnPin), network(radio) {};
+    void handshake(char *names);
+    void onReceive();
+    void setValue(int index, float value);
     void setCallback(Callback callback);
     float getLostRate();
     int getSentCount();
-    void print();
     void setup();
     void loop();
   private:
