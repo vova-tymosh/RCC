@@ -4,7 +4,7 @@
  *  Timer
  */
 #pragma once
-
+#include <Arduino.h>
 
 class Timer {
   private:
