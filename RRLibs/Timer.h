@@ -23,7 +23,7 @@ class Timer {
       start(this->duration);
     }
     
-    bool hasFired() {
+    bool hasFiredOnce() {
       if ((fire != 0) && (millis() > fire)) {
         fire = 0;
         return true;
@@ -31,8 +31,8 @@ class Timer {
         return false;
       }
     }
-    bool hasFiredMulti() {
-      if (hasFired()) {
+    bool hasFired() {
+      if (hasFiredOnce()) {
         restart();
         return true;
       } else {
