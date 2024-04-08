@@ -18,7 +18,7 @@ class Intercom {
     bool master;
     data_t packetIn[MAX_FIELD];
     data_t packetOut[MAX_FIELD];
-    int Intercom::internalRecv();
+    int internalRecv();
 
   public:
     void onReceive(int bytes);
