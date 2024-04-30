@@ -42,18 +42,22 @@ class WirelessBase {
   protected:
     static const uint16_t STATION_NODE = 0;
     uint16_t node;
-    int sent;
+    int total;
     int lost;
 
   public:
     WirelessBase(int node) : node(node) {};
 
-    float getLostRate() {
-      if (sent)
-        return (float)lost / (float)sent;
-      else
-        return 0;
+    int getLostRate() {
+      int lostRate = 0;
+      if (total) {
+        lostRate = 100 * lost / total;
+        if (lostRate > 100)
+          lostRate = 100;
+      }
+      return lostRate;
     }
+
     virtual uint16_t read(void* payload, uint16_t size) = 0;
     virtual bool write(const void* payload, uint16_t size) = 0;
     virtual bool available() = 0;
@@ -75,11 +79,10 @@ class Wireless: public WirelessBase {
     }
 
     bool write(const void* payload, uint16_t size) {
+      total++;
       RF24NetworkHeader header(STATION_NODE);
       bool report = network.write(header, payload, size);
-      if (report)
-        sent++;
-      else
+      if (!report)
         lost++;
       return report;
     }
