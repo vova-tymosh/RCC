@@ -48,8 +48,8 @@ class WirelessBase {
   public:
     WirelessBase(int node) : node(node) {};
 
-    int getLostRate() {
-      int lostRate = 0;
+    uint16_t getLostRate() {
+      uint16_t lostRate = 0;
       if (total) {
         lostRate = 100 * lost / total;
         if (lostRate > 100)
