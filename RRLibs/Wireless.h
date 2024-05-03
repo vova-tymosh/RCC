@@ -46,8 +46,6 @@ class WirelessBase {
     int lost;
 
   public:
-    WirelessBase(int node) : node(node) {};
-
     uint16_t getLostRate() {
       uint16_t lostRate = 0;
       if (total) {
@@ -61,7 +59,7 @@ class WirelessBase {
     virtual uint16_t read(void* payload, uint16_t size) = 0;
     virtual bool write(const void* payload, uint16_t size) = 0;
     virtual bool available() = 0;
-    virtual void setup() = 0;
+    virtual void setup(int node) = 0;
 };
 
 class Wireless: public WirelessBase {
@@ -70,12 +68,19 @@ class Wireless: public WirelessBase {
     RADIO_NETWORK network;
 
   public:
-    Wireless(int node, int cePin = 0, int csnPin = 0) :
-      WirelessBase(node), RADIO_CTOR(cePin, csnPin), network(radio) {};
+    Wireless(int cePin = 0, int csnPin = 0) :
+      RADIO_CTOR(cePin, csnPin), network(radio) {};
 
     uint16_t read(void* payload, uint16_t size) {
       RF24NetworkHeader header;
       return network.read(header, payload, size);
+    }
+
+    uint16_t readFrom(int* from, void* payload, uint16_t size) {
+      RF24NetworkHeader header;
+      uint16_t r = network.read(header, payload, size);
+      *from = header.from_node;
+      return r;
     }
 
     bool write(const void* payload, uint16_t size) {
@@ -92,7 +97,8 @@ class Wireless: public WirelessBase {
       return network.available();
     }
 
-    void setup() {
+    void setup(int node) {
+      this->node = node;
       if (!radio.begin()) {
         Serial.println("ERROR: Radio is dead");
         while (1) {}
