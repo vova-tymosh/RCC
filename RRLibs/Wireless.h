@@ -56,8 +56,8 @@ class WirelessBase {
       return lostRate;
     }
 
-    virtual uint16_t read(void* payload, uint16_t size) = 0;
-    virtual bool write(const void* payload, uint16_t size) = 0;
+    virtual uint16_t read(void* payload, uint16_t size, int* from = NULL) = 0;
+    virtual bool write(const void* payload, uint16_t size, int to = STATION_NODE) = 0;
     virtual bool available() = 0;
     virtual void setup(int node) = 0;
 };
@@ -71,19 +71,15 @@ class Wireless: public WirelessBase {
     Wireless(int cePin = 0, int csnPin = 0) :
       RADIO_CTOR(cePin, csnPin), network(radio) {};
 
-    uint16_t read(void* payload, uint16_t size) {
-      RF24NetworkHeader header;
-      return network.read(header, payload, size);
-    }
-
-    uint16_t readFrom(int* from, void* payload, uint16_t size) {
+    uint16_t read(void* payload, uint16_t size, int* from = NULL) {
       RF24NetworkHeader header;
       uint16_t r = network.read(header, payload, size);
-      *from = header.from_node;
+      if (from)
+        *from = header.from_node;
       return r;
     }
 
-    bool write(const void* payload, uint16_t size) {
+    bool write(const void* payload, uint16_t size, int to = STATION_NODE) {
       total++;
       RF24NetworkHeader header(STATION_NODE);
       bool report = network.write(header, payload, size);
