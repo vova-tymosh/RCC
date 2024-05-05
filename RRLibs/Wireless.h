@@ -81,7 +81,7 @@ class Wireless: public WirelessBase {
 
     bool write(const void* payload, uint16_t size, int to = STATION_NODE) {
       total++;
-      RF24NetworkHeader header(STATION_NODE);
+      RF24NetworkHeader header(to);
       bool report = network.write(header, payload, size);
       if (!report)
         lost++;
