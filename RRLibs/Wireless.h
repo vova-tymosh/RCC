@@ -21,7 +21,7 @@
 
 #pragma once
 
-#ifdef RADIO_52
+#ifdef ARDUINO_ARCH_NRF52
 #include <nrf_to_nrf.h>
 #define RADIO_LEVEL NRF_PA_HIGH
 #define RADIO_BW NRF_250KBPS
