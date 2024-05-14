@@ -4,31 +4,52 @@
  * 
  * 
  */
-#include <SimpleKalmanFilter.h>
 #include "Timer.h"
 
 
+void speedHandler();
+
 class SpeedSensor {
   private:
-    const long MAX_PERIOD = 1500;
-    SimpleKalmanFilter simpleKalmanFilter;
-    int pin;
-    double wheelDia;
-    double clicksPerRotation;
-    double speed;
-    long distance;
-    double rotationPerSecond;
+    const int updatePeriod;
+    const float distancePerClick;
+    const int pin;
     Timer timer;
+    float distance;
+    float lastDisatnce;
+    unsigned long lastTime;
+    float speed;
   public:
-    SpeedSensor(int _pin, double _clicksPerRotation, double _wheelDia) : 
-      pin(_pin), clicksPerRotation(_clicksPerRotation), wheelDia(_wheelDia), simpleKalmanFilter(1, 1, 0.1) {
+    SpeedSensor(int pin, float distancePerClick, int updatePeriod = 500) :
+      pin(pin), distancePerClick(distancePerClick), updatePeriod(updatePeriod) {
+    }
+    void setup() {
+      pinMode(pin, INPUT);
+      attachInterrupt(digitalPinToInterrupt(pin), speedHandler, RISING);
+      lastTime = millis();
+      timer.start(updatePeriod);
+    }
+    void loop() {
+      if (timer.hasFired()) {
+        unsigned long now = millis();
+        speed = (float)(distance - lastDisatnce) / ((float)(now - lastTime) / 1000);
+        lastDisatnce = distance;
+        lastTime = now;
+      }
+    }
+    void update() {
+      distance += distancePerClick;
+    }
+    float getDistance() {
+      return distance;
     }
     float getSpeed() {
-      return this->speed;
+      return speed;
     }
-    long getDistance() {
-      return this->distance;
-    }
-    void setup();
-    void loop();
 };
+
+extern SpeedSensor speedSensor;
+
+void speedHandler() {
+  speedSensor.update();
+}
