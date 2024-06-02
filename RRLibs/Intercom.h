@@ -5,29 +5,25 @@
  * 
  */
 #pragma once
+#include <Wire.h>
 
 
 class Intercom {
-  public:
-    typedef float data_t;  
   private:
     static const int I2C_CODE = 1;
-    static const int MAX_FIELD = 2;
-    static const int PACKET_LEN = MAX_FIELD * sizeof(data_t) ;
+    static const int PACKET_LEN = 16;
+    bool    master;
     uint8_t size;
-    bool master;
-    data_t packetIn[MAX_FIELD];
-    data_t packetOut[MAX_FIELD];
-    int internalRecv();
+    uint8_t packetIn[PACKET_LEN];
+    uint8_t packetOut[PACKET_LEN];
 
   public:
-    void onReceive(int bytes);
+    int onReceive();
     void onSend();
 
     void setup(bool master);
-    void send(data_t* data, uint8_t size);
-    void recv(data_t* data, uint8_t size);
+    void send(void* data, uint8_t size);
+    void recv(void* data, uint8_t size);
 };
-extern Intercom intercom;
 
- 
+extern Intercom intercom;
