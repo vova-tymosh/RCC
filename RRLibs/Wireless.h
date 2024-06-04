@@ -44,6 +44,7 @@ class WirelessBase {
     uint16_t node;
     int total;
     int lost;
+    int lastSent;
 
   public:
     uint16_t getLostRate() {
@@ -54,6 +55,12 @@ class WirelessBase {
           lostRate = 100;
       }
       return lostRate;
+    }
+    bool isTransmitting() {
+      int sent = total - lost;
+      bool alive = lastSent != sent;
+      lastSent = sent;
+      return alive;
     }
 
     virtual uint16_t read(void* payload, uint16_t size, int* from = NULL) = 0;
