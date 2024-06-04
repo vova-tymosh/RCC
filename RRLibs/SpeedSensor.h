@@ -67,6 +67,7 @@ class SpeedSensorLegacy: public SpeedSensorBase {
 
     double speed;
     double rotationPerSecond;
+    long distance;
 
   public:
     double measurementError;
@@ -89,6 +90,9 @@ class SpeedSensorLegacy: public SpeedSensorBase {
     float getSpeed() {
       return speed;
     }
+    float getDistance() {
+      return distance;
+    }
     void loop() {
       volatile long localPeriod = period;
       if ( (millis() - lastTimestamp) < min(localPeriod * 2, MAX_PERIOD) )
@@ -96,6 +100,7 @@ class SpeedSensorLegacy: public SpeedSensorBase {
       else
         rotationPerSecond = 0;
       speed = filter.updateEstimate(rotationPerSecond);
+      distance += speed;
     }
     void update() {
       long now = millis();
