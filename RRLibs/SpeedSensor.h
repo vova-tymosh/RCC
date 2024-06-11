@@ -58,30 +58,30 @@ class SpeedSensorLegacy: public SpeedSensorBase {
   private:
     const long MAX_PERIOD = 3000;
     const int DEBOUNCE_THRESHOLD = 20;
-    const double SCALE = 2;
+    const float SCALE = 2;
     SimpleKalmanFilter filter;
     int pin;
 
     volatile long period;
     volatile long lastTimestamp;
 
-    double speed;
-    double rotationPerSecond;
-    long distance;
+    float speed;
+    float rotationPerSecond;
+    float distance;
 
   public:
-    double measurementError;
+    float measurementError;
     SpeedSensorLegacy(int pin) : pin(pin), filter(5, 5, 0.5) {
     }
     void setup() {
       pinMode(pin, INPUT_PULLUP);
       attachInterrupt(digitalPinToInterrupt(pin), speedHandler, FALLING);
     }
-    void setKalmanError(double value) {
+    void setKalmanError(float value) {
       measurementError = value;
       filter.setMeasurementError(value);
     }
-    void setKalmanNoise(double value) {
+    void setKalmanNoise(float value) {
       filter.setProcessNoise(value);
     }
     float getSpeedRaw() {

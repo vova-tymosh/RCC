@@ -14,7 +14,7 @@ class RCCLoco {
     static const char PACKET_NORM = 'n';
     static const int FUNCTION_BASE = '@';
     static const int FUNCTION_END = FUNCTION_BASE + 14; //16 - 2 bits for direction
-    const char *FIELDS = "Time Bitstate Lost Throttle Speed Disatnce Battery Temp Psi Water";
+    const char *FIELDS = "Time Disatnce Bitstate Speed Lost Throttle Battery Temp Psi Water";
 
     Wireless *wireless;
     Storage *storage;
@@ -48,16 +48,16 @@ class RCCLoco {
       } else if (code == 'r') {
           authorize(addr, name);
       } else if (code == 'd') {
-          int direction = constrain((int)value, 0, 2);
+          uint8_t direction = constrain((int)value, 0, 2);
           state.direction = direction;
       } else if (code == 't') {
-          int throttle = constrain((int)value, 0, 100);
+          uint8_t throttle = constrain((int)value, 0, 100);
           state.throttle = throttle;
       }
     }
 
     void handleThrottle() {
-      static int runtimeThrottle = 0;
+      static uint8_t runtimeThrottle = 0;
       if (state.direction == 0) {
         state.throttle = 0;
         runtimeThrottle = 0;
@@ -76,7 +76,7 @@ class RCCLoco {
 
   protected:
     int addr;
-    char *name;
+    const char *name;
     int increment;
     Timer timer;
 
@@ -94,7 +94,7 @@ class RCCLoco {
     virtual void onFunction(char code, bool value) {
     }
 
-    virtual void onThrottle(uint16_t direction, uint16_t throttle) {
+    virtual void onThrottle(uint8_t direction, uint8_t throttle) {
     }
 
     void setup() {

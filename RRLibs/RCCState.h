@@ -12,7 +12,8 @@ struct __attribute__((packed)) Command {
 // Message longer than 24 bytes will be fragmented
 struct __attribute__((packed)) LocoState {
   uint8_t packetType;
-  uint16_t tick;
+  uint32_t tick;
+  uint32_t disatnce;
   union {
     uint16_t bitstate;
     struct {
@@ -23,13 +24,12 @@ struct __attribute__((packed)) LocoState {
       uint16_t direction : 2;
     };
   };
-  uint16_t lost;
-  uint16_t throttle;
   uint16_t speed;
-  uint16_t disatnce;
-  uint16_t battery;
-  int16_t  temperature;
-  uint16_t psi;
-  uint16_t water;
+  uint8_t lost;
+  uint8_t throttle;
+  uint8_t battery;
+  uint8_t temperature;
+  uint8_t psi;
+  uint8_t water;
 };
  
