@@ -66,7 +66,6 @@ class Motor {
 class ThermoSensor2 {
   private:
     const int PIN_VCC = 10;
-    // const int PIN_IN  = A0;
     const int PIN_GND = A1;
     int pin;
 
@@ -133,7 +132,11 @@ class ThermoSensor {
     }
 
     float read() {
-      float voltage = (float)1023 / analogRead(pin) - 1;
+      int reading = analogRead(pin);
+      if (reading == 0)
+        return 0;
+      reading = constrain(reading, 0, 1022);
+      float voltage = (float)1023 / reading - 1;
       float resistance = EXTERNAL_RESISTOR / voltage;
       float temperature = resistance / THERMISTOR_RT0;
       temperature = log(temperature);
@@ -142,6 +145,23 @@ class ThermoSensor {
       temperature = 1.0 / temperature;
       temperature -= KELVIN_BASE;
       return temperature;
+    }
+};
+
+class ThermoSensorPowered: public ThermoSensor {
+  protected:
+    const int vcc;
+    const int gnd;
+
+  public:
+    ThermoSensorPowered(const int pin, const int vcc, const int gnd): ThermoSensor(pin), vcc(vcc), gnd(gnd) {}
+
+    void setup() {
+      ThermoSensor::setup();
+      pinMode(vcc, OUTPUT);
+      digitalWrite(vcc, HIGH);
+      pinMode(gnd, OUTPUT);
+      digitalWrite(gnd, LOW);
     }
 };
 
