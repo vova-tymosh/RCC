@@ -14,13 +14,19 @@ class RCCLoco {
     static const char PACKET_NORM = 'n';
     static const int FUNCTION_BASE = '@';
     static const int FUNCTION_END = FUNCTION_BASE + 14; //16 - 2 bits for direction
+
+    // LocoState list of filed and their Python struct format
+    //  Update every time LocoState changes. Update version too.
+    const char *VERSION = "0.1.1";
     const char *FIELDS = "Time Disatnce Bitstate Speed Lost Throttle Battery Temp Psi Water";
+    const char *LOCO_FORMAT = "BIIHHBBBBBB";
 
     Wireless *wireless;
     Storage *storage;
 
     void authorize(const int node, const char *name) {
-      String packet = String(PACKET_REG) + " " + String(node) + " " + String(name) + " " + String(FIELDS);
+      String packet = String(PACKET_REG) + " " + VERSION + " " + LOCO_FORMAT
+        + " " + String(node) + " " + String(name) + " " + String(FIELDS);
       int size = packet.length();
       wireless->write(packet.c_str(), size);
       if (debug)
