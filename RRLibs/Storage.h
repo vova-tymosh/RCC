@@ -6,7 +6,6 @@
 #include <EEPROM.h>
 #endif
 
-
 #ifdef ARDUINO_ARCH_NRF52
 
 class Storage {
@@ -28,13 +27,14 @@ class Storage {
         for (int i = 0; i < SIZE / sizeof(data); i++)
           file.write((uint8_t*)&data, sizeof(data));
         file.close();
+        Serial.println("First time FLASH init");
       }
     }
 
-    uint16_t restore(uint16_t offset = 0) {
+    uint16_t restore(uint8_t offset = 0) {
+      uint32_t data;
       file.open(FILENAME, FILE_O_READ);
-      file.seek(offset);
-      uint16_t data;
+      file.seek(offset * sizeof(data));
       if (file) {
         file.read(&data, sizeof(data));
         file.close();
@@ -42,9 +42,9 @@ class Storage {
       return data;
     }
 
-    void save(uint16_t data, uint16_t offset = 0) {
+    void save(uint32_t data, uint8_t offset = 0) {
       file.open(FILENAME, FILE_O_WRITE);
-      file.seek(offset);
+      file.seek(offset * sizeof(data));
       file.write((uint8_t*)&data, sizeof(data));
       file.close();
     }
@@ -69,18 +69,18 @@ class Storage {
       }
     }
 
-    uint16_t restore(uint16_t offset = 0) {
+    uint32_t restore(uint8_t offset = 0) {
       if (offset < SIZE) {
-        uint16_t data = 0;
+        uint32_t data = 0;
         setup();
-        EEPROM.get(ADDR_DATA + offset, data);
+        EEPROM.get(ADDR_DATA + offset * sizeof(data), data);
         return data;
       }
     }
 
-    void save(uint16_t data, uint16_t offset = 0) {
+    void save(uint32_t data, uint8_t offset = 0) {
       if (offset < SIZE) {
-        EEPROM.put(ADDR_DATA + offset, data);
+        EEPROM.put(ADDR_DATA + offset * sizeof(data), data);
       }
     }
 };

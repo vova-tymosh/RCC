@@ -6,6 +6,7 @@
 #include "RCCState.h"
 #include "Wireless.h"
 #include "Storage.h"
+#include "SpeedControl.h"
 
 
 class RCCLoco {
@@ -17,12 +18,13 @@ class RCCLoco {
 
     // LocoState list of filed and their Python struct format
     //  Update every time LocoState changes. Update version too.
-    const char *VERSION = "0.1.1";
+    const char *VERSION = "0.1.2";
     const char *FIELDS = "Time Disatnce Bitstate Speed Lost Throttle Battery Temp Psi Water";
     const char *LOCO_FORMAT = "BIIHHBBBBBB";
 
     Wireless *wireless;
     Storage *storage;
+
 
     void authorize(const int node, const char *name) {
       String packet = String(PACKET_REG) + " " + VERSION + " " + LOCO_FORMAT
@@ -59,25 +61,65 @@ class RCCLoco {
       } else if (code == 't') {
           uint8_t throttle = constrain((int)value, 0, 100);
           state.throttle = throttle;
+          if (!state.slow && !state.pid)
+            onThrottle(state.direction, state.throttle);
+      } else if (code == 'a') {
+          pid.setP(value);
+          storage->save(toInt(value), 1);
+      } else if (code == 'b') {
+          pid.setI(value);
+          storage->save(toInt(value), 2);
+      } else if (code == 'c') {
+          pid.setD(value);
+          storage->save(toInt(value), 3);
+      } else if (code == 'e') {
+          pid.setUpper(value);
+          storage->save(toInt(value), 4);
+      } else {
+        onCommand(code, value);
       }
     }
 
     void handleThrottle() {
-      static uint8_t runtimeThrottle = 0;
+      uint8_t throttle, runtimeThrottle;
       if (state.direction == 0) {
         state.throttle = 0;
-        runtimeThrottle = 0;
+        throttle = runtimeThrottle = 0;
       } else {
         if (state.slow) {
-          if (runtimeThrottle < state.throttle)
-            runtimeThrottle += increment;
-          else if (runtimeThrottle > state.throttle)
-            runtimeThrottle -= increment;
+          static uint8_t slowThrottle = 0;
+          if (slowThrottle < state.throttle)
+            slowThrottle += increment;
+          else if (slowThrottle > state.throttle)
+            slowThrottle -= increment;
+          throttle = slowThrottle;
         } else {
-          runtimeThrottle = state.throttle;
+          throttle = state.throttle;
+        }
+        if (state.pid) {
+          float speed = state.speed;
+          float scaled = pid.scale(speed);
+          pid.setDesired(throttle);
+          pid.setMeasured(scaled);
+          runtimeThrottle = pid.read();
+          Serial.println("PID: " + String(speed) + " " + String(scaled) + " " + String(runtimeThrottle));
+        } else {
+          runtimeThrottle = throttle;
         }
       }
       onThrottle(state.direction, runtimeThrottle);
+    }
+
+    float toFloat(uint32_t x) {
+      union {float f; uint32_t i;} t;
+      t.i = x;
+      return t.f;
+    }
+
+    uint32_t toInt(float x) {
+      union {float f; uint32_t i;} t;
+      t.f = x;
+      return t.i;
     }
 
   protected:
@@ -87,6 +129,9 @@ class RCCLoco {
     Timer timer;
 
   public:
+
+    SpeedControl pid;
+
     LocoState state;
     bool debug;
 
@@ -103,11 +148,24 @@ class RCCLoco {
     virtual void onThrottle(uint8_t direction, uint8_t throttle) {
     }
 
+    virtual void onCommand(char code, float value) {
+    }
+
     void setup() {
       wireless->setup(addr);
       authorize(addr, name);
-      if (storage)
-        state.bitstate = storage->restore();
+      float p = 0;
+      float i = 0;
+      float d = 0;
+      float m = 0;
+      if (storage) {
+        state.bitstate = storage->restore(0);
+        p = toFloat(storage->restore(1));
+        i = toFloat(storage->restore(2));
+        d = toFloat(storage->restore(3));
+        m = toFloat(storage->restore(4));
+      }
+      pid.setup(p, i , d, m);
       timer.restart();
     }
 
