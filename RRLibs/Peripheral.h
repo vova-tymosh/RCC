@@ -35,30 +35,44 @@ class ServoBase {
 };
 
 class Motor {
+  protected:
     const float MIN_THR = 10;
     const int pin_back;
     const int pin_fowd;
+
+    virtual void stop() {
+      digitalWrite(pin_back, LOW);
+      digitalWrite(pin_fowd, LOW);
+    }
+
+    virtual void forward(int throttle) {
+      digitalWrite(pin_back, LOW);
+      analogWrite(pin_fowd, throttle);
+    }
+
+    virtual void backward(int throttle) {
+        analogWrite(pin_back, throttle);
+        digitalWrite(pin_fowd, LOW);
+    }
+
   public:
     Motor(int pin_back, int pin_fowd): pin_back(pin_back), pin_fowd(pin_fowd) {}
 
-    void setup() {
+    virtual void setup() {
       pinMode(pin_back, OUTPUT);
       pinMode(pin_fowd, OUTPUT);
     }
 
-    void apply(int direction, int throttle) {
+    virtual void apply(int direction, int throttle) {
       throttle = map(throttle, 0, 100, MIN_THR, 255);
       if (throttle == MIN_THR)
         throttle = 0;
       if (direction == 0) {
-        digitalWrite(pin_back, LOW);
-        digitalWrite(pin_fowd, LOW);
+        stop();
       } else if (direction == 1) {
-        digitalWrite(pin_back, LOW);
-        analogWrite(pin_fowd, throttle);
+        forward(throttle);
       } else {
-        analogWrite(pin_back, throttle);
-        digitalWrite(pin_fowd, LOW);
+        backward(throttle);
       }
     }
 };
