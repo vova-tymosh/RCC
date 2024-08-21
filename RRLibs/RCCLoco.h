@@ -61,7 +61,7 @@ class RCCLoco {
       } else if (code == 't') {
           uint8_t throttle = constrain((int)value, 0, 100);
           state.throttle = throttle;
-          if (!state.slow && !state.pid)
+          if ((state.slow == false) && (state.pid == false))
             onThrottle(state.direction, state.throttle);
       } else if (code == 'a') {
           pid.setP(value);
