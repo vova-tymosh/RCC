@@ -18,9 +18,9 @@ class RCCLoco {
 
     // LocoState list of filed and their Python struct format
     //  Update every time LocoState changes. Update version too.
-    const char *VERSION = "0.1.2";
-    const char *FIELDS = "Time Disatnce Bitstate Speed Lost Throttle Battery Temp Psi Water";
-    const char *LOCO_FORMAT = "BIIHHBBBBBB";
+    const char *VERSION = "0.1.3";
+    const char *FIELDS = "Time Disatnce Bitstate Speed Lost Throttle ThrOut Battery Temp Psi Water";
+    const char *LOCO_FORMAT = "BIIHHBBBBBBB";
 
     Wireless *wireless;
     Storage *storage;
@@ -65,26 +65,27 @@ class RCCLoco {
             onThrottle(state.direction, state.throttle);
       } else if (code == 'a') {
           pid.setP(value);
-          storage->save(toInt(value), 1);
+          storage->save(toBinary(value), 1);
       } else if (code == 'b') {
           pid.setI(value);
-          storage->save(toInt(value), 2);
+          storage->save(toBinary(value), 2);
       } else if (code == 'c') {
           pid.setD(value);
-          storage->save(toInt(value), 3);
+          storage->save(toBinary(value), 3);
       } else if (code == 'e') {
           pid.setUpper(value);
-          storage->save(toInt(value), 4);
+          storage->save(toBinary(value), 4);
       } else {
         onCommand(code, value);
       }
     }
 
     void handleThrottle() {
-      uint8_t throttle, runtimeThrottle;
+      uint8_t throttle;
       if (state.direction == 0) {
         state.throttle = 0;
-        throttle = runtimeThrottle = 0;
+        state.throttle_out = 0;
+        throttle = 0;
       } else {
         if (state.slow) {
           static uint8_t slowThrottle = 0;
@@ -101,22 +102,22 @@ class RCCLoco {
           float scaled = pid.scale(speed);
           pid.setDesired(throttle);
           pid.setMeasured(scaled);
-          runtimeThrottle = pid.read();
-          Serial.println("PID: " + String(speed) + " " + String(scaled) + " " + String(runtimeThrottle));
+          state.throttle_out = pid.read();
+          Serial.println("PID: " + String(speed) + " " + String(scaled) + " " + String(state.throttle_out));
         } else {
-          runtimeThrottle = throttle;
+          state.throttle_out = throttle;
         }
       }
-      onThrottle(state.direction, runtimeThrottle);
+      onThrottle(state.direction, state.throttle_out);
     }
 
-    float toFloat(uint32_t x) {
+    float fromBinary(uint32_t x) {
       union {float f; uint32_t i;} t;
       t.i = x;
       return t.f;
     }
 
-    uint32_t toInt(float x) {
+    uint32_t toBinary(float x) {
       union {float f; uint32_t i;} t;
       t.f = x;
       return t.i;
@@ -160,10 +161,10 @@ class RCCLoco {
       float m = 0;
       if (storage) {
         state.bitstate = storage->restore(0);
-        p = toFloat(storage->restore(1));
-        i = toFloat(storage->restore(2));
-        d = toFloat(storage->restore(3));
-        m = toFloat(storage->restore(4));
+        p = fromBinary(storage->restore(1));
+        i = fromBinary(storage->restore(2));
+        d = fromBinary(storage->restore(3));
+        m = fromBinary(storage->restore(4));
       }
       pid.setup(p, i , d, m);
       timer.restart();
