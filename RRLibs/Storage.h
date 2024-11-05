@@ -31,6 +31,7 @@ class Storage {
       }
     }
 
+//TODO
     uint16_t restore(uint8_t offset = 0) {
       uint32_t data;
       file.open(FILENAME, FILE_O_READ);

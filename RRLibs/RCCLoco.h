@@ -13,14 +13,6 @@ class RCCLoco {
   private:
     static const char PACKET_REG = 'r';
     static const char PACKET_NORM = 'n';
-    static const int FUNCTION_BASE = '@';
-    static const int FUNCTION_END = FUNCTION_BASE + 14; //16 - 2 bits for direction
-
-    // LocoState list of filed and their Python struct format
-    //  Update every time LocoState changes. Update version too.
-    const char *VERSION = "0.1.3";
-    const char *FIELDS = "Time Disatnce Bitstate Speed Lost Throttle ThrOut Battery Temp Psi Water";
-    const char *LOCO_FORMAT = "BIIHHBBBBBBB";
 
     Wireless *wireless;
     Storage *storage;
@@ -47,9 +39,9 @@ class RCCLoco {
       if (code >= FUNCTION_BASE && code < FUNCTION_END) {
         code -= FUNCTION_BASE;
         if (value)
-          state.bitstate |= 1 << code;
+          state.bitstate |= (uint32_t)1 << code;
         else
-          state.bitstate &= ~(1 << code);
+          state.bitstate &= ~((uint32_t)1 << code);
         if (storage)
           storage->save(state.bitstate);
         onFunction(code, value);
