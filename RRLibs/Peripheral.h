@@ -1,5 +1,5 @@
 #pragma once
-#include <Servo.h>
+// #include <Servo.h>
 
 
 class Light {
@@ -17,6 +17,7 @@ class Light {
     }
 };
 
+/*
 class ServoBase {
   protected:
     int pin;
@@ -33,6 +34,7 @@ class ServoBase {
       servo.write(value);
     }
 };
+*/
 
 class Motor {
   protected:
