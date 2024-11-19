@@ -46,24 +46,24 @@ protected:
     uint16_t node;
     int total;
     int lost;
-    int lastSent;
+    int last_sent;
 
 public:
     uint16_t getLostRate()
     {
-        uint16_t lostRate = 0;
+        uint16_t lost_rate = 0;
         if (total) {
-            lostRate = 100 * lost / total;
-            if (lostRate > 100)
-                lostRate = 100;
+            lost_rate = 100 * lost / total;
+            if (lost_rate > 100)
+                lost_rate = 100;
         }
-        return lostRate;
+        return lost_rate;
     }
     bool isTransmitting()
     {
         int sent = total - lost;
-        bool alive = lastSent != sent;
-        lastSent = sent;
+        bool alive = last_sent != sent;
+        last_sent = sent;
         return alive;
     }
 
