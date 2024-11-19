@@ -1,23 +1,24 @@
 /*
- * Wireless comms (RF24 based) 
- * 
+ * Wireless comms (RF24 based)
+ *
  * RF Library Instalation
  *   Home page:            https://nrf24.github.io/RF24/index.html
- *   C code Instalation:   https://nrf24.github.io/RF24/md_docs_linux_install.html
- *   Python wrapper:       https://nrf24.github.io/RF24/md_docs_python_wrapper.html
+ *   C code Instalation: https://nrf24.github.io/RF24/md_docs_linux_install.html
+ *   Python wrapper: https://nrf24.github.io/RF24/md_docs_python_wrapper.html
  *
  *    Need to patch it using this https://github.com/nRF24/RF24/issues/320
  *
  *    Patch for old MacOS:
  *       pip3 install adafruit-nrfutil
- *       cd /Users/XXX/Library/Arduino15/packages/Seeeduino/hardware/nrf52/1.1.8/tools/adafruit-nrfutil/macos
+ *       cd
+ * /Users/XXX/Library/Arduino15/packages/Seeeduino/hardware/nrf52/1.1.8/tools/adafruit-nrfutil/macos
  *       mv adafruit-nrfutil adafruit-nrfutil.backup
  *       ln -s $(which adafruit-nrfutil)
- * 
+ *
  *    To debug radio issues try the following:
  *       printf_begin();
  *       radio.printPrettyDetails();
-*/
+ */
 
 #pragma once
 
@@ -38,76 +39,86 @@
 #endif
 #include <RF24Network.h>
 
-class WirelessBase {
-  protected:
+class WirelessBase
+{
+protected:
     static const uint16_t STATION_NODE = 0;
     uint16_t node;
     int total;
     int lost;
     int lastSent;
 
-  public:
-    uint16_t getLostRate() {
-      uint16_t lostRate = 0;
-      if (total) {
-        lostRate = 100 * lost / total;
-        if (lostRate > 100)
-          lostRate = 100;
-      }
-      return lostRate;
+public:
+    uint16_t getLostRate()
+    {
+        uint16_t lostRate = 0;
+        if (total) {
+            lostRate = 100 * lost / total;
+            if (lostRate > 100)
+                lostRate = 100;
+        }
+        return lostRate;
     }
-    bool isTransmitting() {
-      int sent = total - lost;
-      bool alive = lastSent != sent;
-      lastSent = sent;
-      return alive;
+    bool isTransmitting()
+    {
+        int sent = total - lost;
+        bool alive = lastSent != sent;
+        lastSent = sent;
+        return alive;
     }
 
-    virtual uint16_t read(void* payload, uint16_t size, int* from = NULL) = 0;
-    virtual bool write(const void* payload, uint16_t size, int to = STATION_NODE) = 0;
+    virtual uint16_t read(void *payload, uint16_t size, int *from = NULL) = 0;
+    virtual bool write(const void *payload, uint16_t size,
+                       int to = STATION_NODE) = 0;
     virtual bool available() = 0;
     virtual void setup(int node) = 0;
 };
 
-class Wireless: public WirelessBase {
-  protected:
+class Wireless : public WirelessBase
+{
+protected:
     RADIO_TYPE radio;
     RADIO_NETWORK network;
 
-  public:
-    Wireless(int cePin = 0, int csnPin = 0) :
-      RADIO_CTOR(cePin, csnPin), network(radio) {};
+public:
+    Wireless(int cePin = 0, int csnPin = 0)
+        : RADIO_CTOR(cePin, csnPin), network(radio) {};
 
-    uint16_t read(void* payload, uint16_t size, int* from = NULL) {
-      RF24NetworkHeader header;
-      uint16_t r = network.read(header, payload, size);
-      if (from)
-        *from = header.from_node;
-      return r;
+    uint16_t read(void *payload, uint16_t size, int *from = NULL)
+    {
+        RF24NetworkHeader header;
+        uint16_t r = network.read(header, payload, size);
+        if (from)
+            *from = header.from_node;
+        return r;
     }
 
-    bool write(const void* payload, uint16_t size, int to = STATION_NODE) {
-      total++;
-      RF24NetworkHeader header(to);
-      bool report = network.write(header, payload, size);
-      if (!report)
-        lost++;
-      return report;
+    bool write(const void *payload, uint16_t size, int to = STATION_NODE)
+    {
+        total++;
+        RF24NetworkHeader header(to);
+        bool report = network.write(header, payload, size);
+        if (!report)
+            lost++;
+        return report;
     }
 
-    bool available() {
-      network.update();
-      return network.available();
+    bool available()
+    {
+        network.update();
+        return network.available();
     }
 
-    void setup(int node) {
-      this->node = node;
-      if (!radio.begin()) {
-        Serial.println("ERROR: Radio is dead");
-        while (1) {}
-      }
-      radio.setPALevel(RADIO_LEVEL);
-      radio.setDataRate(RADIO_BW);
-      network.begin(node);
+    void setup(int node)
+    {
+        this->node = node;
+        if (!radio.begin()) {
+            Serial.println("ERROR: Radio is dead");
+            while (1) {
+            }
+        }
+        radio.setPALevel(RADIO_LEVEL);
+        radio.setDataRate(RADIO_BW);
+        network.begin(node);
     }
 };
