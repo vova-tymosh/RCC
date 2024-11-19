@@ -1,22 +1,23 @@
 /*
  * Speed Sensor (rotation counter)
- * 
- * 
- * 
+ *
+ *
+ *
  */
 #include "Timer.h"
 #include <SimpleKalmanFilter.h>
 
-
 void speedHandler();
 
-class SpeedSensorBase {
-  public:
+class SpeedSensorBase
+{
+public:
     virtual void update();
 };
 
-class SpeedSensor: public SpeedSensorBase {
-  private:
+class SpeedSensor : public SpeedSensorBase
+{
+private:
     const int updatePeriod;
     const float distancePerClick;
     const int pin;
@@ -25,37 +26,47 @@ class SpeedSensor: public SpeedSensorBase {
     float lastDisatnce;
     unsigned long lastTime;
     float speed;
-  public:
-    SpeedSensor(int pin, float distancePerClick, int updatePeriod = 500) :
-      pin(pin), distancePerClick(distancePerClick), updatePeriod(updatePeriod) {
+
+public:
+    SpeedSensor(int pin, float distancePerClick, int updatePeriod = 500)
+        : pin(pin), distancePerClick(distancePerClick),
+          updatePeriod(updatePeriod)
+    {
     }
-    void setup() {
-      pinMode(pin, INPUT);
-      attachInterrupt(digitalPinToInterrupt(pin), speedHandler, RISING);
-      lastTime = millis();
-      timer.start(updatePeriod);
+    void setup()
+    {
+        pinMode(pin, INPUT);
+        attachInterrupt(digitalPinToInterrupt(pin), speedHandler, RISING);
+        lastTime = millis();
+        timer.start(updatePeriod);
     }
-    void loop() {
-      if (timer.hasFired()) {
-        unsigned long now = millis();
-        speed = (float)(distance - lastDisatnce) / ((float)(now - lastTime) / 1000);
-        lastDisatnce = distance;
-        lastTime = now;
-      }
+    void loop()
+    {
+        if (timer.hasFired()) {
+            unsigned long now = millis();
+            speed = (float)(distance - lastDisatnce) /
+                    ((float)(now - lastTime) / 1000);
+            lastDisatnce = distance;
+            lastTime = now;
+        }
     }
-    void update() {
-      distance += distancePerClick;
+    void update()
+    {
+        distance += distancePerClick;
     }
-    float getDistance() {
-      return distance;
+    float getDistance()
+    {
+        return distance;
     }
-    float getSpeed() {
-      return speed;
+    float getSpeed()
+    {
+        return speed;
     }
 };
 
-class SpeedSensorLegacy: public SpeedSensorBase {
-  private:
+class SpeedSensorLegacy : public SpeedSensorBase
+{
+private:
     const long MAX_PERIOD = 3000;
     const int DEBOUNCE_THRESHOLD = 20;
     const float SCALE = 2;
@@ -69,51 +80,59 @@ class SpeedSensorLegacy: public SpeedSensorBase {
     float rotationPerSecond;
     float distance;
 
-  public:
+public:
     float measurementError;
-    SpeedSensorLegacy(int pin) : pin(pin), filter(5, 5, 0.5) {
+    SpeedSensorLegacy(int pin) : pin(pin), filter(5, 5, 0.5) {}
+    void setup()
+    {
+        pinMode(pin, INPUT_PULLUP);
+        attachInterrupt(digitalPinToInterrupt(pin), speedHandler, FALLING);
     }
-    void setup() {
-      pinMode(pin, INPUT_PULLUP);
-      attachInterrupt(digitalPinToInterrupt(pin), speedHandler, FALLING);
+    void setKalmanError(float value)
+    {
+        measurementError = value;
+        filter.setMeasurementError(value);
     }
-    void setKalmanError(float value) {
-      measurementError = value;
-      filter.setMeasurementError(value);
+    void setKalmanNoise(float value)
+    {
+        filter.setProcessNoise(value);
     }
-    void setKalmanNoise(float value) {
-      filter.setProcessNoise(value);
+    float getSpeedRaw()
+    {
+        return rotationPerSecond;
     }
-    float getSpeedRaw() {
-      return rotationPerSecond;
+    float getSpeed()
+    {
+        return speed;
     }
-    float getSpeed() {
-      return speed;
+    float getDistance()
+    {
+        return distance;
     }
-    float getDistance() {
-      return distance;
+    void loop()
+    {
+        volatile long localPeriod = period;
+        if ((millis() - lastTimestamp) < min(localPeriod * 2, MAX_PERIOD))
+            rotationPerSecond = SCALE * 1000.0 / localPeriod;
+        else
+            rotationPerSecond = 0;
+        speed = filter.updateEstimate(rotationPerSecond);
+        distance += speed;
     }
-    void loop() {
-      volatile long localPeriod = period;
-      if ( (millis() - lastTimestamp) < min(localPeriod * 2, MAX_PERIOD) )
-        rotationPerSecond = SCALE * 1000.0 / localPeriod;
-      else
-        rotationPerSecond = 0;
-      speed = filter.updateEstimate(rotationPerSecond);
-      distance += speed;
-    }
-    void update() {
-      long now = millis();
-      uint16_t since = now - lastTimestamp;
-      if (since > DEBOUNCE_THRESHOLD) {
-        period = since;
-        lastTimestamp = now;
-      }
+    void update()
+    {
+        long now = millis();
+        uint16_t since = now - lastTimestamp;
+        if (since > DEBOUNCE_THRESHOLD) {
+            period = since;
+            lastTimestamp = now;
+        }
     }
 };
 
 extern SpeedSensorBase *speedSensorPtr;
 
-void speedHandler() {
-  speedSensorPtr->update();
+void speedHandler()
+{
+    speedSensorPtr->update();
 }
