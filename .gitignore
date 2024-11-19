@@ -134,3 +134,5 @@ dmypy.json
 
 # WiFi and other secret creadentials
 RubyCredentials.h
+
+.vscode/
