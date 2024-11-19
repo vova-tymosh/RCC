@@ -31,7 +31,7 @@ private:
 
     void send()
     {
-        state.packetType = PACKET_NORM;
+        state.packet_type = PACKET_NORM;
         wireless->write(&state, sizeof(state));
     }
 
@@ -85,12 +85,12 @@ private:
             throttle = 0;
         } else {
             if (state.slow) {
-                static uint8_t slowThrottle = 0;
-                if (slowThrottle < state.throttle)
-                    slowThrottle += increment;
-                else if (slowThrottle > state.throttle)
-                    slowThrottle -= increment;
-                throttle = slowThrottle;
+                static uint8_t slow_throttle = 0;
+                if (slow_throttle < state.throttle)
+                    slow_throttle += increment;
+                else if (slow_throttle > state.throttle)
+                    slow_throttle -= increment;
+                throttle = slow_throttle;
             } else {
                 throttle = state.throttle;
             }

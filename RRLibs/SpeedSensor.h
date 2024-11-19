@@ -18,46 +18,49 @@ public:
 class SpeedSensor : public SpeedSensorBase
 {
 private:
-    const int updatePeriod;
-    const float distancePerClick;
+    const int update_period;
+    const float distance_per_click;
     const int pin;
     Timer timer;
     float distance;
-    float lastDisatnce;
-    unsigned long lastTime;
+    float last_disatnce;
+    unsigned long last_time;
     float speed;
 
 public:
-    SpeedSensor(int pin, float distancePerClick, int updatePeriod = 500)
-        : pin(pin), distancePerClick(distancePerClick),
-          updatePeriod(updatePeriod)
-    {
-    }
+    SpeedSensor(int pin, float distance_per_click, int update_period = 500)
+        : pin(pin), distance_per_click(distance_per_click),
+          update_period(update_period) {}
+
     void setup()
     {
         pinMode(pin, INPUT);
         attachInterrupt(digitalPinToInterrupt(pin), speedHandler, RISING);
-        lastTime = millis();
-        timer.start(updatePeriod);
+        last_time = millis();
+        timer.start(update_period);
     }
+
     void loop()
     {
         if (timer.hasFired()) {
             unsigned long now = millis();
-            speed = (float)(distance - lastDisatnce) /
-                    ((float)(now - lastTime) / 1000);
-            lastDisatnce = distance;
-            lastTime = now;
+            speed = (float)(distance - last_disatnce) /
+                    ((float)(now - last_time) / 1000);
+            last_disatnce = distance;
+            last_time = now;
         }
     }
+
     void update()
     {
-        distance += distancePerClick;
+        distance += distance_per_click;
     }
+
     float getDistance()
     {
         return distance;
     }
+
     float getSpeed()
     {
         return speed;
@@ -83,32 +86,39 @@ private:
 public:
     float measurementError;
     SpeedSensorLegacy(int pin) : pin(pin), filter(5, 5, 0.5) {}
+
     void setup()
     {
         pinMode(pin, INPUT_PULLUP);
         attachInterrupt(digitalPinToInterrupt(pin), speedHandler, FALLING);
     }
+
     void setKalmanError(float value)
     {
         measurementError = value;
         filter.setMeasurementError(value);
     }
+
     void setKalmanNoise(float value)
     {
         filter.setProcessNoise(value);
     }
+
     float getSpeedRaw()
     {
         return rotationPerSecond;
     }
+
     float getSpeed()
     {
         return speed;
     }
+
     float getDistance()
     {
         return distance;
     }
+
     void loop()
     {
         volatile long localPeriod = period;
@@ -119,6 +129,7 @@ public:
         speed = filter.updateEstimate(rotationPerSecond);
         distance += speed;
     }
+
     void update()
     {
         long now = millis();
@@ -130,9 +141,9 @@ public:
     }
 };
 
-extern SpeedSensorBase *speedSensorPtr;
+extern SpeedSensorBase *speed_sensor_ptr;
 
 void speedHandler()
 {
-    speedSensorPtr->update();
+    speed_sensor_ptr->update();
 }
