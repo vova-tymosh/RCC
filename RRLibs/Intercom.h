@@ -14,8 +14,8 @@ private:
     static const int PACKET_LEN = 16;
     bool master;
     uint8_t size;
-    uint8_t packetIn[PACKET_LEN];
-    uint8_t packetOut[PACKET_LEN];
+    uint8_t packet_in[PACKET_LEN];
+    uint8_t packet_out[PACKET_LEN];
 
 public:
     int onReceive();

@@ -191,9 +191,7 @@ protected:
 
 public:
     ThermoSensorPowered(const int pin, const int vcc, const int gnd)
-        : ThermoSensor(pin), vcc(vcc), gnd(gnd)
-    {
-    }
+        : ThermoSensor(pin), vcc(vcc), gnd(gnd) {}
 
     void setup()
     {

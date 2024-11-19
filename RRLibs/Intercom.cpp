@@ -27,7 +27,7 @@ int Intercom::onReceive()
         size = PACKET_LEN;
     for (int i = 0; i < size; i++) {
         if (Wire.available())
-            packetIn[i] = Wire.read();
+            packet_in[i] = Wire.read();
     }
     return size;
 }
@@ -35,7 +35,7 @@ int Intercom::onReceive()
 void Intercom::onSend()
 {
     Wire.write(size);
-    Wire.write((const uint8_t *)packetOut, size);
+    Wire.write((const uint8_t *)packet_out, size);
 }
 
 void Intercom::setup(bool master)
@@ -61,7 +61,7 @@ void Intercom::send(void *data, uint8_t size)
         Wire.endTransmission();
     } else {
         this->size = size;
-        memcpy(packetOut, data, size);
+        memcpy(packet_out, data, size);
     }
 }
 
@@ -71,5 +71,5 @@ void Intercom::recv(void *data, uint8_t size)
         Wire.requestFrom(I2C_CODE, PACKET_LEN + 1);
         size = onReceive();
     }
-    memcpy(data, packetIn, size);
+    memcpy(data, packet_in, size);
 }
