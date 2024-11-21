@@ -60,19 +60,41 @@ public:
 class Storage
 {
     const int SIZE = 256;
-    const int ADDR_VALIDATION = 0;
-    const int ADDR_DATA = 1;
+    const int OFFSET_VERSION = 0;
+    const int OFFSET_DATA = 10;
+
+    void clear()
+    {
+        for (int i = 0; i < SIZE; i++) {
+            EEPROM.write(i, 0);
+        }
+    }
 
 public:
-    void setup()
+    void setup(char* version = NULL)
     {
-        uint8_t validation = 0;
-        EEPROM.get(ADDR_VALIDATION, validation);
+        Serial.println(F("EEPROM setup"));
+        uint8_t validation = EEPROM.read(0);
         if (validation == 0xFF) {
-            for (int i = 0; i < SIZE; i++) {
-                EEPROM.write(i, 0);
-            }
+            clear();
             Serial.println(F("First time EEPROM init"));
+        } else if (version != NULL) {
+            char v[OFFSET_DATA - OFFSET_VERSION];
+            for (int i = 0; i < sizeof(v); i++) {
+                v[i] = EEPROM.read(OFFSET_VERSION + i);
+            }
+            if (strncmp(v, version, sizeof(v)) != 0) {
+                clear();
+                for (int i = 0; i < sizeof(v); i++) {
+                    EEPROM.write(OFFSET_VERSION + i, version[i]);
+                }
+                Serial.print(F("EEPROM version mismatch, old: "));
+                Serial.print(v);
+                Serial.print(F(", "));
+                Serial.print(strncmp(v, version, sizeof(v)));
+                Serial.print(F(", new: "));
+                Serial.println(version);
+            }
         }
     }
 
@@ -80,8 +102,7 @@ public:
     {
         if (offset < SIZE) {
             uint32_t data = 0;
-            setup();
-            EEPROM.get(ADDR_DATA + offset * sizeof(data), data);
+            EEPROM.get(OFFSET_DATA + offset * sizeof(data), data);
             return data;
         }
     }
@@ -89,7 +110,7 @@ public:
     void save(uint32_t data, uint8_t offset = 0)
     {
         if (offset < SIZE) {
-            EEPROM.put(ADDR_DATA + offset * sizeof(data), data);
+            EEPROM.put(OFFSET_DATA + offset * sizeof(data), data);
         }
     }
 };
