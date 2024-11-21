@@ -9,7 +9,7 @@ const int FUNCTION_END = FUNCTION_BASE + 32 - 2; // 2 bits for direction
 
 // LocoState list of filed and their Python struct format
 //  Update every time LocoState changes. Update version too.
-const char *VERSION = "0.1.7";
+const char *VERSION = "0.1.8";
 const char *FIELDS =
     "Time Disatnce Bitstate Speed Lost Throttle ThrOut Battery Temp Psi Water";
 const char *LOCO_FORMAT = "BIIIHBBBBBBB";
@@ -28,24 +28,39 @@ struct __attribute__((packed)) LocoState {
     union {
         uint32_t bitstate;
         struct {
-            uint32_t lights    : 1;
+            uint32_t lights    : 1; //0 - G1
             uint32_t bell      : 1;
             uint32_t whistle   : 1;
             uint32_t shortw    : 1;
-            uint32_t cocks     : 1;
-            uint32_t           : 3; //
-            uint32_t mute      : 1;
-            uint32_t           : 2;
-            uint32_t brek      : 1;
+            uint32_t cocks     : 1; //4
+            uint32_t           : 1; //5 - G2
             uint32_t           : 1;
-            uint32_t couple    : 1;
-            uint32_t           : 2; //
-            uint32_t           : 7;
-            uint32_t allaboard : 1; //
-            // uint32_t           : 4;
+            uint32_t           : 1;
+            uint32_t mute      : 1; //8
+            uint32_t           : 1; //9 - G3
+            uint32_t           : 1;
+            uint32_t brek      : 1;
+            uint32_t           : 1; //12
+            uint32_t couple    : 1; //13 - G3
+            uint32_t           : 1;
+            uint32_t           : 1;
+            uint32_t           : 1;
+            uint32_t           : 1;
+            uint32_t           : 1;
+            uint32_t           : 1;
+            uint32_t           : 1;
+            uint32_t           : 1; //20
+            uint32_t           : 1; //21 - G4
+            uint32_t           : 1;
+            uint32_t allaboard : 1; //23
+            uint32_t           : 1;
+            uint32_t           : 1;
+            uint32_t           : 1;
+            uint32_t           : 1;
+            uint32_t           : 1; //28 - END
             uint32_t slow      : 1;
             uint32_t pid       : 1;
-            uint32_t direction : 2; //
+            uint32_t direction : 2; //32
         };
     };
     uint16_t speed;
