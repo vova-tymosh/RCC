@@ -1,36 +1,22 @@
 /*
- * Railroad Tools/Libraries Test Script
+ * RCC Example Locomotive
  *
- * Test should output "Command X: Y", where X is command char and Y is float
- * value. It sends uptime (in ms), packet lost rate and a last command value
- * back to control station
  *
  */
-#define ARDUINO_MICRO 1
-#define ARDUINO_UNO 2
-#define ARDUINO_RFNANO 3
-#define ARDUINO_XIAO 4
-#define PLATFORM ARDUINO_RFNANO
-
 #include "Peripheral.h"
 #include "RCCLoco.h"
 #include "SpeedSensor.h"
 #include "Timer.h"
 
-
-// Change pins per the test board
-#if PLATFORM == ARDUINO_MICRO
-#define CE_PIN 19
-#define CSN_PIN 18
-#elif PLATFORM == ARDUINO_UNO
-#define CE_PIN 9
-#define CSN_PIN 10
-#elif PLATFORM == ARDUINO_RFNANO
-#define CE_PIN 10
-#define CSN_PIN 9
-#else
-#define CE_PIN 0
-#define CSN_PIN 0
+#if defined(ARDUINO_AVR_NANO)
+    #define CE_PIN 10
+    #define CSN_PIN 9
+#elif defined(ARDUINO_AVR_LEONARDO)
+    #define CE_PIN 19
+    #define CSN_PIN 18
+#elif defined(ARDUINO_ARCH_NRF52)
+    #define CE_PIN 0
+    #define CSN_PIN 0
 #endif
 
 const int NODE = 01;
@@ -75,7 +61,7 @@ void setup()
     setupSerial();
     storage.setup(VERSION);
     loco.setup();
-    // loco.debug = true;
+    loco.debug = true;
     speed_sensor.setup();
     led.setup();
     led.apply(loco.state.lights);

@@ -56,9 +56,9 @@ struct __attribute__((packed)) LocoState {
             uint32_t           : 1;
             uint32_t           : 1;
             uint32_t           : 1; //27 - END
-            uint32_t slow      : 1;
-            uint32_t pid       : 1;
-            uint32_t direction : 2; //32
+            uint32_t slow      : 1; //28
+            uint32_t pid       : 1; //29
+            uint32_t direction : 2; //30-31
         };
     };
     uint16_t speed;
