@@ -10,6 +10,7 @@ public:
     void setup()
     {
         pinMode(pin, OUTPUT);
+        digitalWrite(pin, LOW);
     }
     void apply(bool on)
     {

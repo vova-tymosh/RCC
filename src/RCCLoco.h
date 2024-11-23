@@ -171,6 +171,7 @@ public:
             i = fromBinary(storage->restore(2));
             d = fromBinary(storage->restore(3));
             m = fromBinary(storage->restore(4));
+            //TODO: restore all the functions
         }
         pid.setup(p, i, d, m);
         timer.restart();
