@@ -43,7 +43,7 @@ class ServoBase {
 class Motor
 {
 protected:
-    const float MIN_THR = 10;
+    const float MIN_THR = 0;
     const int pin_back;
     const int pin_fowd;
 

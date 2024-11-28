@@ -8,7 +8,7 @@
 void dccPhy::setup()
 {
     pinMode(9, OUTPUT);
-#ifndef ARDUINO_ARCH_NRF52
+#ifdef ARDUINO_AVR_LEONARDO
     TCCR1A = 0x00;
     TCCR1B = 0x00 | (1 << CS11);
     TIMSK1 = 0x00 | (1 << OCIE1A);
@@ -20,7 +20,7 @@ void dccPhy::setup()
 
 inline void dccPhy::writeHigh()
 {
-#ifndef ARDUINO_ARCH_NRF52
+#ifdef ARDUINO_AVR_LEONARDO
     // Clear GPIO D9
     PORTB &= ~0x20;
 #endif
@@ -28,7 +28,7 @@ inline void dccPhy::writeHigh()
 
 inline void dccPhy::writeLow()
 {
-#ifndef ARDUINO_ARCH_NRF52
+#ifdef ARDUINO_AVR_LEONARDO
     // Set GPIO D9
     PORTB |= 0x20;
 #endif
@@ -36,7 +36,7 @@ inline void dccPhy::writeLow()
 
 void dccPhy::handleInterrupt()
 {
-#ifndef ARDUINO_ARCH_NRF52
+#ifdef ARDUINO_AVR_LEONARDO
     static dccPulseState current_state = Preamble;
     static uint8_t pulse = PULSE_SHORT;
     static bool is_second_pulse = false;
@@ -93,7 +93,7 @@ void dccPhy::handleInterrupt()
 #endif
 }
 
-#ifndef ARDUINO_ARCH_NRF52
+#ifdef ARDUINO_AVR_LEONARDO
 ISR(TIMER1_COMPA_vect)
 {
     dccPhy::handleInterrupt();
