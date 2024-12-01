@@ -1,4 +1,6 @@
 #pragma once
+#include "Timer.h"
+#include <Adafruit_INA219.h>
 // #include <Servo.h>
 
 class Light
@@ -87,6 +89,75 @@ public:
             forward(throttle);
         } else {
             backward(throttle);
+        }
+    }
+};
+
+class Motor2
+{
+protected:
+    const int pin_back;
+    const int pin_fowd;
+    const int pin_bemf;
+    const int min_thr;
+    const int cool_down;
+    int direction;
+    int throttle;
+    Timer timer;
+
+public:
+    int bemf;
+
+    Motor2(int pin_back, int pin_fowd, int pin_bemf, int min_thr = 20,
+           int cool_down_us = 40)
+        : pin_back(pin_back), pin_fowd(pin_fowd), pin_bemf(pin_bemf),
+          min_thr(min_thr), cool_down(cool_down_us)
+    {
+    }
+
+    virtual void setup()
+    {
+        pinMode(pin_back, OUTPUT);
+        pinMode(pin_fowd, OUTPUT);
+        pinMode(pin_bemf, INPUT);
+        timer.start(700);
+    }
+
+    virtual void apply(int direction, int throttle)
+    {
+        const uint8_t MAX = 0xFF;
+        this->direction = direction;
+        this->throttle = throttle;
+        if (throttle > 0)
+            throttle = map(throttle, 0, 100, MAX - min_thr, 0);
+        else
+            throttle = MAX;
+        if (direction == 0) {
+            analogWrite(pin_back, 0);
+            analogWrite(pin_fowd, 0);
+        } else if (direction == 1) {
+            analogWrite(pin_back, MAX);
+            analogWrite(pin_fowd, throttle);
+        } else {
+            analogWrite(pin_back, throttle);
+            analogWrite(pin_fowd, MAX);
+        }
+    }
+
+    int readBemf()
+    {
+        analogWrite(pin_back, 0);
+        analogWrite(pin_fowd, 0);
+        delayMicroseconds(cool_down);
+        bemf = analogRead(pin_bemf);
+        apply(direction, throttle);
+        return bemf;
+    }
+
+    void loop()
+    {
+        if (timer.hasFired()) {
+            readBemf();
         }
     }
 };
@@ -192,7 +263,9 @@ protected:
 
 public:
     ThermoSensorPowered(const int pin, const int vcc, const int gnd)
-        : ThermoSensor(pin), vcc(vcc), gnd(gnd) {}
+        : ThermoSensor(pin), vcc(vcc), gnd(gnd)
+    {
+    }
 
     void setup()
     {
@@ -224,5 +297,45 @@ public:
         const float bitsMin = voltsMin * bitPerVolt;
         float raw = analogRead(pin);
         return (raw - bitsMin) / (voltsRange * bitPerVolt / psiMax);
+    }
+};
+
+class PowerMeter
+{
+private:
+    static constexpr float SHUNT = 0.1;
+    bool active = false;
+    Adafruit_INA219 ina219;
+
+public:
+    PowerMeter() : ina219() {}
+    void setup()
+    {
+        if (ina219.begin()) {
+            active = true;
+        } else {
+            Serial.println("Failed to find INA219 chip");
+        }
+    }
+    float readVoltage()
+    {
+        if (active)
+            return ina219.getBusVoltage_V();
+        else
+            return 0;
+    }
+    float readCurrent()
+    {
+        if (active)
+            return ina219.getCurrent_mA() / SHUNT;
+        else
+            return 0;
+    }
+    float readPower()
+    {
+        if (active)
+            return ina219.getPower_mW() / SHUNT;
+        else
+            return 0;
     }
 };
