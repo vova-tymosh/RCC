@@ -303,15 +303,16 @@ public:
 class PowerMeter
 {
 private:
-    static constexpr float SHUNT = 0.1;
     bool active = false;
-    Adafruit_INA219 ina219;
 
 public:
+    Adafruit_INA219 ina219;
+
     PowerMeter() : ina219() {}
     void setup()
     {
         if (ina219.begin()) {
+            ina219.setCalibration_32V_2A();
             active = true;
         } else {
             Serial.println("Failed to find INA219 chip");
@@ -319,23 +320,14 @@ public:
     }
     float readVoltage()
     {
-        if (active)
-            return ina219.getBusVoltage_V();
-        else
-            return 0;
+        return active ? ina219.getBusVoltage_V() : 0;
     }
     float readCurrent()
     {
-        if (active)
-            return ina219.getCurrent_mA() / SHUNT;
-        else
-            return 0;
+        return active ? ina219.getCurrent_mA() : 0;
     }
     float readPower()
     {
-        if (active)
-            return ina219.getPower_mW() / SHUNT;
-        else
-            return 0;
+        return active ? ina219.getPower_mW() : 0;
     }
 };
