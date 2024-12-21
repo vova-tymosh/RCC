@@ -3,77 +3,75 @@
  *
  *
  */
+#pragma once
 #include "RCCState.h"
-#include "SpeedControl.h"
+// #include "SpeedControl.h"
 #include "Storage.h"
 #include "Timer.h"
-#include "Wireless.h"
 
 class RCCLoco
 {
-private:
-    static const char PACKET_REG = 'r';
-    static const char PACKET_NORM = 'n';
-
-    Wireless *wireless;
+protected:
     Storage *storage;
+    Timer timer;
+    // SpeedControl pid;
+    int increment;
 
-    void authorize(const int node, const char *name)
+public:
+    LocoState state;
+
+    RCCLoco(Storage *storage = NULL) : storage(storage), increment(1) {};
+
+    virtual void onFunction(bool activate, uint8_t code) {}
+    virtual void onThrottle(uint8_t direction, uint8_t throttle) {}
+    virtual void onCommand(uint8_t code, float value) {}
+
+
+    void setFunction(bool activate, int code)
     {
-        String packet = String(PACKET_REG) + " " + VERSION + " " + LOCO_FORMAT +
-                        " " + String(node) + " " + String(name) + " " +
-                        String(FIELDS);
-        int size = packet.length();
-        wireless->write(packet.c_str(), size);
-        if (debug)
-            Serial.println(String("Authorize: ") + packet);
+        if (activate)
+            state.bitstate |= (uint32_t)1 << code;
+        else
+            state.bitstate &= ~((uint32_t)1 << code);
+        if (storage)
+            storage->save(state.bitstate);
+
+        Serial.println(String("Function: ") + activate + "/" + code);
+        onFunction(activate, code);
     }
 
-    void send()
+    bool getFunction(int code)
     {
-        state.packet_type = PACKET_NORM;
-        wireless->write(&state, sizeof(state));
+        return (state.bitstate & ((uint32_t)1 << code)) != 0;
     }
 
-    void received(char code, float value)
+    void setThrottle(int value)
     {
-        if (debug)
-            Serial.println("Got: " + String((int)code) + "/" + String(value));
+        value = constrain(value, 0, 100);
+        Serial.println(String("Throttle: ") + value);
+        state.throttle = value;
+        if ((state.slow == false) && (state.pid == false))
+            onThrottle(state.direction, state.throttle);
+    }
 
-        if (code >= FUNCTION_BASE && code < FUNCTION_END) {
-            code -= FUNCTION_BASE;
-            if (value)
-                state.bitstate |= (uint32_t)1 << code;
-            else
-                state.bitstate &= ~((uint32_t)1 << code);
-            if (storage)
-                storage->save(state.bitstate);
-            onFunction(code, value);
-        } else if (code == 'r') {
-            authorize(addr, name);
-        } else if (code == 'd') {
-            uint8_t direction = constrain((int)value, 0, 2);
-            state.direction = direction;
-        } else if (code == 't') {
-            uint8_t throttle = constrain((int)value, 0, 100);
-            state.throttle = throttle;
-            if ((state.slow == false) && (state.pid == false))
-                onThrottle(state.direction, state.throttle);
-        } else if (code == 'a') {
-            pid.setP(value);
-            storage->save(toBinary(value), 1);
-        } else if (code == 'b') {
-            pid.setI(value);
-            storage->save(toBinary(value), 2);
-        } else if (code == 'c') {
-            pid.setD(value);
-            storage->save(toBinary(value), 3);
-        } else if (code == 'e') {
-            pid.setUpper(value);
-            storage->save(toBinary(value), 4);
-        } else {
-            onCommand(code, value);
-        }
+    void setDirection(int value)
+    {
+        //TODO modify TransportNRF to use 0/1 direction only
+        value = constrain((int)value, 0, 1);
+        state.direction = value;
+        Serial.println(String("Direction: ") + value);
+    }
+
+    int getThrottle()
+    {
+        Serial.println(String("QSpeed"));
+        return state.throttle;
+    }
+
+    int getDirection()
+    {
+        Serial.println(String("QDirection"));
+        return state.direction;
     }
 
     void handleThrottle()
@@ -95,13 +93,13 @@ private:
                 throttle = state.throttle;
             }
             if (state.pid) {
-                float speed = state.speed;
-                float scaled = pid.scale(speed);
-                pid.setDesired(throttle);
-                pid.setMeasured(scaled);
-                state.throttle_out = pid.read();
-                Serial.println("PID: " + String(speed) + " " + String(scaled) +
-                               " " + String(state.throttle_out));
+                // float speed = state.speed;
+                // float scaled = pid.scale(speed);
+                // pid.setDesired(throttle);
+                // pid.setMeasured(scaled);
+                // state.throttle_out = pid.read();
+                // Serial.println("PID: " + String(speed) + " " + String(scaled) +
+                //                " " + String(state.throttle_out));
             } else {
                 state.throttle_out = throttle;
             }
@@ -129,38 +127,8 @@ private:
         return t.i;
     }
 
-protected:
-    int addr;
-    const char *name;
-    int increment;
-    Timer timer;
-
-public:
-    SpeedControl pid;
-
-    LocoState state;
-    bool debug;
-
-    RCCLoco(Wireless *wireless, const int addr, const char *name,
-            Storage *storage = NULL)
-        : wireless(wireless), addr(addr), name(name), increment(1), timer(100),
-          storage(storage) {};
-
-    bool isTransmitting()
-    {
-        return wireless->isTransmitting();
-    }
-
-    virtual void onFunction(char code, bool value) {}
-
-    virtual void onThrottle(uint8_t direction, uint8_t throttle) {}
-
-    virtual void onCommand(char code, float value) {}
-
     void setup()
     {
-        wireless->setup(addr);
-        authorize(addr, name);
         float p = 0;
         float i = 0;
         float d = 0;
@@ -173,22 +141,22 @@ public:
             m = fromBinary(storage->restore(4));
             //TODO: restore all the functions
         }
-        pid.setup(p, i, d, m);
+        // pid.setup(p, i, d, m);
         timer.restart();
     }
 
     void loop()
     {
-        if (wireless->available()) {
-            struct Command command;
-            wireless->read(&command, sizeof(command));
-            received(command.cmd, command.value);
-        }
-        if (timer.hasFired()) {
-            handleThrottle();
-            state.tick = (float)millis() / 100;
-            state.lost = wireless->getLostRate();
-            send();
-        }
+        // if (wireless->available()) {
+        //     struct Command command;
+        //     wireless->read(&command, sizeof(command));
+        //     received(command.cmd, command.value);
+        // }
+        // if (timer.hasFired()) {
+        //     handleThrottle();
+        //     state.tick = (float)millis() / 100;
+        //     // state.lost = wireless->getLostRate();
+        //     // send();
+        // }
     }
 };

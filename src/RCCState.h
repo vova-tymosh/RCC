@@ -3,7 +3,7 @@
  *
  *
  */
-
+#pragma once
 const int FUNCTION_BASE = ' ';
 const int FUNCTION_END = FUNCTION_BASE + 32 - 2; // 2 bits for direction
 
