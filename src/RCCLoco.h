@@ -5,13 +5,15 @@
  */
 #pragma once
 #include "RCCState.h"
+#include "Transport.h"
 // #include "SpeedControl.h"
 #include "Storage.h"
 #include "Timer.h"
 
-class RCCLoco
+class RCCLoco : public RCCLocoBase
 {
 protected:
+    Transport *transport;
     Storage *storage;
     Timer timer;
     // SpeedControl pid;
@@ -20,7 +22,10 @@ protected:
 public:
     LocoState state;
 
-    RCCLoco(Storage *storage = NULL) : storage(storage), increment(1) {};
+    RCCLoco(Storage *storage = NULL) : storage(storage), increment(1)
+    {
+        transport = new Transport(this);
+    };
 
     virtual void onFunction(bool activate, uint8_t code) {}
     virtual void onThrottle(uint8_t direction, uint8_t throttle) {}
@@ -129,6 +134,7 @@ public:
 
     void setup()
     {
+        transport->begin();
         float p = 0;
         float i = 0;
         float d = 0;
@@ -147,6 +153,7 @@ public:
 
     void loop()
     {
+        transport->loop();
         // if (wireless->available()) {
         //     struct Command command;
         //     wireless->read(&command, sizeof(command));

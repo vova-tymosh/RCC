@@ -3,7 +3,7 @@
 #include <WiFi.h>
 #include <ESPmDNS.h>
 #include "Timer.h"
-#include "RCCLoco.h"
+#include "RCCLocoBase.h"
 
 //
 // https://www.jmri.org/help/en/package/jmri/jmrit/withrottle/Protocol.shtml
@@ -43,7 +43,7 @@ protected:
     const char *locoAddr = "S3";
     const char *propertySeparator = "<;>";
     const int heartbeatTimeout = 10;
-    RCCLoco *loco;
+    RCCLocoBase *loco;
 
 public:
 
@@ -58,7 +58,7 @@ public:
         conn.println(msg);
     }
 
-    void begin(WiFiClient _conn, RCCLoco *_loco)
+    void begin(WiFiClient _conn, RCCLocoBase *_loco)
     {
         conn = _conn;
         loco = _loco;
@@ -214,14 +214,15 @@ class TransportWT
 private:
     const int port = 44444;
     const char *mdnsName = "withrottle";
+    //TODO proper name
     const char *hostname = "RCC_Loco";
     WiFiServer server;
     WiFiClient client;
     WiThrottleClient wtClient;
-    RCCLoco *loco;
+    RCCLocoBase *loco;
 
 public:
-    TransportWT(RCCLoco *loco) : server(port), loco(loco) {}
+    TransportWT(RCCLocoBase *loco) : server(port), loco(loco) {}
 
     void begin() {
         MDNS.begin(hostname);

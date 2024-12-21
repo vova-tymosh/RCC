@@ -1,5 +1,6 @@
 #pragma once
 
+#include "RCCLocoBase.h"
 
 #if defined(ARDUINO_ARCH_NRF52) || defined(ARDUINO_AVR_LEONARDO)
 #include "TransportNRF.h"
