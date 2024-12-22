@@ -11,7 +11,7 @@
 // #define RCC_WIFI_AP
 #include "RCCLoco.h"
 
-
+Timer timer(1000);
 
 class TestLoco : public RCCLoco
 {
@@ -38,10 +38,19 @@ void setup()
     delay(50);
 
     loco.debugLevel = 1;
+
     loco.setup();
+    timer.restart();
 }
 
+int t;
 void loop()
 {
     loco.loop();
+
+    if (timer.hasFired()) {
+        loco.state.temperature = t++;
+        if (t>100)
+            t = 0;
+    }
 }

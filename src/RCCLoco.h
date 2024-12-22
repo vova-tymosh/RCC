@@ -20,7 +20,6 @@ protected:
     int increment;
 
 public:
-    LocoState state;
 
     RCCLoco(Storage *storage = NULL) : storage(storage), increment(1)
     {

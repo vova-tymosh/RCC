@@ -4,11 +4,15 @@
  *
  */
 #pragma once
+#include "RCCState.h"
 
 class RCCLocoBase
 {
 public:
+    LocoState state;
+
     int debugLevel;
+
     void log(String msg)
     {
         if (debugLevel > 0)
