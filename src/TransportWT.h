@@ -1,6 +1,6 @@
 #pragma once
-#include <WiFiClient.h>
 #include <WiFi.h>
+#include <WiFiClient.h>
 #include <ESPmDNS.h>
 #include "Timer.h"
 #include "RCCLocoBase.h"
@@ -186,7 +186,7 @@ public:
         bool state = loco->getFunction(functId);
         if (press) {
             state = !state;
-            loco->setFunction(state, functId);
+            loco->setFunction(functId, state);
         }
         char stateChar = (state) ? '1' : '0';
         reply(String("M")+throttleId+"A"+locoAddr+"<;>"+"F"+stateChar+String(functId));
@@ -208,8 +208,6 @@ public:
 };
 
 
-
-
 class TransportWT
 {
 private:
@@ -226,7 +224,40 @@ public:
 
     TransportWT(RCCLocoBase *loco) : server(port), loco(loco) {}
 
+    void log(String msg)
+    {
+        if (loco->debugLevel > 0)
+            Serial.print(msg);
+    }
+
+    void wifiAP()
+    {
+        WiFi.softAP(SECRET_SSID, SECRET_PWD);
+        log("Started wifi as AP.\n");
+    }
+
+    void wifiConnect()
+    {
+        int start = millis();
+        WiFi.begin(SECRET_SSID, SECRET_PWD);
+        log("Connecting to wifi.");
+        while (WiFi.status() != WL_CONNECTED) {
+            delay(100);
+            log(".");
+        }
+        int elapsed = millis() - start;
+        log(" Done in ");
+        log(String((float)elapsed/1000));
+        log("s\n");
+    }
+
+
     void begin() {
+#ifdef RCC_WIFI_AP
+        wifiAP();
+#else
+        wifiConnect();
+#endif
         MDNS.begin(hostname);
         server.begin();
         MDNS.addService(mdnsName, "tcp", port);

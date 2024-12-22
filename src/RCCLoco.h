@@ -28,11 +28,11 @@ public:
         state.direction = 1;
     };
 
-    virtual void onFunction(bool activate, uint8_t code) {}
+    virtual void onFunction(uint8_t code, bool activate) {}
     virtual void onThrottle(uint8_t direction, uint8_t throttle) {}
     virtual void onCommand(uint8_t code, float value) {}
 
-    void setFunction(bool activate, int code)
+    void setFunction(int code, bool activate)
     {
         if (activate)
             state.bitstate |= (uint32_t)1 << code;
@@ -40,7 +40,7 @@ public:
             state.bitstate &= ~((uint32_t)1 << code);
         if (storage)
             storage->save(state.bitstate);
-        onFunction(activate, code);
+        onFunction(code, activate);
     }
 
     bool getFunction(int code)
