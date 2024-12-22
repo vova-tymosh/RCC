@@ -49,7 +49,8 @@ public:
 
     void log(String msg)
     {
-        Serial.println(msg);
+        if (loco->debugLevel > 1)
+            Serial.println(msg);
     }
 
     void reply(String msg)
@@ -222,6 +223,7 @@ private:
     RCCLocoBase *loco;
 
 public:
+
     TransportWT(RCCLocoBase *loco) : server(port), loco(loco) {}
 
     void begin() {

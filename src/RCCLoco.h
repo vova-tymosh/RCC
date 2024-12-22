@@ -25,12 +25,12 @@ public:
     RCCLoco(Storage *storage = NULL) : storage(storage), increment(1)
     {
         transport = new Transport(this);
+        state.direction = 1;
     };
 
     virtual void onFunction(bool activate, uint8_t code) {}
     virtual void onThrottle(uint8_t direction, uint8_t throttle) {}
     virtual void onCommand(uint8_t code, float value) {}
-
 
     void setFunction(bool activate, int code)
     {
@@ -40,8 +40,6 @@ public:
             state.bitstate &= ~((uint32_t)1 << code);
         if (storage)
             storage->save(state.bitstate);
-
-        Serial.println(String("Function: ") + activate + "/" + code);
         onFunction(activate, code);
     }
 
@@ -53,7 +51,6 @@ public:
     void setThrottle(int value)
     {
         value = constrain(value, 0, 100);
-        Serial.println(String("Throttle: ") + value);
         state.throttle = value;
         if ((state.slow == false) && (state.pid == false))
             onThrottle(state.direction, state.throttle);
@@ -64,18 +61,17 @@ public:
         //TODO modify TransportNRF to use 0/1 direction only
         value = constrain((int)value, 0, 1);
         state.direction = value;
-        Serial.println(String("Direction: ") + value);
+        if ((state.slow == false) && (state.pid == false))
+            onThrottle(state.direction, state.throttle);
     }
 
     int getThrottle()
     {
-        Serial.println(String("QSpeed"));
         return state.throttle;
     }
 
     int getDirection()
     {
-        Serial.println(String("QDirection"));
         return state.direction;
     }
 
@@ -109,6 +105,7 @@ public:
                 state.throttle_out = throttle;
             }
         }
+        log("handleThrottle");
         onThrottle(state.direction, state.throttle_out);
     }
 
@@ -154,16 +151,5 @@ public:
     void loop()
     {
         transport->loop();
-        // if (wireless->available()) {
-        //     struct Command command;
-        //     wireless->read(&command, sizeof(command));
-        //     received(command.cmd, command.value);
-        // }
-        // if (timer.hasFired()) {
-        //     handleThrottle();
-        //     state.tick = (float)millis() / 100;
-        //     // state.lost = wireless->getLostRate();
-        //     // send();
-        // }
     }
 };

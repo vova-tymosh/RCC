@@ -8,6 +8,13 @@
 class RCCLocoBase
 {
 public:
+    int debugLevel;
+    void log(String msg)
+    {
+        if (debugLevel > 0)
+            Serial.println(msg);
+    }
+
     virtual void onFunction(bool activate, uint8_t code) = 0;
     virtual void onThrottle(uint8_t direction, uint8_t throttle) = 0;
     virtual void onCommand(uint8_t code, float value) = 0;
