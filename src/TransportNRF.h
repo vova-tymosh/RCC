@@ -7,11 +7,21 @@
 #include "Timer.h"
 #include "RCCLocoBase.h"
 
+
+//TODO - tick, pid setting (CV?), direction (1/0)
+
+struct __attribute__((packed)) Command {
+    uint8_t cmd;
+    float value;
+};
+
 class TransportNRF
 {
 private:
     static const char PACKET_REG = 'r';
     static const char PACKET_NORM = 'n';
+    const int FUNCTION_BASE = ' ';
+    const int FUNCTION_END = FUNCTION_BASE + 32 - 2; // 2 bits for direction
 
     int addr;
     const char *name;

@@ -4,8 +4,6 @@
  *
  */
 #pragma once
-const int FUNCTION_BASE = ' ';
-const int FUNCTION_END = FUNCTION_BASE + 32 - 2; // 2 bits for direction
 
 // LocoState list of filed and their Python struct format
 //  Update every time LocoState changes. Update version too.
@@ -14,10 +12,6 @@ const char *FIELDS =
     "Time Disatnce Bitstate Speed Lost Throttle ThrOut Battery Temp Psi Water";
 const char *LOCO_FORMAT = "BIIIHBBBBBBB";
 
-struct __attribute__((packed)) Command {
-    uint8_t cmd;
-    float value;
-};
 
 // Message longer than 24 bytes will be fragmented
 //  As of now it is 22
