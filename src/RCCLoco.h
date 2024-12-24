@@ -10,7 +10,7 @@
 #include "Storage.h"
 #include "Timer.h"
 
-//fix PID, Storage
+// fix PID, Storage
 
 class RCCLoco : public RCCLocoBase
 {
@@ -22,7 +22,6 @@ protected:
     int increment;
 
 public:
-
     RCCLoco(Storage *storage = NULL) : storage(storage), increment(1)
     {
         transport = new Transport(this);
@@ -59,7 +58,7 @@ public:
 
     void setDirection(int value)
     {
-        //TODO modify TransportNRF to use 0/1 direction only
+        // TODO modify TransportNRF to use 0/1 direction only
         value = constrain((int)value, 0, 1);
         state.direction = value;
         if ((state.slow == false) && (state.pid == false))
@@ -100,7 +99,8 @@ public:
                 // pid.setDesired(throttle);
                 // pid.setMeasured(scaled);
                 // state.throttle_out = pid.read();
-                // Serial.println("PID: " + String(speed) + " " + String(scaled) +
+                // Serial.println("PID: " + String(speed) + " " + String(scaled)
+                // +
                 //                " " + String(state.throttle_out));
             } else {
                 state.throttle_out = throttle;
@@ -143,7 +143,7 @@ public:
             i = fromBinary(storage->restore(2));
             d = fromBinary(storage->restore(3));
             m = fromBinary(storage->restore(4));
-            //TODO: restore all the functions
+            // TODO: restore all the functions
         }
         // pid.setup(p, i, d, m);
         timer.restart();

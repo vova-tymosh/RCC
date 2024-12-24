@@ -2,8 +2,6 @@
 #include "DccPhy.h"
 #include <Arduino.h>
 
-
-
 //
 // Debug/CLI interface
 //

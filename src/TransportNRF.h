@@ -7,8 +7,7 @@
 #include "Timer.h"
 #include "RCCLocoBase.h"
 
-
-//TODO - tick, pid setting (CV?), direction (1/0)
+// TODO - tick, pid setting (CV?), direction (1/0)
 
 struct __attribute__((packed)) Command {
     uint8_t cmd;
@@ -66,27 +65,27 @@ private:
         } else if (code == 't') {
             uint8_t throttle = constrain((int)value, 0, 100);
             loco->setThrottle(throttle);
-        // } else if (code == 'a') {
-        //     pid.setP(value);
-        //     storage->save(toBinary(value), 1);
-        // } else if (code == 'b') {
-        //     pid.setI(value);
-        //     storage->save(toBinary(value), 2);
-        // } else if (code == 'c') {
-        //     pid.setD(value);
-        //     storage->save(toBinary(value), 3);
-        // } else if (code == 'e') {
-        //     pid.setUpper(value);
-        //     storage->save(toBinary(value), 4);
+            // } else if (code == 'a') {
+            //     pid.setP(value);
+            //     storage->save(toBinary(value), 1);
+            // } else if (code == 'b') {
+            //     pid.setI(value);
+            //     storage->save(toBinary(value), 2);
+            // } else if (code == 'c') {
+            //     pid.setD(value);
+            //     storage->save(toBinary(value), 3);
+            // } else if (code == 'e') {
+            //     pid.setUpper(value);
+            //     storage->save(toBinary(value), 4);
         } else {
             loco->onCommand(code, value);
         }
     }
 
 public:
-
-    //TODO fix name/addr
-    TransportNRF(RCCLocoBase *loco) : loco(loco), addr(1), name("t001"), timer(100) {};
+    // TODO fix name/addr
+    TransportNRF(RCCLocoBase *loco)
+        : loco(loco), addr(1), name("t001"), timer(100) {};
 
     // bool isTransmitting()
     // {

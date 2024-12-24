@@ -1,10 +1,6 @@
 #pragma once
 
-typedef enum {
-    Preamble,
-    Seperator,
-    SendByte
-} dccPulseState;
+typedef enum { Preamble, Seperator, SendByte } dccPulseState;
 
 class dccPhy
 {

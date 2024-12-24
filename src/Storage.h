@@ -19,7 +19,7 @@ class Storage
 public:
     Storage() : file(InternalFS) {}
 
-    void setup(const char* version = NULL)
+    void setup(const char *version = NULL)
     {
         InternalFS.begin();
         file.open(FILENAME, FILE_O_READ);
@@ -70,7 +70,7 @@ class Storage
     }
 
 public:
-    void setup(const char* version = NULL)
+    void setup(const char *version = NULL)
     {
         Serial.println(F("EEPROM setup"));
         uint8_t validation = EEPROM.read(0);

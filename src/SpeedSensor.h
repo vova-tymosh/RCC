@@ -30,7 +30,9 @@ private:
 public:
     SpeedSensor(int pin, float distance_per_click, int update_period = 500)
         : pin(pin), distance_per_click(distance_per_click),
-          update_period(update_period) {}
+          update_period(update_period)
+    {
+    }
 
     void setup()
     {
