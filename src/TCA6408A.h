@@ -1,6 +1,5 @@
 #pragma once
 
-
 class Tca6408a
 {
 private:
@@ -12,7 +11,7 @@ private:
     static const int TCA_CONFIGURATION = 0x03;
 
     uint8_t addr;
-    
+
     void write(uint8_t reg, uint8_t value)
     {
         Wire.beginTransmission(addr);
@@ -34,8 +33,8 @@ private:
     }
 
 public:
-    Tca6408a(bool alternativeAddr = false) : 
-        addr(alternativeAddr ? I2C_ADDR_ALT : I2C_ADDR) {};
+    Tca6408a(bool alternativeAddr = false)
+        : addr(alternativeAddr ? I2C_ADDR_ALT : I2C_ADDR) {};
 
     bool begin()
     {

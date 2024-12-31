@@ -9,17 +9,16 @@
 // https://www.jmri.org/help/en/package/jmri/jmrit/withrottle/Protocol.shtml
 //
 
-
-
 class LineReceiver
 {
 private:
     static const int MAX_LINE = 256;
     char line[MAX_LINE];
     int linePointer = 0;
+
 public:
     char *getLine(char c)
-    {        
+    {
         if (c == '\n' || c == '\r') {
             line[linePointer] = '\0';
             linePointer = 0;
@@ -46,7 +45,6 @@ protected:
     RCCLocoBase *loco;
 
 public:
-
     void log(String msg)
     {
         if (loco->debugLevel > 1)
@@ -55,7 +53,7 @@ public:
 
     void reply(String msg)
     {
-        log(String("> ")+msg);
+        log(String("> ") + msg);
         conn.println(msg);
     }
 
@@ -69,11 +67,11 @@ public:
         conn.setTimeout(500);
 
         reply("VN2.0");
-        //TODOD - loco name/addr     
+        // TODOD - loco name/addr
         reply("RL1]\\[RGS 3}|{3}|{S");
         reply("PPA1");
         reply("");
-        reply("*"+String(heartbeatTimeout));
+        reply("*" + String(heartbeatTimeout));
     }
 
     void loop()
@@ -94,7 +92,7 @@ public:
         line++;
         switch (first) {
         case 'N':
-            reply("*"+String(heartbeatTimeout));
+            reply("*" + String(heartbeatTimeout));
             break;
         case 'M':
             processMultiThrottle(line);
@@ -131,26 +129,28 @@ public:
         }
     }
 
-    void processAddLoco(char throttleId, char *key, char *value) {
-        String prefix = String("M")+throttleId+"A"+key+"<;>";
-        reply(String("M")+throttleId+"+"+key+"<;>");
-        for(int i = 0; i < 29; i++){
+    void processAddLoco(char throttleId, char *key, char *value)
+    {
+        String prefix = String("M") + throttleId + "A" + key + "<;>";
+        reply(String("M") + throttleId + "+" + key + "<;>");
+        for (int i = 0; i < 29; i++) {
             bool state = loco->getFunction(i);
             char stateChar = (state) ? '1' : '0';
-            reply(prefix+"F"+String(state)+i);
+            reply(prefix + "F" + String(state) + i);
         }
         reply(prefix + "V" + getThrottle());
         reply(prefix + "R" + loco->getDirection());
         reply(prefix + "s1");
     }
 
-    void processDelLoco(char throttleId, char *key, char *value) {
-        reply(String("M")+throttleId+"-"+key+"<;>");
+    void processDelLoco(char throttleId, char *key, char *value)
+    {
+        reply(String("M") + throttleId + "-" + key + "<;>");
     }
 
-    void processAction(char throttleId, char *key, char* value)
-    {        
-        //key = loco addr, or *, ignore it
+    void processAction(char throttleId, char *key, char *value)
+    {
+        // key = loco addr, or *, ignore it
         char actionId = *value;
         value++;
         if (strlen(value) < 1)
@@ -168,16 +168,16 @@ public:
         case 'q':
             if (*value == 'V') {
                 int v = getThrottle();
-                reply(String("M")+throttleId+"A"+locoAddr+"<;>V"+v);
+                reply(String("M") + throttleId + "A" + locoAddr + "<;>V" + v);
             } else if (*value == 'R') {
                 int d = loco->getDirection();
-                reply(String("M")+throttleId+"A"+locoAddr+"<;>R"+d);                
+                reply(String("M") + throttleId + "A" + locoAddr + "<;>R" + d);
             }
             break;
         }
     }
 
-    void processFunction(char throttleId, char* value)
+    void processFunction(char throttleId, char *value)
     {
         if (strlen(value) < 2)
             return;
@@ -189,7 +189,8 @@ public:
             loco->setFunction(functId, state);
         }
         char stateChar = (state) ? '1' : '0';
-        reply(String("M")+throttleId+"A"+locoAddr+"<;>"+"F"+stateChar+String(functId));
+        reply(String("M") + throttleId + "A" + locoAddr + "<;>" + "F" +
+              stateChar + String(functId));
     }
 
     int getThrottle()
@@ -207,13 +208,12 @@ public:
     }
 };
 
-
 class TransportWT
 {
 private:
     const int port = 44444;
     const char *mdnsName = "withrottle";
-    //TODO proper name
+    // TODO proper name
     const char *hostname = "RCC_Loco";
     WiFiServer server;
     WiFiClient client;
@@ -221,7 +221,6 @@ private:
     RCCLocoBase *loco;
 
 public:
-
     TransportWT(RCCLocoBase *loco) : server(port), loco(loco) {}
 
     void log(String msg)
@@ -247,12 +246,12 @@ public:
         }
         int elapsed = millis() - start;
         log(" Done in ");
-        log(String((float)elapsed/1000));
+        log(String((float)elapsed / 1000));
         log("s\n");
     }
 
-
-    void begin() {
+    void begin()
+    {
 #ifdef RCC_WIFI_AP
         wifiAP();
 #else
@@ -263,7 +262,8 @@ public:
         MDNS.addService(mdnsName, "tcp", port);
     }
 
-    void loop() {
+    void loop()
+    {
         if (!client) {
             client = server.available();
             if (client)

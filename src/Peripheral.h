@@ -3,9 +3,6 @@
 #include "Motherboard.h"
 // #include <Servo.h>
 
-
-
-
 class Pin
 {
 protected:
@@ -32,8 +29,8 @@ public:
 class PinExt : public Pin, protected Tca6408a
 {
 public:
-    PinExt(int pin, bool alternativeAddr = false) : 
-        Pin(pin), Tca6408a(alternativeAddr) {};
+    PinExt(int pin, bool alternativeAddr = false)
+        : Pin(pin), Tca6408a(alternativeAddr) {};
 
     void begin()
     {
@@ -53,9 +50,10 @@ public:
 class PinInputExt : protected Tca6408a
 {
     uint8_t pin;
+
 public:
-    PinInputExt(int pin, bool alternativeAddr = false) : 
-        pin(pin), Tca6408a(alternativeAddr) {};
+    PinInputExt(int pin, bool alternativeAddr = false)
+        : pin(pin), Tca6408a(alternativeAddr) {};
 
     void begin()
     {
@@ -67,7 +65,6 @@ public:
         return Tca6408a::getValue(1 << pin);
     }
 };
-
 
 /*
 class ServoBase {
@@ -88,7 +85,7 @@ class ServoBase {
 };
 */
 
-//TODO: Deprecate
+// TODO: Deprecate
 class Motor
 {
 protected:
@@ -155,8 +152,9 @@ protected:
 public:
     int bemf;
 
-    Motor2(int pin_back = PIN_MOTOR_BCK, int pin_fowd = PIN_MOTOR_FWD, int pin_bemf = PIN_MOTOR_EMF,
-        int min_thr = 20, int cool_down_us = 40)
+    Motor2(int pin_back = PIN_MOTOR_BCK, int pin_fowd = PIN_MOTOR_FWD,
+           int pin_bemf = PIN_MOTOR_EMF, int min_thr = 20,
+           int cool_down_us = 40)
         : pin_back(pin_back), pin_fowd(pin_fowd), pin_bemf(pin_bemf),
           min_thr(min_thr), cool_down(cool_down_us)
     {
@@ -209,7 +207,7 @@ public:
     }
 };
 
-//TODO: Choose one
+// TODO: Choose one
 class ThermoSensor2
 {
 private:
