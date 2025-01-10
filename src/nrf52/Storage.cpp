@@ -98,13 +98,15 @@ uint Storage::read(const char *filename, void *buffer, size_t size, uint offset)
     return 0;
 }
 
-uint Storage::write(const char *filename, void *buffer, size_t size)
+uint Storage::write(const char *filename, void *buffer, size_t size, uint offset)
 {
     FileRecord f;
     if (getFile(filename, &f)) {
-        if (size > f.size)
-            size = f.size;
-        return flash.writeBuffer(f.offset, (const uint8_t*)buffer, size);
+        if (offset >= f.size)
+            return 0;
+        if (offset + size > f.size)
+            size -= offset + size - f.size;
+        return flash.writeBuffer(f.offset + offset, (const uint8_t*)buffer, size);
     } else {
         uint32_t fileOffset = createFile(filename, size);
         if (fileOffset)
@@ -113,5 +115,10 @@ uint Storage::write(const char *filename, void *buffer, size_t size)
     Serial.print("[FS] Failed to write file: ");
     Serial.println(filename);
     return 0;
+}
+
+bool Storage::allocate(const char *filename, size_t size)
+{
+    return (createFile(filename, size) > 0);
 }
 #endif

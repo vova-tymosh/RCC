@@ -40,5 +40,7 @@ public:
         return r;
     }
 
-    uint write(const char *filename, void *buffer, size_t size);
+    uint write(const char *filename, void *buffer, size_t size, uint offset = 0);
+
+    bool allocate(const char *filename, size_t size);
 };
