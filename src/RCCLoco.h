@@ -22,7 +22,7 @@ protected:
     int increment;
 
 public:
-    RCCLoco(Storage *storage = NULL) : storage(storage), increment(1)
+    RCCLoco(Storage *storage) : storage(storage), increment(1)
     {
         transport = new Transport(this);
         state.direction = 1;
@@ -38,8 +38,7 @@ public:
             state.bitstate |= (uint32_t)1 << code;
         else
             state.bitstate &= ~((uint32_t)1 << code);
-        if (storage)
-            storage->save(state.bitstate);
+        // storage->write("bitstate", &state.bitstate, sizeof(state.bitstate));
         onFunction(code, activate);
     }
 
@@ -137,14 +136,15 @@ public:
         float i = 0;
         float d = 0;
         float m = 0;
-        if (storage) {
-            state.bitstate = storage->restore(0);
-            p = fromBinary(storage->restore(1));
-            i = fromBinary(storage->restore(2));
-            d = fromBinary(storage->restore(3));
-            m = fromBinary(storage->restore(4));
+        // if (storage) {
+        // storage->read("bitstate", &state.bitstate, sizeof(state.bitstate));
+
+            // p = fromBinary(storage->restore(1));
+            // i = fromBinary(storage->restore(2));
+            // d = fromBinary(storage->restore(3));
+            // m = fromBinary(storage->restore(4));
             // TODO: restore all the functions
-        }
+        // }
         // pid.setup(p, i, d, m);
         timer.restart();
     }

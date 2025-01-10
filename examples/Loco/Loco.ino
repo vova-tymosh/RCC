@@ -4,15 +4,21 @@
  *
  */
 #include "Timer.h"
-#include "Secrets.h"
+// #include "Secrets.h"
 
 
-#define RCC_NO_STATION
+// #define RCC_NO_STATION
 // #define RCC_WIFI_AP
-#include "RCCLoco.h"
+// #include "RCCLoco.h"
+#include "Storage.h"
 
-Timer timer(1000);
+Storage storage;
 
+
+Timer initit;
+Timer doit;
+
+/*
 class TestLoco : public RCCLoco
 {
 public:
@@ -29,28 +35,40 @@ public:
         state.speed = throttle;
     }
 };
-TestLoco loco;
+TestLoco loco(&s);
+*/
+
+char testStr[] = "abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+char buffer[64];
+
+void test01()
+{
+    storage.write("test", testStr, sizeof(testStr));
+
+    int s = storage.read("test", buffer, 20);
+    buffer[s - 1] = '\0';
+    Serial.print(buffer);
+    if (strncmp(testStr, buffer, s) == 0)
+        Serial.println("test1 ... ok");
+}
 
 
 void setup()
 {
     Serial.begin(115200);
-    delay(50);
+    storage.begin();
+    delay(100);
 
-    loco.debugLevel = 1;
-
-    loco.setup();
-    timer.restart();
+    // loco.debugLevel = 1;
+    // loco.setup();
+    doit.start(1000);
 }
 
-int t;
 void loop()
 {
-    loco.loop();
+    // loco.loop();
 
-    if (timer.hasFired()) {
-        loco.state.temperature = t++;
-        if (t>100)
-            t = 0;
+    if (doit.hasFired()) {
+        test01();
     }
 }
