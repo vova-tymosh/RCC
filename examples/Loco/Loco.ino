@@ -38,25 +38,57 @@ public:
 TestLoco loco(&s);
 */
 
-char testStr[] = "abcdefghijklmnopqrstuvwxyz 1234567890 abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+char testStr[] = "0123456789abcdef";
 char buffer[64];
 
 void test01()
 {
-    storage.write("test", testStr, sizeof(testStr));
+    storage.write("test01", testStr, sizeof(testStr));
 
-    int s = storage.read("test", buffer, 20);
-    buffer[s - 1] = '\0';
-    Serial.print(buffer);
+    int s = storage.read("test01", buffer, 12);
+    buffer[s + 1] = '\0';
+    Serial.println(buffer);
     if (strncmp(testStr, buffer, s) == 0)
         Serial.println("test1 ... ok");
 }
 
+void test02()
+{
+    storage.write("test02", testStr, sizeof(testStr));
+
+    int s = storage.read("test02", buffer, 12, 2);
+    buffer[s + 1] = '\0';
+    Serial.println(buffer);
+    if (strncmp(testStr + 2, buffer, s) == 0)
+        Serial.println("test2 ... ok");
+}
+
+void test03()
+{
+    storage.write("test03", testStr, sizeof(testStr));
+
+    int s = storage.read("test02", buffer, 12, 10);
+    buffer[s + 1] = '\0';
+    Serial.println(buffer);
+    if (strncmp(testStr + 10, buffer, s) == 0)
+        Serial.println("test3 ... ok");
+}
+
+void test04()
+{
+    int s = storage.read("test01", buffer, 12);
+    buffer[s + 1] = '\0';
+    Serial.println(buffer);
+    if (strncmp(testStr, buffer, s) == 0)
+        Serial.println("test4 ... ok");
+}
 
 void setup()
 {
     Serial.begin(115200);
+    // storage.clear();
     storage.begin();
+
     delay(100);
 
     // loco.debugLevel = 1;
@@ -69,6 +101,10 @@ void loop()
     // loco.loop();
 
     if (doit.hasFired()) {
+        Serial.println("-------");
         test01();
+        test02();
+        test03();
+        test04();
     }
 }
