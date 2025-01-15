@@ -16,13 +16,12 @@ class RCCLoco : public RCCLocoBase
 {
 protected:
     Transport *transport;
-    Storage *storage;
     Timer timer;
     // SpeedControl pid;
     int increment;
 
 public:
-    RCCLoco(Storage *storage) : storage(storage), increment(1)
+    RCCLoco() : increment(1)
     {
         transport = new Transport(this);
         state.direction = 1;

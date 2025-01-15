@@ -4,6 +4,8 @@
 #include <ESPmDNS.h>
 #include "Timer.h"
 #include "RCCLocoBase.h"
+#include "ConfigWeb.h"
+#include "Settings.h"
 
 //
 // https://www.jmri.org/help/en/package/jmri/jmrit/withrottle/Protocol.shtml
@@ -208,6 +210,8 @@ public:
     }
 };
 
+
+
 class TransportWT
 {
 private:
@@ -220,6 +224,7 @@ private:
     WiThrottleClient wtClient;
     RCCLocoBase *loco;
 
+
 public:
     TransportWT(RCCLocoBase *loco) : server(port), loco(loco) {}
 
@@ -229,16 +234,16 @@ public:
             Serial.print(msg);
     }
 
-    void wifiAP()
+    void wifiAP(String wifissid, String wifipwd)
     {
-        WiFi.softAP(SECRET_SSID, SECRET_PWD);
+        WiFi.softAP(wifissid, wifipwd);
         log("Started wifi as AP.\n");
     }
 
-    void wifiConnect()
+    void wifiConnect(String wifissid, String wifipwd)
     {
         int start = millis();
-        WiFi.begin(SECRET_SSID, SECRET_PWD);
+        WiFi.begin(wifissid, wifipwd);
         log("Connecting to wifi.");
         while (WiFi.status() != WL_CONNECTED) {
             delay(100);
@@ -252,14 +257,18 @@ public:
 
     void begin()
     {
-#ifdef RCC_WIFI_AP
-        wifiAP();
-#else
-        wifiConnect();
-#endif
+        String wifiap = settings.get("wifiap");
+        String wifissid = settings.get("wifissid");
+        String wifipwd = settings.get("wifipwd");
+        if (wifiap == "on")
+            wifiAP(wifissid, wifipwd);
+        else
+            wifiConnect(wifissid, wifipwd);
         MDNS.begin(hostname);
         server.begin();
         MDNS.addService(mdnsName, "tcp", port);
+
+        configWeb.begin();
     }
 
     void loop()
@@ -271,5 +280,8 @@ public:
         } else {
             wtClient.loop();
         }
+
+
+        configWeb.loop();
     }
 };

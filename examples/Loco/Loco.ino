@@ -7,18 +7,19 @@
 // #include "Secrets.h"
 
 
-// #define RCC_NO_STATION
-// #define RCC_WIFI_AP
-// #include "RCCLoco.h"
+#define RCC_NO_STATION
+#include "RCCLoco.h"
 #include "Storage.h"
+#include "ConfigWeb.h"
+#include "Settings.h"
 
 Storage storage;
+Settings settings(storage);
+ConfigWeb configWeb;
+
+Timer timer;
 
 
-Timer initit;
-Timer doit;
-
-/*
 class TestLoco : public RCCLoco
 {
 public:
@@ -35,8 +36,8 @@ public:
         state.speed = throttle;
     }
 };
-TestLoco loco(&s);
-*/
+TestLoco loco;
+
 
 char testStr[] = "0123456789abcdef";
 char buffer[64];
@@ -92,19 +93,27 @@ void setup()
     delay(100);
 
     // loco.debugLevel = 1;
-    // loco.setup();
-    doit.start(1000);
+    loco.setup();
+
+    Serial.println("-------");
+    test01();
+    test02();
+    test03();
+    test04();
+
+    timer.start(1000);
 }
 
 void loop()
 {
-    // loco.loop();
+    loco.loop();
+    // if (timer.hasFired()) {
+    //     String wifiap = settings.get("wifiap");
+    //     String wifissid = settings.get("wifissid");
+    //     String wifipwd = settings.get("wifipwd");
+    //     Serial.println(String("wifiap: ") + (wifiap ? "on" : "off"));
+    //     Serial.println("wifissid: " + wifissid);
+    //     Serial.println("wifipwd: " + wifipwd);
 
-    if (doit.hasFired()) {
-        Serial.println("-------");
-        test01();
-        test02();
-        test03();
-        test04();
-    }
+    // }
 }

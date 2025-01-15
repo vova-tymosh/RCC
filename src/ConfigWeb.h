@@ -1,19 +1,20 @@
 #pragma once
 #include <WebServer.h>
-#include "Storage.h"
+
 
 
 class ConfigWeb
 {
 public:
     WebServer server;
-    Storage &storage;
 
-    ConfigWeb(Storage &storage) : server(80), storage(storage) {}
+    ConfigWeb() : server(80) {}
 
     void begin();
-    
+
     void loop() {
+        if (WiFi.status() != WL_CONNECTED)
+            return; 
         server.handleClient();
     }
 };

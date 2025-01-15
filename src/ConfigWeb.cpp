@@ -1,7 +1,7 @@
 #include <WiFi.h>
 #include <WebServer.h>
-#include "Storage.h"
 #include "ConfigWeb.h"
+#include "Settings.h"
 
 const char* htmlRoot = R"(
 <html>
@@ -73,17 +73,11 @@ const char* htmlSubmitted = R"(
 
 
 void handleRoot() {
-    char buffer[256];
-    configWeb.storage.readOrCreate("wifiap", buffer, sizeof(buffer));
-    String wifiap = String(buffer);
-    configWeb.storage.readOrCreate("wifissid", buffer, sizeof(buffer));
-    String wifissid = String(buffer);
-    configWeb.storage.readOrCreate("wifipwd", buffer, sizeof(buffer));
-    String wifipwd = String(buffer);
-    configWeb.storage.readOrCreate("loconame", buffer, sizeof(buffer));
-    String loconame = String(buffer);
-    configWeb.storage.readOrCreate("locoaddr", buffer, sizeof(buffer));
-    String locoaddr = String(buffer);
+    String wifiap = settings.get("wifiap");
+    String wifissid = settings.get("wifissid");
+    String wifipwd = settings.get("wifipwd");
+    String loconame = settings.get("loconame");
+    String locoaddr = settings.get("locoaddr");
 
     String form = String(htmlRoot);
     form.replace("$wifiap$", (wifiap == "on") ? "checked" : "");
@@ -95,23 +89,23 @@ void handleRoot() {
 }
 
 void handleSubmit() {
-    String wifiap = server.arg("wifiap");
-    String wifissid = server.arg("wifissid");
-    String wifipwd = server.arg("wifipwd");
-    String loconame = server.arg("loconame");
-    String locoaddr = server.arg("locoaddr");
+    String wifiap = configWeb.server.arg("wifiap");
+    String wifissid = configWeb.server.arg("wifissid");
+    String wifipwd = configWeb.server.arg("wifipwd");
+    String loconame = configWeb.server.arg("loconame");
+    String locoaddr = configWeb.server.arg("locoaddr");
 
     if (wifiap != "on")
         wifiap = "of";
-    configWeb.storage.write("wifiap", (void*)wifiap.c_str(), wifiap.length() + 1);
-    configWeb.storage.write("wifissid", (void*)wifissid.c_str(), wifissid.length() + 1);
-    configWeb.storage.write("wifipwd", (void*)wifipwd.c_str(), wifipwd.length() + 1);
-    configWeb.storage.write("loconame", (void*)loconame.c_str(), loconame.length() + 1);
-    configWeb.storage.write("locoaddr", (void*)locoaddr.c_str(), locoaddr.length() + 1);
+    settings.put("wifiap", wifiap);
+    settings.put("wifissid", wifissid);
+    settings.put("wifipwd", wifipwd);
+    settings.put("loconame", loconame);
+    settings.put("locoaddr", locoaddr);
 
 ////
     Serial.println("Form Submitted:");
-    Serial.println(String("wifiap: ") + (wifiap ? "true" : "false"));
+    Serial.println(String("wifiap: ") + (wifiap ? "on" : "off"));
     Serial.println("wifissid: " + wifissid);
     Serial.println("wifipwd: " + wifipwd);
     Serial.println("loconame: " + loconame);
@@ -125,9 +119,12 @@ void handleSubmit() {
 
 
 void ConfigWeb::begin() {
-  server.on("/", HTTP_GET, handleRoot);
-  server.on("/submit", HTTP_POST, handleSubmit);
+    if (WiFi.status() != WL_CONNECTED)
+        return; 
 
-  server.begin();
-  Serial.println("[Web] Server started");
+    server.on("/", HTTP_GET, handleRoot);
+    server.on("/submit", HTTP_POST, handleSubmit);
+
+    server.begin();
+    Serial.println("[Web] Server started");
 }
