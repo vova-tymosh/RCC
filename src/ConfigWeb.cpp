@@ -1,3 +1,5 @@
+#if defined(ARDUINO_ARCH_ESP32)
+
 #include <WiFi.h>
 #include <WebServer.h>
 #include "ConfigWeb.h"
@@ -103,24 +105,13 @@ void handleSubmit() {
     settings.put("loconame", loconame);
     settings.put("locoaddr", locoaddr);
 
-////
-    Serial.println("Form Submitted:");
-    Serial.println(String("wifiap: ") + (wifiap ? "on" : "off"));
-    Serial.println("wifissid: " + wifissid);
-    Serial.println("wifipwd: " + wifipwd);
-    Serial.println("loconame: " + loconame);
-    Serial.println("locoaddr: " + locoaddr);
-    Serial.println(strlen(htmlRoot));
-    Serial.println(strlen(htmlSubmitted));
-////      
-
     configWeb.server.send(200, "text/html", htmlSubmitted);
 }
 
 
 void ConfigWeb::begin() {
-    if (WiFi.status() != WL_CONNECTED)
-        return; 
+    // if (WiFi.status() != WL_CONNECTED)
+    //     return; 
 
     server.on("/", HTTP_GET, handleRoot);
     server.on("/submit", HTTP_POST, handleSubmit);
@@ -128,3 +119,4 @@ void ConfigWeb::begin() {
     server.begin();
     Serial.println("[Web] Server started");
 }
+#endif

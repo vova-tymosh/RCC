@@ -39,12 +39,15 @@ public:
 class WiThrottleClient
 {
 protected:
-    WiFiClient conn;
-    LineReceiver lr;
-    const char *locoAddr = "S3";
     const char *propertySeparator = "<;>";
     const int heartbeatTimeout = 10;
+
+    WiFiClient conn;
+    LineReceiver lr;
     RCCLocoBase *loco;
+
+    String locoName;
+    String locoAddr;
 
 public:
     void log(String msg)
@@ -59,18 +62,21 @@ public:
         conn.println(msg);
     }
 
-    void begin(WiFiClient _conn, RCCLocoBase *_loco)
+    void begin(WiFiClient _conn, RCCLocoBase *_loco, String _locoName, uint _locoAddr)
     {
         conn = _conn;
         loco = _loco;
+        locoName = _locoName;
+
+        char addrType = (_locoAddr < 127) ? 'S' : 'L';
+        locoAddr = String(addrType) + _locoAddr;
+
 
         log("WiThrottle Start");
         conn.flush();
         conn.setTimeout(500);
-
         reply("VN2.0");
-        // TODOD - loco name/addr
-        reply("RL1]\\[RGS 3}|{3}|{S");
+        reply(String("RL1]\\[") + locoName + "}|{" + _locoAddr + "}|{" + addrType);
         reply("PPA1");
         reply("");
         reply("*" + String(heartbeatTimeout));
@@ -217,13 +223,13 @@ class TransportWT
 private:
     const int port = 44444;
     const char *mdnsName = "withrottle";
-    // TODO proper name
-    const char *hostname = "RCC_Loco";
     WiFiServer server;
     WiFiClient client;
     WiThrottleClient wtClient;
     RCCLocoBase *loco;
 
+    String locoName;
+    uint locoAddr;
 
 public:
     TransportWT(RCCLocoBase *loco) : server(port), loco(loco) {}
@@ -236,6 +242,7 @@ public:
 
     void wifiAP(String wifissid, String wifipwd)
     {
+        log("ssid: " + wifissid + " pwd: " + wifipwd + "\n");
         WiFi.softAP(wifissid, wifipwd);
         log("Started wifi as AP.\n");
     }
@@ -257,14 +264,17 @@ public:
 
     void begin()
     {
-        String wifiap = settings.get("wifiap");
-        String wifissid = settings.get("wifissid");
-        String wifipwd = settings.get("wifipwd");
+        String wifiap = settings.get("wifiap", "on");
+        String wifissid = settings.get("wifissid", "RCC_Loco");
+        String wifipwd = settings.get("wifipwd", "RCC_Loco");
+        locoName = settings.get("loconame", "RCC");
+        String addr = settings.get("locoaddr", "3");
+        locoAddr = addr.toInt();
         if (wifiap == "on")
             wifiAP(wifissid, wifipwd);
         else
             wifiConnect(wifissid, wifipwd);
-        MDNS.begin(hostname);
+        MDNS.begin(locoName.c_str());
         server.begin();
         MDNS.addService(mdnsName, "tcp", port);
 
@@ -276,11 +286,10 @@ public:
         if (!client) {
             client = server.available();
             if (client)
-                wtClient.begin(client, loco);
+                wtClient.begin(client, loco, locoName, locoAddr);
         } else {
             wtClient.loop();
         }
-
 
         configWeb.loop();
     }

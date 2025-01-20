@@ -87,33 +87,34 @@ void test04()
 void setup()
 {
     Serial.begin(115200);
-    // storage.clear();
-    storage.begin();
 
     delay(100);
+    storage.begin();
+    // storage.clear();
 
-    // loco.debugLevel = 1;
+    loco.debugLevel = 2;
     loco.setup();
 
-    Serial.println("-------");
-    test01();
-    test02();
-    test03();
-    test04();
+    // Serial.println("-------");
+    // // test01();
+    // // test02();
+    // // test03();
+    // // test04();
 
-    timer.start(1000);
+    timer.start(10000);
 }
 
 void loop()
 {
     loco.loop();
+
     // if (timer.hasFired()) {
+    //     Serial.println("-----------------------------");
     //     String wifiap = settings.get("wifiap");
     //     String wifissid = settings.get("wifissid");
     //     String wifipwd = settings.get("wifipwd");
-    //     Serial.println(String("wifiap: ") + (wifiap ? "on" : "off"));
+    //     Serial.println("wifiap: " + wifiap);
     //     Serial.println("wifissid: " + wifissid);
     //     Serial.println("wifipwd: " + wifipwd);
-
     // }
 }
