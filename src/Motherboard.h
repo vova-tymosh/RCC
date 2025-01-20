@@ -10,3 +10,12 @@
 #define PIN_AUDIO_LRC 32 + 12 // D7
 #define PIN_AUDIO_SCK 32 + 13 // D8
 #define PIN_AUDIO_OUT 32 + 14 // D9
+
+
+const char *defaultSettings[] = {
+        "wifiap", "on",
+        "wifissid", "RCC_Loco",
+        "wifipwd", "RCC_Loco",
+        "loconame", "RCC",
+        "locoaddr", "3"
+};

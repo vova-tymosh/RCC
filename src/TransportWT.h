@@ -67,8 +67,8 @@ public:
     void begin(WiFiClient _conn)
     {
         conn = _conn;
-        locoName = settings.get("loconame", "RCC");
-        uint addr = settings.get("locoaddr", "3").toInt();
+        locoName = settings.get("loconame");
+        uint addr = settings.get("locoaddr").toInt();
         char addrType = (addr < 127) ? 'S' : 'L';
         locoAddr = String(addrType) + addr;
 
@@ -252,10 +252,10 @@ public:
 
     void begin()
     {
-        String wifiap = settings.get("wifiap", "on");
-        String wifissid = settings.get("wifissid", "RCC_Loco");
-        String wifipwd = settings.get("wifipwd", "RCC_Loco");
-        String locoName = settings.get("loconame", "RCC");
+        String wifiap = settings.get("wifiap");
+        String wifissid = settings.get("wifissid");
+        String wifipwd = settings.get("wifipwd");
+        String locoName = settings.get("loconame");
 
         if (wifiap == "on")
             wifiAP(wifissid, wifipwd);

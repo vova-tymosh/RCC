@@ -12,6 +12,7 @@
 #include "Storage.h"
 #include "ConfigWeb.h"
 #include "Settings.h"
+#include "Motherboard.h"
 
 Storage storage;
 Settings settings(storage);
@@ -91,6 +92,7 @@ void setup()
     delay(100);
     storage.begin();
     // storage.clear();
+    settings.checkDefaults(defaultSettings);
 
     loco.debugLevel = 2;
     loco.setup();
