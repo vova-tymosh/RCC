@@ -50,6 +50,8 @@ protected:
     String locoAddr;
 
 public:
+    WiThrottleClient(RCCLocoBase *loco) : loco(loco) {}
+
     void log(String msg)
     {
         if (loco->debugLevel > 1)
@@ -62,21 +64,20 @@ public:
         conn.println(msg);
     }
 
-    void begin(WiFiClient _conn, RCCLocoBase *_loco, String _locoName, uint _locoAddr)
+    void begin(WiFiClient _conn)
     {
         conn = _conn;
-        loco = _loco;
-        locoName = _locoName;
-
-        char addrType = (_locoAddr < 127) ? 'S' : 'L';
-        locoAddr = String(addrType) + _locoAddr;
+        locoName = settings.get("loconame", "RCC");
+        uint addr = settings.get("locoaddr", "3").toInt();
+        char addrType = (addr < 127) ? 'S' : 'L';
+        locoAddr = String(addrType) + addr;
 
 
         log("WiThrottle Start");
         conn.flush();
         conn.setTimeout(500);
         reply("VN2.0");
-        reply(String("RL1]\\[") + locoName + "}|{" + _locoAddr + "}|{" + addrType);
+        reply(String("RL1]\\[") + locoName + "}|{" + addr + "}|{" + addrType);
         reply("PPA1");
         reply("");
         reply("*" + String(heartbeatTimeout));
@@ -226,40 +227,27 @@ private:
     WiFiServer server;
     WiFiClient client;
     WiThrottleClient wtClient;
-    RCCLocoBase *loco;
-
-    String locoName;
-    uint locoAddr;
 
 public:
-    TransportWT(RCCLocoBase *loco) : server(port), loco(loco) {}
-
-    void log(String msg)
-    {
-        if (loco->debugLevel > 0)
-            Serial.print(msg);
-    }
+    TransportWT(RCCLocoBase *loco) : server(port), wtClient(loco) {}
 
     void wifiAP(String wifissid, String wifipwd)
     {
-        log("ssid: " + wifissid + " pwd: " + wifipwd + "\n");
         WiFi.softAP(wifissid, wifipwd);
-        log("Started wifi as AP.\n");
+        Serial.print("Started wifi as AP, SSID: ");
+        Serial.println(wifissid);
     }
 
     void wifiConnect(String wifissid, String wifipwd)
     {
-        int start = millis();
         WiFi.begin(wifissid, wifipwd);
-        log("Connecting to wifi.");
+        Serial.println("Connecting to wifi.");
         while (WiFi.status() != WL_CONNECTED) {
             delay(100);
-            log(".");
+            Serial.print(".");
         }
-        int elapsed = millis() - start;
-        log(" Done in ");
-        log(String((float)elapsed / 1000));
-        log("s\n");
+        Serial.print("Connected, IP: ");
+        Serial.println(WiFi.localIP());
     }
 
     void begin()
@@ -267,14 +255,13 @@ public:
         String wifiap = settings.get("wifiap", "on");
         String wifissid = settings.get("wifissid", "RCC_Loco");
         String wifipwd = settings.get("wifipwd", "RCC_Loco");
-        locoName = settings.get("loconame", "RCC");
-        String addr = settings.get("locoaddr", "3");
-        locoAddr = addr.toInt();
+        String locoName = settings.get("loconame", "RCC");
+
         if (wifiap == "on")
             wifiAP(wifissid, wifipwd);
         else
             wifiConnect(wifissid, wifipwd);
-        MDNS.begin(locoName.c_str());
+        MDNS.begin(locoName);
         server.begin();
         MDNS.addService(mdnsName, "tcp", port);
 
@@ -286,7 +273,7 @@ public:
         if (!client) {
             client = server.available();
             if (client)
-                wtClient.begin(client, loco, locoName, locoAddr);
+                wtClient.begin(client);
         } else {
             wtClient.loop();
         }
