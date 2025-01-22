@@ -92,7 +92,8 @@ void setup()
     delay(100);
     storage.begin();
     // storage.clear();
-    settings.checkDefaults(defaultSettings);
+    settings.checkDefaults(defaultSettings, sizeof(defaultSettings)/sizeof(defaultSettings[0]));
+
 
     loco.debugLevel = 2;
     loco.setup();
@@ -103,7 +104,7 @@ void setup()
     // // test03();
     // // test04();
 
-    timer.start(10000);
+    timer.start(2000);
 }
 
 void loop()

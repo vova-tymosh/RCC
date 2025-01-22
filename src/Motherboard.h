@@ -17,5 +17,5 @@ const char *defaultSettings[] = {
         "wifissid", "RCC_Loco",
         "wifipwd", "RCC_Loco",
         "loconame", "RCC",
-        "locoaddr", "3"
+        "locoaddr", "3",
 };

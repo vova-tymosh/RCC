@@ -7,11 +7,11 @@ class Settings
 public:
     Settings(Storage &storage) : storage(storage) {}
 
-    void checkDefaults(const char *defaultSettings[]) 
+    void checkDefaults(const char *defaultSettings[], size_t size)
     {
-        int size = sizeof(defaultSettings)/sizeof(defaultSettings[0]);
-        for (int i = 0; i < size/2; i++)
+        for (int i = 0; i < size/2; i++) {
             get(defaultSettings[i*2], defaultSettings[i*2 + 1]);
+        }
     }
 
     String get(String key)
