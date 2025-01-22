@@ -14,7 +14,7 @@ struct __attribute__((packed)) Command {
     float value;
 };
 
-class TransportNRF
+class Transport
 {
 private:
     static const char PACKET_REG = 'r';
@@ -84,7 +84,7 @@ private:
 
 public:
     // TODO fix name/addr
-    TransportNRF(RCCLocoBase *loco)
+    Transport(RCCLocoBase *loco)
         : loco(loco), addr(1), name("t001"), timer(100) {};
 
     // bool isTransmitting()

@@ -10,13 +10,12 @@
 #define RCC_NO_STATION
 #include "RCCLoco.h"
 #include "Storage.h"
-#include "ConfigWeb.h"
 #include "Settings.h"
 #include "Motherboard.h"
 
 Storage storage;
 Settings settings(storage);
-ConfigWeb configWeb;
+
 
 Timer timer;
 

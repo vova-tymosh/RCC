@@ -3,12 +3,10 @@
 #include "RCCLocoBase.h"
 
 #if defined(ARDUINO_ARCH_NRF52) || defined(ARDUINO_AVR_LEONARDO)
-#include "TransportNRF.h"
-#define Transport TransportNRF
+#include "nrf52/Transport.h"
 #elif defined(ARDUINO_ARCH_ESP32)
 #if defined(RCC_NO_STATION)
-#include "TransportWT.h"
-#define Transport TransportWT
+#include "esp32/Transport.h"
 #else
 #error MQTT is not implemented yet
 #endif

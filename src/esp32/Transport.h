@@ -3,7 +3,6 @@
 #include <WiFiClient.h>
 #include <ESPmDNS.h>
 #include "Timer.h"
-#include "RCCLocoBase.h"
 #include "ConfigWeb.h"
 #include "Settings.h"
 
@@ -219,7 +218,7 @@ public:
 
 
 
-class TransportWT
+class Transport
 {
 private:
     const int port = 44444;
@@ -227,9 +226,10 @@ private:
     WiFiServer server;
     WiFiClient client;
     WiThrottleClient wtClient;
+    ConfigWeb configWeb;
 
 public:
-    TransportWT(RCCLocoBase *loco) : server(port), wtClient(loco) {}
+    Transport(RCCLocoBase *loco) : server(port), wtClient(loco) {}
 
     void wifiAP(String wifissid, String wifipwd)
     {

@@ -73,8 +73,10 @@ const char* htmlSubmitted = R"(
   </html>
 )";
 
+WebServer ConfigWeb::server(80);
 
-void handleRoot() {
+
+void ConfigWeb::handleRoot() {
     String wifiap = settings.get("wifiap");
     String wifissid = settings.get("wifissid");
     String wifipwd = settings.get("wifipwd");
@@ -87,15 +89,15 @@ void handleRoot() {
     form.replace("$wifipwd$", wifipwd);
     form.replace("$loconame$", loconame);
     form.replace("$locoaddr$", locoaddr);
-    configWeb.server.send(200, "text/html", form);
+    server.send(200, "text/html", form);
 }
 
-void handleSubmit() {
-    String wifiap = configWeb.server.arg("wifiap");
-    String wifissid = configWeb.server.arg("wifissid");
-    String wifipwd = configWeb.server.arg("wifipwd");
-    String loconame = configWeb.server.arg("loconame");
-    String locoaddr = configWeb.server.arg("locoaddr");
+void ConfigWeb::handleSubmit() {
+    String wifiap = server.arg("wifiap");
+    String wifissid = server.arg("wifissid");
+    String wifipwd = server.arg("wifipwd");
+    String loconame = server.arg("loconame");
+    String locoaddr = server.arg("locoaddr");
 
     if (wifiap != "on")
         wifiap = "of";
@@ -105,7 +107,7 @@ void handleSubmit() {
     settings.put("loconame", loconame);
     settings.put("locoaddr", locoaddr);
 
-    configWeb.server.send(200, "text/html", htmlSubmitted);
+    server.send(200, "text/html", htmlSubmitted);
 }
 
 

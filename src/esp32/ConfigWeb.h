@@ -1,17 +1,17 @@
 #pragma once
 
-#if defined(ARDUINO_ARCH_ESP32)
-
 #include <WebServer.h>
-
 
 
 class ConfigWeb
 {
-public:
-    WebServer server;
+private:
+    static void handleRoot();
 
-    ConfigWeb() : server(80) {}
+    static void handleSubmit();
+
+public:
+    static WebServer server;
 
     void begin();
 
@@ -22,5 +22,4 @@ public:
     }
 };
 
-extern ConfigWeb configWeb;
-#endif
+// extern ConfigWeb configWeb;
