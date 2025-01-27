@@ -6,6 +6,7 @@
 #pragma once
 #include "RCCState.h"
 #include "Transport.h"
+#include "Cli.h"
 // #include "SpeedControl.h"
 #include "Storage.h"
 #include "Timer.h"
@@ -16,12 +17,13 @@ class RCCLoco : public RCCLocoBase
 {
 protected:
     Transport *transport;
+    Cli cli;
     Timer timer;
     // SpeedControl pid;
     int increment;
 
 public:
-    RCCLoco() : increment(1)
+    RCCLoco() : increment(1), cli(this)
     {
         transport = new Transport(this);
         state.direction = 1;
@@ -151,5 +153,6 @@ public:
     void loop()
     {
         transport->loop();
+        cli.loop();
     }
 };
