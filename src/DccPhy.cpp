@@ -1,3 +1,5 @@
+#ifdef DCC_PIPE
+
 #include "DccPhy.h"
 #include "DccPipe.h"
 #include <Arduino.h>
@@ -99,3 +101,5 @@ ISR(TIMER1_COMPA_vect)
     dccPhy::handleInterrupt();
 }
 #endif
+
+#endif // DCC_PIPE

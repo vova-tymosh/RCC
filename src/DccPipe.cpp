@@ -1,3 +1,5 @@
+#ifdef DCC_PIPE
+
 #include "DccPipe.h"
 #include "DccPhy.h"
 #include <Arduino.h>
@@ -152,3 +154,5 @@ Packet dccPipe::getPacket()
 }
 
 dccPipe dcc;
+
+#endif // DCC_PIPE

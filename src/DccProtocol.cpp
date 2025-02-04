@@ -1,3 +1,5 @@
+#ifdef DCC_PIPE
+
 #include "DccProtocol.h"
 #include <Arduino.h>
 
@@ -118,3 +120,5 @@ Packet dccProtocol::getBroadcastStopPacket()
     m.data[2] = 0x51;
     return m;
 }
+
+#endif // DCC_PIPE
