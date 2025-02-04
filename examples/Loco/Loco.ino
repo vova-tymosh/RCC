@@ -3,12 +3,11 @@
  *
  *
  */
-#include "Timer.h"
-// #include "Secrets.h"
 
 
 #define RCC_NO_STATION
 #include "RCCLoco.h"
+#include "Timer.h"
 #include "Storage.h"
 #include "Settings.h"
 #include "Motherboard.h"
@@ -110,13 +109,13 @@ void loop()
 {
     loco.loop();
 
-    // if (timer.hasFired()) {
-    //     Serial.println("-----------------------------");
+    if (timer.hasFired()) {
+        Serial.println("-----------a-");
     //     String wifiap = settings.get("wifiap");
     //     String wifissid = settings.get("wifissid");
     //     String wifipwd = settings.get("wifipwd");
     //     Serial.println("wifiap: " + wifiap);
     //     Serial.println("wifissid: " + wifissid);
     //     Serial.println("wifipwd: " + wifipwd);
-    // }
+    }
 }
