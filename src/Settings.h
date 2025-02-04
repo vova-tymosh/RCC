@@ -3,6 +3,7 @@
 
 class Settings
 {
+    const int MAX_LENGTH = 256;
     Storage &storage;
 public:
     Settings(Storage &storage) : storage(storage) {}
@@ -16,17 +17,19 @@ public:
 
     String get(String key)
     {
-        char buffer[256];
+        char buffer[MAX_LENGTH];
         storage.readOrCreate(key.c_str(), buffer, sizeof(buffer));
         return String(buffer);
     }
 
     String get(String key, String defaultValue)
     {
-        char buffer[256];
+        char buffer[MAX_LENGTH];
         uint r = storage.read(key.c_str(), buffer, sizeof(buffer));
         if (r == 0) {
-            storage.write(key.c_str(), (void*)defaultValue.c_str(), defaultValue.length() + 1);
+            memset(buffer, 0, sizeof(buffer));
+            memcpy(buffer, defaultValue.c_str(), defaultValue.length());
+            storage.write(key.c_str(), (void*)buffer, MAX_LENGTH);
             return defaultValue;
         }
         return String(buffer);
