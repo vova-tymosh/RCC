@@ -3,15 +3,23 @@
  *
  *
  */
-#include "Wireless.h"
+#include "nrf52/Wireless.h"
 #include "Timer.h"
 #include "RCCLocoBase.h"
+#include "Settings.h"
 
-// TODO - tick, pid setting (CV?), direction (1/0)
+// TODO - tick, pid setting (CV?)
 
 struct __attribute__((packed)) Command {
     uint8_t cmd;
-    float value;
+    union {
+        float value;
+        struct {
+            uint8_t keySize;
+            uint8_t valueSize;
+            uint16_t reserved;
+        };
+    };
 };
 
 class Transport
@@ -22,8 +30,6 @@ private:
     const int FUNCTION_BASE = ' ';
     const int FUNCTION_END = FUNCTION_BASE + 32 - 2; // 2 bits for direction
 
-    int addr;
-    const char *name;
     Timer timer;
     Wireless wireless;
     RCCLocoBase *loco;
@@ -31,13 +37,15 @@ private:
     void log(String msg)
     {
         if (loco->debugLevel > 1)
-            Serial.print(msg);
+            Serial.println(msg);
     }
 
-    void authorize(const int node, const char *name)
+    void authorize()
     {
+        String name = settings.get("loconame");
+        String addr = settings.get("locoaddr");
         String packet = String(PACKET_REG) + " " + VERSION + " " + LOCO_FORMAT +
-                        " " + String(node) + " " + String(name) + " " +
+                        " " + addr + " " + name + " " +
                         String(FIELDS);
         int size = packet.length();
         wireless.write(packet.c_str(), size);
@@ -58,7 +66,7 @@ private:
             code -= FUNCTION_BASE;
             loco->setFunction(code, value != 0);
         } else if (code == 'r') {
-            authorize(addr, name);
+            authorize();
         } else if (code == 'd') {
             uint8_t direction = constrain((int)value, 0, 2);
             loco->setDirection(direction);
@@ -83,9 +91,11 @@ private:
     }
 
 public:
-    // TODO fix name/addr
     Transport(RCCLocoBase *loco)
-        : loco(loco), addr(1), name("t001"), timer(100) {};
+        : loco(loco), timer(100)
+    {
+
+    };
 
     // bool isTransmitting()
     // {
@@ -94,8 +104,9 @@ public:
 
     void begin()
     {
+        int addr = settings.get("locoaddr").toInt();
         wireless.setup(addr);
-        authorize(addr, name);
+        authorize();
         timer.restart();
     }
 
@@ -103,7 +114,17 @@ public:
     {
         if (wireless.available()) {
             struct Command command;
-            wireless.read(&command, sizeof(command));
+            uint8_t buffer[128];
+            wireless.read(buffer, sizeof(buffer));
+            memcpy(&command, buffer, sizeof(command));
+            if (command.cmd == 122) {
+                char key[256];
+                char value[256];
+                Serial.println("###1>" + String(command.keySize) + " = " + String(command.valueSize));
+                memcpy(key, buffer + sizeof(command), command.keySize);
+                memcpy(value, buffer + sizeof(command) + command.keySize, command.valueSize);
+                Serial.println("###3>" + String(key) + " = " + String(value));
+            }
             received(command.cmd, command.value);
         }
         if (timer.hasFired()) {
@@ -111,6 +132,7 @@ public:
             // state.tick = (float)millis() / 100;
             // state.lost = wireless->getLostRate();
             send();
+            // Serial.println("###loop>");
         }
     }
 };

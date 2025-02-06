@@ -16,7 +16,7 @@ Storage storage;
 Settings settings(storage);
 
 
-Timer timer;
+Timer testRun, timer;
 
 
 class TestLoco : public RCCLoco
@@ -59,7 +59,7 @@ void test02()
     int s = storage.read("test02", buffer, 12, 2);
     buffer[s + 1] = '\0';
     Serial.println(buffer);
-    if (strncmp(testStr + 2, buffer, s) == 0)
+    if (strcmp(testStr + 2, buffer) == 0)
         Serial.println("test2 ... ok");
 }
 
@@ -70,7 +70,7 @@ void test03()
     int s = storage.read("test02", buffer, 12, 10);
     buffer[s + 1] = '\0';
     Serial.println(buffer);
-    if (strncmp(testStr + 10, buffer, s) == 0)
+    if (strcmp(testStr + 10, buffer) == 0)
         Serial.println("test3 ... ok");
 }
 
@@ -79,28 +79,29 @@ void test04()
     int s = storage.read("test01", buffer, 12);
     buffer[s + 1] = '\0';
     Serial.println(buffer);
-    if (strncmp(testStr, buffer, s) == 0)
+    if (strcmp(testStr, buffer) == 0)
         Serial.println("test4 ... ok");
+}
+
+void test05()
+{
+    // settings.put("test05", testStr);
+    String r = settings.get("test05");
+    Serial.println(r);
+    if (strcmp(testStr, r.c_str()) == 0)
+        Serial.println("test5 ... ok");
 }
 
 void setup()
 {
     Serial.begin(115200);
-
     delay(100);
     storage.begin();
     // storage.clear();
-    settings.checkDefaults(defaultSettings, sizeof(defaultSettings)/sizeof(defaultSettings[0]));
-
+    settings.checkDefaults(defaultSettings, defaultSettingsSize);
 
     loco.debugLevel = 2;
     loco.setup();
-
-    // Serial.println("-------");
-    // // test01();
-    // // test02();
-    // // test03();
-    // // test04();
 
     timer.start(2000);
 }
@@ -109,8 +110,14 @@ void loop()
 {
     loco.loop();
 
-    if (timer.hasFired()) {
+    if (testRun.hasFiredOnce()) {
         Serial.println("-----------------------------");
+        settings.put("test05", testStr);
+        test03();
+        test05();
+        String name = settings.get("loconame");
+        Serial.println(">>" + name);
+            
     //     String wifiap = settings.get("wifiap");
     //     String wifissid = settings.get("wifissid");
     //     String wifipwd = settings.get("wifipwd");
@@ -118,4 +125,12 @@ void loop()
     //     Serial.println("wifissid: " + wifissid);
     //     Serial.println("wifipwd: " + wifipwd);
     }
+
+    // if (timer.hasFired()) {
+    //     Serial.println("002 Tender:" + 
+    //                           + " " + String(loco.state.throttle)   + " " +
+    //                           String(loco.state.distance)
+    //                           + " " + String(sensors.temperature) + " " +
+    //                           String(sensors.psi));        
+    // }
 }
