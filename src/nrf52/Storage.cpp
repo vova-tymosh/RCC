@@ -1,5 +1,14 @@
 #if defined(ARDUINO_ARCH_NRF52)
 
+/*
+SPI flash storage for nRF52
+Important:
+    The flash writes with 4 bytes alignment, so the size of the file will be rounded up to the next multiple of 4
+    Also FileRecords has to be aligned to 4 bytes
+
+
+*/
+
 #include <stdint.h>
 #include "Adafruit_SPIFlash.h"
 #include "Storage.h"
@@ -32,6 +41,7 @@ uint32_t createFile(const char *filename, size_t size)
         Serial.println("[FS] Storage full");
         return 0;
     }
+    size = (size + 3) & ~3;
     FileRecord f;
     strncpy(f.filename, filename, sizeof(f.filename));
     f.offset = mr.end;
@@ -79,7 +89,7 @@ void Storage::setValidation(uint32_t validation)
     flash.writeBuffer(0, (const uint8_t*)&mr, sizeof(mr));
 }
 
-void Storage::clear()
+void Storage::clearInternal()
 {
     flash.eraseChip();
     flash.waitUntilReady();

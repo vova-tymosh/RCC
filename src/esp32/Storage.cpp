@@ -25,7 +25,7 @@ void Storage::setValidation(uint32_t validation)
     write("validation", &validation, sizeof(validation));
 }
 
-void Storage::clear()
+void Storage::clearInternal()
 {
     File root = SPIFFS.open("/");
     File file = root.openNextFile();

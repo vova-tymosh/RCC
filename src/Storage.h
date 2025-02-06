@@ -8,6 +8,8 @@ private:
 
     void beginInternal();
 
+    void clearInternal();
+
     uint32_t getValidation();
 
     void setValidation(uint32_t value);
@@ -21,11 +23,14 @@ public:
         if (validation >> 16 != code || (validation & 0xFFFF) != version) {
             Serial.println("[FS] No FS or old version, reformat");
             clear();
-            setValidation(code << 16 | version);
         }
     }
 
-    void clear();
+    void clear()
+    {
+        clearInternal();
+        setValidation(code << 16 | version);
+    }
 
     uint read(const char *filename, void *buffer, size_t size, uint offset = 0);
 

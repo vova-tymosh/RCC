@@ -19,3 +19,4 @@ const char *defaultSettings[] = {
         "loconame", "RCC",
         "locoaddr", "3",
 };
+const int defaultSettingsSize = sizeof(defaultSettings) / sizeof(defaultSettings[0]);

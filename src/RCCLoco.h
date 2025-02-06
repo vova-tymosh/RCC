@@ -56,7 +56,6 @@ public:
 
     void setDirection(int value)
     {
-        // TODO modify TransportNRF to use 0/1 direction only
         value = constrain((int)value, 0, 1);
         state.direction = value;
         if ((state.slow == false) && (state.pid == false))
@@ -104,7 +103,6 @@ public:
                 state.throttle_out = throttle;
             }
         }
-        log("handleThrottle");
         onThrottle(state.direction, state.throttle_out);
     }
 
