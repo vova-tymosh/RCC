@@ -110,7 +110,7 @@ void loop()
     loco.loop();
 
     if (timer.hasFired()) {
-        Serial.println("-----------a-");
+        Serial.println("-----------------------------");
     //     String wifiap = settings.get("wifiap");
     //     String wifissid = settings.get("wifissid");
     //     String wifipwd = settings.get("wifipwd");
