@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "RCCLocoBase.h"
+#include "Settings.h"
 
 class Cli
 {
@@ -11,6 +12,9 @@ private:
     static const char CMD_SPEED = 'S';
     static const char CMD_FUNCTION = 'F';
     static const char CMD_READ = 'R';
+    static const char CMD_PUT = 'P';
+    static const char CMD_GET = 'G';
+    static const char CMD_CLEAR = 'C';
 
     RCCLocoBase *loco;
 
@@ -18,7 +22,7 @@ private:
     {
         if (strlen(cmd) == 0)
             return false;
-        char first = cmd[0];
+        char first = toupper(cmd[0]);
         if (strlen(cmd) > 1) {
             cmd++;
             if (first == CMD_READ)
@@ -27,6 +31,12 @@ private:
                 return processSpeed(cmd);
             else if (first == CMD_FUNCTION)
                 return processFunction(cmd);
+            else if (first == CMD_PUT)
+                return processPut(cmd);
+            else if (first == CMD_GET)
+                return processGet(cmd);
+            else if (first == CMD_CLEAR)
+                return processClear(cmd);
         }
         return false;
     }
@@ -64,6 +74,34 @@ private:
         return true;
     }
 
+    bool processPut(char cmd[]) 
+    {
+        if (strlen(cmd) < 2)
+            return false;
+        char *separator = strchr(cmd, ':');
+        if (separator == NULL)
+            return false;
+        *separator = '\0';
+        char *key = cmd;
+        char *value = ++separator;
+        onPut(key, value);
+        return true;
+    }
+
+    bool processGet(char cmd[]) 
+    {
+        if (strlen(cmd) < 1)
+            return false;
+        char *key = cmd;
+        onGet(key);
+        return true;
+    }
+
+    bool processClear(char cmd[]) 
+    {
+        onClear();
+        return true;
+    }
 
 public:
     Cli(RCCLocoBase *loco) : loco(loco) {}
@@ -78,6 +116,24 @@ public:
     virtual void onFunction(uint8_t code, bool value)
     {
         loco->onFunction(code, value);
+    }
+
+    void onPut(char *key, char *value)
+    {
+        settings.put(key, value);
+        Serial.println(String("Put=")+key+":"+value);
+    }
+
+    void onGet(char *key)
+    {
+        String value = settings.get(key);
+        Serial.println(String("Get=")+key+":"+value);
+    }
+
+    void onClear()
+    {
+        storage.clear();
+        Serial.println(String("Clear"));
     }
 
     void loop() 

@@ -12,12 +12,6 @@
 #include "Settings.h"
 #include "Motherboard.h"
 
-Storage storage;
-Settings settings(storage);
-
-
-Timer testRun, timer;
-
 
 class TestLoco : public RCCLoco
 {
@@ -37,6 +31,11 @@ public:
 };
 TestLoco loco;
 
+
+Storage storage;
+Settings settings;
+Timer testRun, timer;
+Cli cli(&loco);
 
 char testStr[] = "0123456789abcdef";
 char buffer[64];
@@ -103,12 +102,13 @@ void setup()
     loco.debugLevel = 2;
     loco.setup();
 
-    timer.start(2000);
+    testRun.start(2000);
 }
 
 void loop()
 {
     loco.loop();
+    cli.loop();
 
     if (testRun.hasFiredOnce()) {
         Serial.println("-----------------------------");

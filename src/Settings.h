@@ -4,9 +4,7 @@
 class Settings
 {
     static const int MAX_LENGTH = 256;
-    Storage &storage;
 public:
-    Settings(Storage &storage) : storage(storage) {}
 
     void checkDefaults(const char *defaultSettings[], size_t size)
     {

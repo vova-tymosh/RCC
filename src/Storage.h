@@ -49,3 +49,5 @@ public:
 
     bool allocate(const char *filename, size_t size);
 };
+
+extern Storage storage;
