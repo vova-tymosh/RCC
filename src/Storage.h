@@ -4,7 +4,7 @@
 class Storage {
 private:
     const uint16_t code = 0xC0DE;
-    const uint16_t version = 9;
+    const uint16_t version = 10;
 
     void beginInternal();
 
