@@ -1,6 +1,8 @@
 #pragma once
 #include "Timer.h"
-#include "Motherboard.h"
+#include <TCA6408A.h>
+#include <Adafruit_INA219.h>
+
 // #include <Servo.h>
 
 class Pin
@@ -86,7 +88,7 @@ class ServoBase {
 */
 
 // TODO: Deprecate
-class Motor
+class MotorDeprecated
 {
 protected:
     const float MIN_THR = 0;
@@ -112,9 +114,7 @@ protected:
     }
 
 public:
-    Motor(int pin_back, int pin_fowd) : pin_back(pin_back), pin_fowd(pin_fowd)
-    {
-    }
+    MotorDeprecated(int pin_back, int pin_fowd) : pin_back(pin_back), pin_fowd(pin_fowd) {}
 
     virtual void setup()
     {
@@ -137,7 +137,7 @@ public:
     }
 };
 
-class Motor2
+class Motor
 {
 protected:
     const int pin_back;
@@ -147,13 +147,13 @@ protected:
     const int cool_down;
     int direction;
     int throttle;
-    Timer timer;
+    Timer bemf_timer;
 
 public:
     int bemf;
 
-    Motor2(int pin_back = PIN_MOTOR_BCK, int pin_fowd = PIN_MOTOR_FWD,
-           int pin_bemf = PIN_MOTOR_EMF, int min_thr = 20,
+    Motor(int pin_back, int pin_fowd,
+           int pin_bemf = -1, int min_thr = 20,
            int cool_down_us = 40)
         : pin_back(pin_back), pin_fowd(pin_fowd), pin_bemf(pin_bemf),
           min_thr(min_thr), cool_down(cool_down_us)
@@ -164,8 +164,10 @@ public:
     {
         pinMode(pin_back, OUTPUT);
         pinMode(pin_fowd, OUTPUT);
-        pinMode(pin_bemf, INPUT);
-        timer.start(700);
+        if (pin_bemf >= 0) {
+            pinMode(pin_bemf, INPUT);
+            bemf_timer.start(700);
+        }
     }
 
     virtual void apply(int direction, int throttle)
@@ -191,17 +193,21 @@ public:
 
     int readBemf()
     {
-        analogWrite(pin_back, 0);
-        analogWrite(pin_fowd, 0);
-        delayMicroseconds(cool_down);
-        bemf = analogRead(pin_bemf);
-        apply(direction, throttle);
-        return bemf;
+        if (pin_bemf >= 0) {
+            analogWrite(pin_back, 0);
+            analogWrite(pin_fowd, 0);
+            delayMicroseconds(cool_down);
+            bemf = analogRead(pin_bemf);
+            apply(direction, throttle);
+            return bemf;
+        } else {
+            return -1;
+        }
     }
 
     void loop()
     {
-        if (timer.hasFired()) {
+        if (bemf_timer.hasFired()) {
             readBemf();
         }
     }

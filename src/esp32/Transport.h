@@ -141,7 +141,9 @@ public:
     {
         String prefix = String("M") + throttleId + "A" + key + "<;>";
         reply(String("M") + throttleId + "+" + key + "<;>");
-        for (int i = 0; i < 29; i++) {
+        reply(String("M") + throttleId + "L" + key + "<;>]\\[Headlight]\\[Bell]\\[Whistle]\\[3]\\[4]\\[5]\\[6]\\[7]\\[8]\\[9");
+        /* ]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\["); */
+        for (int i = 0; i < 9; i++) {
             bool state = loco->getFunction(i);
             char stateChar = (state) ? '1' : '0';
             reply(prefix + "F" + String(state) + i);

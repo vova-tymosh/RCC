@@ -1,6 +1,4 @@
 #pragma once
-#include <Adafruit_INA219.h>
-#include <TCA6408A.h>
 
 #define PIN_NOTHING   D0
 #define PIN_MOTOR_EMF D1

@@ -17,13 +17,13 @@ class RCCLoco : public RCCLocoBase
 {
 protected:
     Transport *transport;
-    Cli cli;
+    RccCli rccCli;
     Timer timer;
     // SpeedControl pid;
     int increment;
 
 public:
-    RCCLoco() : increment(1), cli(this)
+    RCCLoco() : increment(1), rccCli(this)
     {
         transport = new Transport(this);
         state.direction = 1;
@@ -151,6 +151,6 @@ public:
     void loop()
     {
         transport->loop();
-        cli.loop();
+        rccCli.loop();
     }
 };

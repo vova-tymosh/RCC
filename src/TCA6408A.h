@@ -1,4 +1,5 @@
 #pragma once
+#include <Wire.h>
 
 class Tca6408a
 {

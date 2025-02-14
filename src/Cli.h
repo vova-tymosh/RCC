@@ -3,7 +3,7 @@
 #include "RCCLocoBase.h"
 #include "Settings.h"
 
-class Cli
+class RccCli
 {
 private:
     static const uint8_t INPUT_LEN_MAX = 12;
@@ -104,7 +104,7 @@ private:
     }
 
 public:
-    Cli(RCCLocoBase *loco) : loco(loco) {}
+    RccCli(RCCLocoBase *loco) : loco(loco) {}
 
     virtual void onExe(uint8_t code) {}
 
