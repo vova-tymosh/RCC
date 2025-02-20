@@ -4,6 +4,9 @@ Remote Command and Control (RCC) is an easy-to-use and affordable wireless solut
 
 Details about locomotive decoders, throttles, turnouts and how to build them can be found on [RCC-Nodes](https://github.com/vova-tymosh/RCC-Nodes).
 
+Here is how the decoder looks like:
+![decoder](decoder.jpg)
+
 
 ## Is RCC good for me?
 If you are happy with your current setup the answer is obviously “no”. If you are tired of cleaning rails or you don’t want to spend an arm and a leg - RCC is your friend. Think about this. An RCC decoder costs under $30. It is tiny - an inch by two inches. It can drive a motor, play sound and control all blows and whistles your locomotive has. You can build your own Throttle or you may use your phone. After all, you just throw rails on the ground and run your trains! RCC works on the simplest scenarios with a single locomotive or it can be a part of a complex layout (RCC is able to talk to JMRI).
