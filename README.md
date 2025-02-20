@@ -28,3 +28,8 @@ All the instructions and documentation about how to build stuff is located - on 
 
 ## What is the current status?
 Currently RCC supports a couple variants of loco decoders. Complete solutions for throttle, turnouts and other things will come soon. Details about what kind of decoders are available and what they can do are provided on the same RCC-Nodes page.
+
+## How big is the thing, can I fit it in my loco?
+Here is the decoder, 2 inches by 1 inch:
+
+![decoder](decoder.jpg)
