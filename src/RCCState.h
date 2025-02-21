@@ -7,7 +7,7 @@
 
 // LocoState list of filed and their Python struct format
 //  Update every time LocoState changes. Update version too.
-const char *VERSION = "0.1.9";
+const char *VERSION = "0.2";
 const char *FIELDS =
     "Time Disatnce Bitstate Speed Lost Throttle ThrOut Battery Temp Psi Water";
 const char *LOCO_FORMAT = "BIIIHBBBBBBB";
