@@ -170,64 +170,6 @@ public:
     }
 };
 
-// TODO: Choose one
-class ThermoSensor2
-{
-private:
-    const int PIN_VCC = 10;
-    const int PIN_GND = A1;
-    int pin;
-
-    const float KELVIN_BASE = 273.15;
-    const unsigned int THERMISTOR_RT0 = 10000;
-    const unsigned int THERMISTOR_B = 3977;
-    const float THERMISTOR_T0 = 25 + KELVIN_BASE;
-
-    const float VCC = 5.0;
-    const int MAX_ADC = 1023;
-    const int RESISTOR = 10000;
-
-    float getThermistor()
-    {
-        pinMode(PIN_VCC, OUTPUT);
-        digitalWrite(PIN_VCC, HIGH);
-        pinMode(PIN_GND, OUTPUT);
-        digitalWrite(PIN_GND, LOW);
-
-        pinMode(pin, INPUT);
-        float voltage = analogRead(pin);
-        pinMode(pin, OUTPUT);
-        return (VCC / MAX_ADC) * voltage;
-    }
-
-    float getTemperature()
-    {
-        float thermistorVoltage = getThermistor();
-        float vr = VCC - thermistorVoltage;
-        float resistance = thermistorVoltage / (vr / RESISTOR);
-
-        float ln = log(resistance / THERMISTOR_RT0);
-        float temperature = (1 / ((ln / THERMISTOR_B) + (1 / THERMISTOR_T0)));
-        return temperature - KELVIN_BASE;
-    }
-
-public:
-    ThermoSensor2(int pin) : pin(pin) {};
-
-    void setup()
-    {
-        pinMode(PIN_VCC, OUTPUT);
-        digitalWrite(PIN_VCC, HIGH);
-        pinMode(PIN_GND, OUTPUT);
-        digitalWrite(PIN_VCC, LOW);
-    }
-
-    float read()
-    {
-        return getTemperature();
-    }
-};
-
 class ThermoSensor
 {
 private:
