@@ -10,12 +10,13 @@ If you are happy with your current setup the answer is obviously “no”. If yo
 
 
 ## Does RCC use batteries?
-Yes. In the 21st century some of the real trains are running on batteries. It’s time for the model ones to do the same. A battery that gives you 10h running time costs $30. Also, you may always swap for a fresh battery and keep running virtually indefinitely. With batteries you don’t need to worry about wiring, cleaning rails or transformers.
-You hate batteries or you already have a wired setup. Ok, you may still use an RCC decoder, just power it from rail pickups via a rectifier.
+Yes. In the 21st century some of the real trains are running on batteries. It’s time for the model ones to do the same. A battery that gives you 10h running time costs $30. Also, you may always swap for a fresh battery and keep running virtually indefinitely. With batteries you don’t need to worry about wiring, cleaning rails or transformers. One element of the Lithium battery gives about 4 volts. To power RCC you’d need 2 to 6 elements (8 to 24V) depending on maximum speed you want to achieve. If you are not sure - start with 12V (3S batteries).
+If you don't like batteries or you already have a wired setup, you may still use an RCC decoder, just power it from rail pickups via a rectifier.
 
 
 ## Why do we need yet another solution?
 There are many solutions available. Some are very affordable, like DCC-EX, but still require electrical conductivity between all the rail sections and locomotive wheels. Some are wireless, but for G-scale they cost $100-$200. RCC excels in both - it is dirt cheap and it doesn’t need wires. Also it is open source. You can change it to your unique needs and desires.
+There is one more advantage, RCC is bi-directional. It sends back information about the train speed, battery voltage and power currently drawn by the motor. You can build much more sophisticated automation using this info, or you can simply look at this as the real engineer would do in the cab of a locomotive. 
 
 
 ## Do I need a degree in electrical engineering to use RCC?
@@ -33,4 +34,3 @@ Currently RCC supports a couple variants of loco decoders. Complete solutions fo
 Here is the decoder, 2 inches by 1 inch:
 
 ![decoder](decoder.jpg)
-
