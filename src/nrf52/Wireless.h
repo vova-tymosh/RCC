@@ -28,14 +28,16 @@
 #define RADIO_BW NRF_250KBPS
 #define RADIO_TYPE nrf_to_nrf
 #define RADIO_NETWORK RF52Network
-#define RADIO_CTOR(x, y) radio()
-#else
+#define RADIO_CTOR radio()
+#elif defined(ARDUINO_AVR_LEONARDO)
 #include <RF24.h>
 #define RADIO_LEVEL RF24_PA_HIGH
 #define RADIO_BW RF24_250KBPS
 #define RADIO_TYPE RF24
 #define RADIO_NETWORK RF24Network
-#define RADIO_CTOR(x, y) radio(x, y)
+#define RADIO_CTOR radio(NRF_CE, NRF_CSN)
+#else
+#error Architecture/Platform is not supported!
 #endif
 #include <RF24Network.h>
 
@@ -81,8 +83,8 @@ protected:
     RADIO_NETWORK network;
 
 public:
-    Wireless(int cePin = 0, int csnPin = 0)
-        : RADIO_CTOR(cePin, csnPin), network(radio) {};
+    Wireless()
+        : RADIO_CTOR, network(radio) {};
 
     uint16_t read(void *payload, uint16_t size, int *from = NULL)
     {

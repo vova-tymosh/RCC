@@ -6,11 +6,13 @@
 
 
 #define RCC_NO_STATION
+#define NRF_CE 19
+#define NRF_CSN 18
 #include "RCCLoco.h"
 #include "Timer.h"
 #include "Storage.h"
 #include "Settings.h"
-#include "Motherboard.h"
+// #include "Motherboard.h"
 
 
 class TestLoco : public RCCLoco
@@ -35,9 +37,9 @@ TestLoco loco;
 Storage storage;
 Settings settings;
 Timer testRun, timer;
-Cli cli(&loco);
 
-char testStr[] = "0123456789abcdef";
+
+char testStr[] = "0123456789abcd";
 char buffer[64];
 
 void test01()
@@ -48,8 +50,18 @@ void test01()
     buffer[s + 1] = '\0';
     Serial.println(buffer);
     if (strncmp(testStr, buffer, s) == 0)
-        Serial.println("test1 ... ok");
+        Serial.println("test01 ... ok");
 }
+
+void test011()
+{
+    int s = storage.read("test01", buffer, 12);
+    buffer[s + 1] = '\0';
+    Serial.println(String("test011.") + String(s) + "=" + buffer);
+    if (strcmp(testStr, buffer) == 0)
+        Serial.println("test011 ... ok");
+}
+
 
 void test02()
 {
@@ -59,7 +71,7 @@ void test02()
     buffer[s + 1] = '\0';
     Serial.println(buffer);
     if (strcmp(testStr + 2, buffer) == 0)
-        Serial.println("test2 ... ok");
+        Serial.println("test02 ... ok");
 }
 
 void test03()
@@ -70,25 +82,41 @@ void test03()
     buffer[s + 1] = '\0';
     Serial.println(buffer);
     if (strcmp(testStr + 10, buffer) == 0)
-        Serial.println("test3 ... ok");
-}
-
-void test04()
-{
-    int s = storage.read("test01", buffer, 12);
-    buffer[s + 1] = '\0';
-    Serial.println(buffer);
-    if (strcmp(testStr, buffer) == 0)
-        Serial.println("test4 ... ok");
+        Serial.println("test03 ... ok");
 }
 
 void test05()
 {
-    // settings.put("test05", testStr);
+    settings.put("test05", testStr);
     String r = settings.get("test05");
     Serial.println(r);
     if (strcmp(testStr, r.c_str()) == 0)
-        Serial.println("test5 ... ok");
+        Serial.println("test05 ... ok");
+}
+
+void test051()
+{
+    String r = settings.get("test05");
+    Serial.println(r);
+    if (strcmp(testStr, r.c_str()) == 0)
+        Serial.println("test051 ... ok");
+}
+
+void test06()
+{
+    settings.put("name", "1204");
+    String r = settings.get("name");
+    Serial.println(r);
+    if (strcmp("1204", r.c_str()) == 0)
+        Serial.println("test06 ... ok");
+}
+
+void test061()
+{
+    String r = settings.get("name");
+    Serial.println(r);
+    if (strcmp("1204", r.c_str()) == 0)
+        Serial.println("test061 ... ok");
 }
 
 void setup()
@@ -97,26 +125,29 @@ void setup()
     delay(100);
     storage.begin();
     // storage.clear();
-    settings.checkDefaults(defaultSettings, defaultSettingsSize);
+    // settings.checkDefaults(defaultSettings, defaultSettingsSize);
 
-    loco.debugLevel = 2;
-    loco.setup();
+    // loco.debugLevel = 2;
+    // loco.setup();
 
     testRun.start(2000);
 }
 
 void loop()
 {
-    loco.loop();
-    cli.loop();
+    // loco.loop();
 
-    if (testRun.hasFiredOnce()) {
+    if (testRun.hasFired()) {
         Serial.println("-----------------------------");
-        settings.put("test05", testStr);
-        test03();
-        test05();
-        String name = settings.get("loconame");
-        Serial.println(">>" + name);
+
+        // test06();
+        test061();
+
+
+        // test03();
+        // test05();
+        // String name = settings.get("loconame");
+        // Serial.println(">>" + name);
             
     //     String wifiap = settings.get("wifiap");
     //     String wifissid = settings.get("wifissid");

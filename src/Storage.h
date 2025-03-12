@@ -1,5 +1,9 @@
 #pragma once
+#include <stdint.h>
 
+#if defined(ARDUINO_ARCH_NRF52) || defined(ARDUINO_ARCH_ESP32)
+#define HIGH_CAPACITY_STORAGE
+#endif
 
 class Storage {
 private:
@@ -29,14 +33,14 @@ public:
     void clear()
     {
         clearInternal();
-        setValidation(code << 16 | version);
+        setValidation((uint32_t)code << 16 | version);
     }
 
-    uint read(const char *filename, void *buffer, size_t size, uint offset = 0);
+    int read(const char *filename, void *buffer, size_t size, size_t offset = 0);
 
-    uint readOrCreate(const char *filename, void *buffer, size_t size)
+    int readOrCreate(const char *filename, void *buffer, size_t size)
     {
-        uint r = read(filename, buffer, size);
+        int r = read(filename, buffer, size);
         if (size > 0 && r == 0) {
             Serial.print("[FS] File not found, create: ");
             Serial.println(filename);
@@ -45,7 +49,7 @@ public:
         return r;
     }
 
-    uint write(const char *filename, void *buffer, size_t size, uint offset = 0);
+    int write(const char *filename, void *buffer, size_t size, size_t offset = 0);
 
     bool allocate(const char *filename, size_t size);
 };

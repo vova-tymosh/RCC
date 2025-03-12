@@ -36,9 +36,9 @@ void Storage::clearInternal()
     }
 }
 
-uint Storage::read(const char *filename, void *buffer, size_t size, uint offset)
+int Storage::read(const char *filename, void *buffer, size_t size, size_t offset)
 {
-    uint r = 0;
+    int r = 0;
     File file = SPIFFS.open(String("/") + filename);
     if (file) {
         if (offset >= file.size())
@@ -52,7 +52,7 @@ uint Storage::read(const char *filename, void *buffer, size_t size, uint offset)
     return r;
 }
 
-uint Storage::write(const char *filename, void *buffer, size_t size, uint offset)
+int Storage::write(const char *filename, void *buffer, size_t size, size_t offset)
 {
     int r = 0;
     File file = SPIFFS.open(String("/") + filename, FILE_WRITE);

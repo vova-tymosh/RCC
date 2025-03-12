@@ -3,7 +3,11 @@
 
 class Settings
 {
+#if defined(HIGH_CAPACITY_STORAGE)
     static const int MAX_LENGTH = 256;
+#else
+    static const int MAX_LENGTH = 16;
+#endif
 public:
 
     void checkDefaults(const char *defaultSettings[], size_t size)
@@ -16,12 +20,16 @@ public:
     String get(String key, String defaultValue = "")
     {
         char buffer[MAX_LENGTH];
-        uint r = storage.read(key.c_str(), buffer, sizeof(buffer));
+        int r = storage.read(key.c_str(), buffer, sizeof(buffer));
         if (r == 0) {
+            size_t size = defaultValue.length();
+            if (size > sizeof(buffer) - 1)
+                size = sizeof(buffer) - 1;
             memset(buffer, 0, sizeof(buffer));
-            memcpy(buffer, defaultValue.c_str(), defaultValue.length());
+            memcpy(buffer, defaultValue.c_str(), size);
             storage.write(key.c_str(), (void*)buffer, sizeof(buffer));
         }
+        buffer[MAX_LENGTH - 1] = 0;
         return String(buffer);
     }
 
