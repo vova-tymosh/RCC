@@ -15,11 +15,11 @@ You hate batteries or you already have a wired setup. Ok, you may still use an R
 
 
 ## Why do we need yet another solution?
-There are plenty of approaches/solutions available. Some are very affordable, like DCC-EX, but still require electrical conductivity between all the rail sections and locomotive wheels. Some are wireless, but for G-scale they cost $100-$200. RCC excel in both - it is dirt cheap and it doesn’t need wires. Also it is open source. You can change it to your unique needs and desires.
+There are many solutions available. Some are very affordable, like DCC-EX, but still require electrical conductivity between all the rail sections and locomotive wheels. Some are wireless, but for G-scale they cost $100-$200. RCC excels in both - it is dirt cheap and it doesn’t need wires. Also it is open source. You can change it to your unique needs and desires.
 
 
 ## Do I need a degree in electrical engineering to use RCC?
-Fear not. There is nothing really complicated ahead of you. You’d need to do some mouse-clicking and do little soldering. Some folks are scared of this “soldering” part, but I’ll walk you through the process with videos and everything. After all, if you want a $30 decoder you have to do some work yourself. There is no magic in this world.
+Fear not. There is nothing really complicated ahead. You’d need to do some mouse-clicking and do little soldering. Some folks are scared of this “soldering” part, but I’ll walk you through the process with videos and everything. After all, if you want a $30 decoder you have to do some work yourself. There is no magic in this world.
 
 
 ## What is in this repository?
@@ -27,9 +27,10 @@ All the instructions and documentation about how to build stuff is located - on 
 
 
 ## What is the current status?
-Currently RCC supports a couple variants of loco decoders. Complete solutions for throttle, turnouts and other things will come soon. Details about what kind of decoders are available and what they can do are provided on the same RCC-Nodes page.
+Currently RCC supports a couple variants of loco decoders. Complete solutions for throttle, turnouts and other things will come soon. Details on what decoders are available and what they can do are provided on the same RCC-Nodes page.
 
 ## How big is the thing, can I fit it in my loco?
 Here is the decoder, 2 inches by 1 inch:
 
 ![decoder](decoder.jpg)
+
