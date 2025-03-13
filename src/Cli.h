@@ -3,6 +3,9 @@
 #include "RCCLocoBase.h"
 #include "Settings.h"
 
+void (*reboot)(void) = 0;
+
+
 class RccCli
 {
 private:
@@ -11,10 +14,11 @@ private:
 
     static const char CMD_SPEED = 'S';
     static const char CMD_FUNCTION = 'F';
-    static const char CMD_READ = 'R';
+    static const char CMD_CMD = 'C';
     static const char CMD_PUT = 'P';
     static const char CMD_GET = 'G';
-    static const char CMD_CLEAR = 'C';
+    static const char CMD_ERASE = 'E';
+    static const char CMD_REBOOT = '!';
 
     RCCLocoBase *loco;
 
@@ -25,28 +29,22 @@ private:
         char first = toupper(cmd[0]);
         if (strlen(cmd) > 1) {
             cmd++;
-            if (first == CMD_READ)
-                return processExe(cmd);
-            else if (first == CMD_SPEED)
+            if (first == CMD_SPEED)
                 return processSpeed(cmd);
             else if (first == CMD_FUNCTION)
                 return processFunction(cmd);
+            else if (first == CMD_CMD)
+                return processCommand(cmd);
             else if (first == CMD_PUT)
                 return processPut(cmd);
             else if (first == CMD_GET)
                 return processGet(cmd);
-            else if (first == CMD_CLEAR)
+            else if (first == CMD_ERASE)
                 return processClear(cmd);
+            else if (first == CMD_REBOOT)
+                reboot();
         }
         return false;
-    }
-
-    bool processExe(char cmd[]) 
-    {
-        if (strlen(cmd) == 0)
-            return false;
-        onExe(cmd[0]);
-        return true;
     }
 
     bool processSpeed(char cmd[]) 
@@ -71,6 +69,14 @@ private:
             return false;
         uint8_t function = (uint8_t)atoi(cmd + 1);
         onFunction(function, cmd[0] == '1');
+        return true;
+    }
+
+    bool processCommand(char cmd[])
+    {
+        if (strlen(cmd) == 0)
+            return false;
+        onCommand(cmd[0], 0);
         return true;
     }
 
@@ -106,16 +112,19 @@ private:
 public:
     RccCli(RCCLocoBase *loco) : loco(loco) {}
 
-    virtual void onExe(uint8_t code) {}
-
-    virtual void onThrottle(uint8_t direction, uint8_t throttle)
+    void onThrottle(uint8_t direction, uint8_t throttle)
     {
         loco->onThrottle(direction, throttle);
     }
 
-    virtual void onFunction(uint8_t code, bool value)
+    void onFunction(uint8_t code, bool value)
     {
         loco->onFunction(code, value);
+    }
+
+    void onCommand(uint8_t code, float value)
+    {
+        loco->onCommand(code, value);
     }
 
     void onPut(char *key, char *value)
