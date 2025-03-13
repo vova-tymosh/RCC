@@ -73,14 +73,14 @@ void Storage::beginInternal()
 uint32_t Storage::getValidation()
 {
     mr.validation = 0;
-    eeprom_read(0, (uint8_t*)&mr, sizeof(mr));
+    phyRead(0, (uint8_t*)&mr, sizeof(mr));
     return mr.validation;
 }
 
 void Storage::setValidation(uint32_t validation)
 {
     mr = {validation, 0, maxFiles * sizeof(FileRecord)};
-    eeprom_write(0, (const uint8_t*)&mr, sizeof(mr));
+    phyWrite(0, (const uint8_t*)&mr, sizeof(mr));
 }
 
 void Storage::clearInternal()
