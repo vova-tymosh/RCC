@@ -14,14 +14,10 @@
 #define PIN_AUDIO_LRC 32 + 12 // D7
 #define PIN_AUDIO_BCK 32 + 13 // D8
 #define PIN_AUDIO_OUT 32 + 14 // D9
-#elif defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_IDF_TARGET_ESP32C3)
-#define PIN_AUDIO_LRC 20      // D7
-#define PIN_AUDIO_BCK 8       // D8
-#define PIN_AUDIO_OUT 9       // D9
-#elif defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_IDF_TARGET_ESP32C6)
-#define PIN_AUDIO_LRC 17      // D7
-#define PIN_AUDIO_BCK 19      // D8
-#define PIN_AUDIO_OUT 20      // D9
+#elif defined(ARDUINO_ARCH_ESP32)
+#define PIN_AUDIO_LRC D7
+#define PIN_AUDIO_BCK D8
+#define PIN_AUDIO_OUT D9
 #endif
 
 class PinExt : public Pin, protected Tca6408a

@@ -12,6 +12,8 @@
 i2s_data_bit_width_t bps = I2S_DATA_BIT_WIDTH_16BIT;
 i2s_mode_t mode = I2S_MODE_STD;
 i2s_slot_mode_t slot = I2S_SLOT_MODE_MONO;
+// i2s_std_slot_mask_t slotMask = I2S_STD_SLOT_BOTH;
+
 const int sampleRate = 8000; 
 
 
