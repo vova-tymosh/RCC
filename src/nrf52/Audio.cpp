@@ -3,24 +3,14 @@
 
 #include <AutoAnalogAudio.h>
 #include "Audio.h"
-
-// #include "Motherboard.h"
-
-#define PIN_AUDIO_LRC 32 + 12 // D7
-#define PIN_AUDIO_SCK 32 + 13 // D8
-#define PIN_AUDIO_OUT 32 + 14 // D9
-
-// #define PIN_AUDIO_LRC 2 //32 + 12 // D7
-// #define PIN_AUDIO_SCK 3 //32 + 13 // D8
-// #define PIN_AUDIO_OUT 28 //32 + 14 // D9
-
+#include "Motherboard.h"
 
 AutoAnalog aaAudio;
 
 void Audio::beginInternal() 
 {
     aaAudio.I2S_PIN_LRCK = PIN_AUDIO_LRC; 
-    aaAudio.I2S_PIN_SCK = PIN_AUDIO_SCK;
+    aaAudio.I2S_PIN_SCK = PIN_AUDIO_BCK;
     aaAudio.I2S_PIN_SDOUT = PIN_AUDIO_OUT;
 
     aaAudio.autoAdjust = 0;

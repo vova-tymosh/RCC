@@ -6,10 +6,8 @@
 #include <ESP_I2S.h>
 #include "Audio.h"
 #include "Storage.h"
+#include "Motherboard.h"
 
-#define PIN_AUDIO_LRC 2 // D0
-#define PIN_AUDIO_BCK 3 // D1
-#define PIN_AUDIO_OUT 4 // D2
 
 i2s_data_bit_width_t bps = I2S_DATA_BIT_WIDTH_16BIT;
 i2s_mode_t mode = I2S_MODE_STD;
