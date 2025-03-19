@@ -2,7 +2,8 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
+#include <Arduino.h>
+#include "Storage.h"
 
 class Audio
 {
@@ -12,15 +13,60 @@ class Audio
     int offset;
     uint8_t *data;
     size_t size;
+    int volumeDivider;
     bool running;
+
+    void beginInternal();
+
+    void playInternal(uint8_t *data, size_t size, int volumeDivider = 1);
 
 public:
     
-    void begin();
+    void begin()
+    {
+        beginInternal();
+        running = false;
+    }
 
-    void play(const uint8_t *data, size_t size);
+    void play(const uint8_t *data, size_t size, int volumeDivider = 1)
+    {
+        offset = 0;
+        this->data = (uint8_t *)data;
+        this->size = size;
+        this->volumeDivider = volumeDivider;
+        running = true;
+    }
 
-    void play(String filename);
+    void play(String filename, int volumeDivider = 1)
+    {
+        offset = 0;
+        playfile = filename;
+        this->volumeDivider = volumeDivider;
+        running = true;
+    }
 
-    void loop();
+    void loop() {
+        if (!running)
+            return;
+
+        int r;
+        if (playfile.length() != 0) {
+            r = storage.read(playfile.c_str(), (uint8_t*)buffer, CHUNK_SIZE, offset);
+        } else {
+            r = size - offset;
+            if (r > CHUNK_SIZE)
+                r = CHUNK_SIZE;
+            memcpy(buffer, data + offset, r);
+        }
+
+        offset += CHUNK_SIZE;
+        playInternal(buffer, r, this->volumeDivider);
+
+        if (r < CHUNK_SIZE) {
+            playfile = "";
+            running = false;
+            memset(buffer, 0, CHUNK_SIZE);
+            playInternal(buffer, CHUNK_SIZE);
+        }
+    }
 };
