@@ -10,11 +10,11 @@ class Settings
 #endif
 public:
 
-    void checkDefaults(const char *defaultSettings[], size_t size)
+    void defaults();
+
+    void begin()
     {
-        for (int i = 0; i < size/2; i++) {
-            get(defaultSettings[i*2], defaultSettings[i*2 + 1]);
-        }
+        defaults();
     }
 
     String get(String key, String defaultValue = "")

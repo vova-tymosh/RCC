@@ -55,7 +55,7 @@ int Storage::read(const char *filename, void *buffer, size_t size, size_t offset
 int Storage::write(const char *filename, void *buffer, size_t size, size_t offset)
 {
     int r = 0;
-    File file = SPIFFS.open(String("/") + filename, FILE_APPEND);
+    File file = SPIFFS.open(String("/") + filename, (offset) ? FILE_APPEND : FILE_WRITE);
     if (file) {
         file.seek(offset);
         r = file.write((const uint8_t*)buffer, size);
@@ -69,7 +69,6 @@ int Storage::write(const char *filename, void *buffer, size_t size, size_t offse
 
 bool Storage::allocate(const char *filename, size_t size)
 {
-    SPIFFS.remove(String("/") + filename);
     return true;
 }
 
