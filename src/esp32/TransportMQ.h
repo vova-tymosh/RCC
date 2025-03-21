@@ -12,16 +12,50 @@
 
 RCCLocoBase *locoPointer;
 
-void callback(char* topic, byte* payload, unsigned int length) {
-    Serial.print("Message arrived [");
-    Serial.print(topic);
-    Serial.print("] ");
-    for (int i=0;i<length;i++) {
-      Serial.print((char)payload[i]);
+char *getAction(char *topic)
+{
+    char *action = strchr(topic, '/');
+    if (action != NULL) {
+        action = strchr(++action, '/');
+        if (action != NULL) {
+            return ++action;
+        }
     }
-    Serial.println();
+    return NULL;
 }
-  
+
+void onMqttMessage(char* topic, byte* payload, unsigned int length)
+{
+    char *value = (char*)payload;
+    char *action = getAction(topic);
+    if (action == NULL)
+        return;
+    if (strcmp(action, "throttle") == 0) {
+        int l = (length > 4) ? 4 : length;
+        char throttle[5];
+        strncpy(throttle, value, l);
+        throttle[l] = '\0';
+        locoPointer->setThrottle(atoi(throttle));
+    } else if (strcmp(action, "direction") == 0) {
+        if (strncmp(value, "FORWARD", length) == 0) {
+            locoPointer->setDirection(1);
+        } else if (strncmp(value, "REVERSE", length) == 0) {
+            locoPointer->setDirection(0);
+        } else {
+            locoPointer->setDirection(1);
+            locoPointer->setThrottle(0);
+        }
+    } else if (strncmp(action, "function/", strlen("function/")) == 0) {
+        action += strlen("function/");
+        int code = atoi(action);
+        if (strncmp(value, "ON", length) == 0)
+            locoPointer->setFunction(code, true);
+        else 
+            locoPointer->setFunction(code, false);
+    }
+}
+
+
 class MqttClient
 {
 private:
@@ -40,25 +74,22 @@ private:
     String locoAddr;
     Timer heartbeatTimer;
     unsigned long nextReconnectTime;
+
+    char heartbeatPayload[256];
   
 public:
     
     MqttClient(RCCLocoBase *loco): mqtt(conn), heartbeatTimer(1000) {
         locoPointer = loco;
-        Serial.print("[MQ] locoPointer1: ");
-        Serial.println((int)locoPointer);
     };
 
     void heartbeat()
     {
-        // LocoState *s = &localLocoPointer->state;
-        // snprintf(payload, sizeof(payload), "%s %s %s %s %s %s %s %s %s %s %s", 
-        //     s->tick, s->distance, s->bitstate, s->speed, s->lost, 
-        //     s->throttle, s->throttle_out, s->battery, s->temperature, s->psi, s->water);
-
-
-        // log(String("> ") + topic + " " + payload);
-        mqtt.publish(valuesTopicUpdated.c_str(), "20 30 245 123123");
+        LocoState *s = &locoPointer->state;
+        snprintf(heartbeatPayload, sizeof(heartbeatPayload), "%d %d %d %d %d %d %d %d %d %d %d", 
+            s->tick, s->distance, s->bitstate, s->speed, s->lost, 
+            s->throttle, s->throttle_out, s->battery, s->temperature, s->psi, s->water);
+        mqtt.publish(valuesTopicUpdated.c_str(), heartbeatPayload);
     }
 
     void authorize()
@@ -86,7 +117,7 @@ public:
     void begin()
     {
         mqtt.setServer(BROCKER, PORT);
-        mqtt.setCallback(callback);
+        mqtt.setCallback(onMqttMessage);
 
         locoName = settings.get("loconame");
         locoAddr = settings.get("locoaddr");
@@ -107,159 +138,3 @@ public:
         mqtt.loop();
     }
 };
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-RCCLocoBase *localLocoPointer;
-
-char *getAction(char *topic)
-{
-    char *action = strchr(topic, '/');
-    if (action != NULL) {
-        action = strchr(++action, '/');
-        if (action != NULL) {
-            return ++action;
-        }
-    }
-    return NULL;
-}
-
-void onMessage(char* topic, byte* payload, unsigned int length)
-{
-    // const int MAX_LEN = 16;
-    // char value[MAX_LEN];
-    // if (length > MAX_LEN)
-    //     length = MAX_LEN;
-    // strncpy(value, (char *)payload, length);
-    // value[length] = '\0';
-
-    // char *action = getAction(topic);
-    // if (strcmp(action, "throttle") == 0) {
-    //     localLocoPointer->setThrottle(atoi(value));
-    // } else if (strcmp(action, "direction") == 0) {
-    //     if (strcmp(value, "FORWARD") == 0) {
-    //         localLocoPointer->setDirection(1);
-    //     } else if (strcmp(value, "REVERSE") == 0) {
-    //         localLocoPointer->setDirection(0);
-    //     } else {
-    //         localLocoPointer->setDirection(1);
-    //         localLocoPointer->setThrottle(0);
-    //     }
-    // } else if (strncmp(action, "function/", strlen("function/")) == 0) {
-    //     action += strlen("function/");
-    //     int code = atoi(action);
-    //     if (strcmp(value, "ON") == 0)
-    //         localLocoPointer->setFunction(code, true);
-    //     else 
-    //         localLocoPointer->setFunction(code, false);
-    // }
-
-
-    Serial.print("Message arrived [");
-    Serial.print(topic);
-    Serial.print("] ");
-    for (int i=0;i<length;i++) {
-      Serial.print((char)payload[i]);
-    }
-    Serial.println();
-}
-
-class MQTTClient
-{
-protected:
-    const char *BROCKER = "192.168.20.61";
-    const int PORT = 1883;
-
-    PubSubClient client;
-
-    String locoName;
-    String locoAddr;
-    Timer reconnectTimer;
-    Timer heartbeatTimer;
-
-    // char topic[20];
-    // char payload[256];
-public:
-    MQTTClient(RCCLocoBase *_loco)
-    {
-        localLocoPointer = _loco;
-    }
-
-    void log(String msg)
-    {
-        if (localLocoPointer->debugLevel > 1)
-            Serial.println(msg);
-    }
-
-
-
-    void heartbeat()
-    {
-        log(">>>> ");
-        
-        // snprintf(payload, sizeof(payload), "zu zu zu 22");
-
-        // snprintf(topic, sizeof(topic), "cab/%s/heartbeat", locoAddr.c_str());
-        // strcpy(payload, "20 30 245 123123");
-
-        // LocoState *s = &localLocoPointer->state;
-        // snprintf(payload, sizeof(payload), "%s %s %s %s %s %s %s %s %s %s %s", 
-        //     s->tick, s->distance, s->bitstate, s->speed, s->lost, 
-        //     s->throttle, s->throttle_out, s->battery, s->temperature, s->psi, s->water);
-
-
-        // log(String("> ") + topic + " " + payload);
-        // client.publish("cab/3/heartbeat", "20 30 245 123123");
-    }
-
-
-    void loop()
-    {
-        client.loop();
-        if (!client.connected()) {
-            if (reconnectTimer.hasFiredOnce())
-            //locoName.c_str()
-                if (client.connect("rcc222")) {
-                    String topic = "cab/" + locoAddr + "/#";
-                    client.subscribe(topic.c_str());
-                    // authorize();
-                    heartbeatTimer.start(5000);
-                    log("[MQ] Connected");
-                } else {
-                    log("[MQ] Failed to connect");
-                    reconnectTimer.start(1000);
-                }
-        } else {
-            client.loop();
-        }
-
-        if (heartbeatTimer.hasFired()) {
-            heartbeatTimer.start(1000);
-            // heartbeat();
-        }
-    }
-};
-
-*/
