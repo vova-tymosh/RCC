@@ -10,9 +10,25 @@
 // https://www.jmri.org/help/en/html/hardware/mqtt/index.shtml
 //
 
+const char *rootTopic = "cab/{0}/#";
+const char *keysTopic = "cab/{0}/heartbeat/keys";
+const char *valuesTopic = "cab/{0}/heartbeat/values";
+const char *throttleAction = "throttle";
+const char *directionAction = "direction";
+const char *directionFWD = "FORWARD";
+const char *directionREV = "REVERSE";
+const char *functionAction = "function/";
+const char *functionOn = "ON";
+const char *getAction = "get";
+const char *getTopic = "cab/{0}/value/{1}";
+const char *putAction = "put";
+const char *listAction = "list";
+const char *listTopic = "cab/{0}/list";
+
+
 RCCLocoBase *locoPointer;
 
-char *getAction(char *topic)
+char *parseAction(char *topic)
 {
     char *action = strchr(topic, '/');
     if (action != NULL) {
@@ -27,28 +43,28 @@ char *getAction(char *topic)
 void onMqttMessage(char* topic, byte* payload, unsigned int length)
 {
     char *value = (char*)payload;
-    char *action = getAction(topic);
+    char *action = parseAction(topic);
     if (action == NULL)
         return;
-    if (strcmp(action, "throttle") == 0) {
+    if (strcmp(action, throttleAction) == 0) {
         int l = (length > 4) ? 4 : length;
         char throttle[5];
         strncpy(throttle, value, l);
         throttle[l] = '\0';
         locoPointer->setThrottle(atoi(throttle));
-    } else if (strcmp(action, "direction") == 0) {
-        if (strncmp(value, "FORWARD", length) == 0) {
+    } else if (strcmp(action, directionAction) == 0) {
+        if (strncmp(value, directionFWD, length) == 0) {
             locoPointer->setDirection(1);
-        } else if (strncmp(value, "REVERSE", length) == 0) {
+        } else if (strncmp(value, directionREV, length) == 0) {
             locoPointer->setDirection(0);
         } else {
             locoPointer->setDirection(1);
             locoPointer->setThrottle(0);
         }
-    } else if (strncmp(action, "function/", strlen("function/")) == 0) {
-        action += strlen("function/");
+    } else if (strncmp(action, functionAction, strlen(functionAction)) == 0) {
+        action += strlen(functionAction);
         int code = atoi(action);
-        if (strncmp(value, "ON", length) == 0)
+        if (strncmp(value, functionOn, length) == 0)
             locoPointer->setFunction(code, true);
         else 
             locoPointer->setFunction(code, false);
@@ -62,9 +78,6 @@ private:
     const char *BROCKER = "192.168.20.61";
     const int PORT = 1883;
 
-    const char *rootTopic = "cab/{0}/#";
-    const char *keysTopic = "cab/{0}/heartbeat/keys";
-    const char *valuesTopic = "cab/{0}/heartbeat/values";
     String valuesTopicUpdated;
 
     WiFiClient conn;
@@ -75,8 +88,7 @@ private:
     Timer heartbeatTimer;
     unsigned long nextReconnectTime;
 
-    char heartbeatPayload[256];
-  
+    char heartbeatPayload[128];
 public:
     
     MqttClient(RCCLocoBase *loco): mqtt(conn), heartbeatTimer(1000) {
