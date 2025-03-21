@@ -10,6 +10,7 @@
 // https://www.jmri.org/help/en/html/hardware/mqtt/index.shtml
 //
 
+RCCLocoBase *locoPointer;
 
 void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print("Message arrived [");
@@ -28,7 +29,9 @@ private:
     const int PORT = 1883;
 
     const char *rootTopic = "cab/{0}/#";
-    const char *fieldsTopic = "cab/{0}/heartbeat/fields";
+    const char *keysTopic = "cab/{0}/heartbeat/keys";
+    const char *valuesTopic = "cab/{0}/heartbeat/values";
+    String valuesTopicUpdated;
 
     WiFiClient conn;
     PubSubClient mqtt;
@@ -40,11 +43,27 @@ private:
   
 public:
     
-    MqttClient(RCCLocoBase *loco): mqtt(conn) {};
+    MqttClient(RCCLocoBase *loco): mqtt(conn), heartbeatTimer(1000) {
+        locoPointer = loco;
+        Serial.print("[MQ] locoPointer1: ");
+        Serial.println((int)locoPointer);
+    };
+
+    void heartbeat()
+    {
+        // LocoState *s = &localLocoPointer->state;
+        // snprintf(payload, sizeof(payload), "%s %s %s %s %s %s %s %s %s %s %s", 
+        //     s->tick, s->distance, s->bitstate, s->speed, s->lost, 
+        //     s->throttle, s->throttle_out, s->battery, s->temperature, s->psi, s->water);
+
+
+        // log(String("> ") + topic + " " + payload);
+        mqtt.publish(valuesTopicUpdated.c_str(), "20 30 245 123123");
+    }
 
     void authorize()
     {
-        String topic(fieldsTopic);
+        String topic(keysTopic);
         topic.replace("{0}", locoAddr);
         mqtt.publish(topic.c_str(), FIELDS, true);
     }
@@ -71,6 +90,8 @@ public:
 
         locoName = settings.get("loconame");
         locoAddr = settings.get("locoaddr");
+        valuesTopicUpdated = valuesTopic;
+        valuesTopicUpdated.replace("{0}", locoAddr);
         nextReconnectTime = millis();
     }
 
@@ -78,6 +99,10 @@ public:
     {
         if (!mqtt.connected()) {
             reconnect();
+        } else {
+            if (heartbeatTimer.hasFired()) {
+                heartbeat();
+            }
         }
         mqtt.loop();
     }
@@ -188,13 +213,7 @@ public:
             Serial.println(msg);
     }
 
-    void authorize()
-    {
-        char topic[32];
-        snprintf(topic, sizeof(topic), "cab/%s/heartbeat_fields", locoAddr.c_str());
-        log(String("> ") + topic + " " + FIELDS); //locoName + " "
-        // client.publish(topic, FIELDS, true);
-    }
+
 
     void heartbeat()
     {
