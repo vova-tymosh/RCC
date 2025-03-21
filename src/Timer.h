@@ -20,15 +20,15 @@ public:
         start(duration);
     }
 
+    void start()
+    {
+        start(this->duration);
+    }
+
     void start(unsigned int duration)
     {
         this->duration = duration;
         this->fire = millis() + duration;
-    }
-
-    void restart()
-    {
-        start(this->duration);
     }
 
     bool hasFiredOnce()
@@ -44,7 +44,7 @@ public:
     bool hasFired()
     {
         if (hasFiredOnce()) {
-            restart();
+            start();
             return true;
         } else {
             return false;
