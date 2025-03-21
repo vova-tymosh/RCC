@@ -145,7 +145,7 @@ public:
             // TODO: restore all the functions
         // }
         // pid.setup(p, i, d, m);
-        timer.restart();
+        // timer.start();
     }
 
     void loop()

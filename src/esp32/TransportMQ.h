@@ -27,45 +27,51 @@ private:
     const char *BROCKER = "192.168.20.61";
     const int PORT = 1883;
 
+    const char *rootTopic = "cab/{0}/#";
+    const char *fieldsTopic = "cab/{0}/heartbeat/fields";
+
     WiFiClient conn;
     PubSubClient mqtt;
 
     String locoName;
     String locoAddr;
-    Timer reconnectTimer;
-    Timer heartbeatTimer;  
+    Timer heartbeatTimer;
+    unsigned long nextReconnectTime;
   
 public:
-
     
     MqttClient(RCCLocoBase *loco): mqtt(conn) {};
 
+    void authorize()
+    {
+        String topic(fieldsTopic);
+        topic.replace("{0}", locoAddr);
+        mqtt.publish(topic.c_str(), FIELDS, true);
+    }
 
     void reconnect() {
-        // Loop until we're reconnected
-        if (!mqtt.connected()) {
-            Serial.print("Attempting MQTT connection...");
-            // Attempt to connect
-            if (mqtt.connect("arduinoClient")) {
-                Serial.println("connected");
-                // Once connected, publish an announcement...
-                mqtt.publish("outTopic","hello world");
-                // ... and resubscribe
-                mqtt.subscribe("inTopic");
+        if (millis() >= nextReconnectTime) {
+            if (mqtt.connect(locoName.c_str())) {
+                Serial.println("[MQ] Connected");
+                String topic(rootTopic);
+                topic.replace("{0}", locoAddr);
+                mqtt.subscribe(topic.c_str());
+                authorize();
             } else {
-                Serial.print("failed, rc=");
-                Serial.print(mqtt.state());
-                Serial.println(" try again in 5 seconds");
-                // Wait 5 seconds before retrying
-                delay(5000);
+                Serial.println("[MQ] Failed to connect");
+                nextReconnectTime = millis() + 5000;
             }
         }
     }
 
     void begin()
     {
-        mqtt.setServer("192.168.20.61", 1883);
+        mqtt.setServer(BROCKER, PORT);
         mqtt.setCallback(callback);
+
+        locoName = settings.get("loconame");
+        locoAddr = settings.get("locoaddr");
+        nextReconnectTime = millis();
     }
 
     void loop()
@@ -209,23 +215,6 @@ public:
         // client.publish("cab/3/heartbeat", "20 30 245 123123");
     }
 
-    void begin(WiFiClient conn)
-    {
-        client.setClient(conn);
-        client.setServer(BROCKER, PORT);
-        client.setCallback(onMessage);
-
-        if (client.connect("rcc")) {
-            log("[MQ] Connected");
-        } else {
-            log("[MQ] Failed to connect");
-        }
-
-        locoName = settings.get("loconame");
-        locoAddr = settings.get("locoaddr");
-        String topic = "cab/" + locoAddr + "/#";
-        client.subscribe(topic.c_str());        
-    }
 
     void loop()
     {
