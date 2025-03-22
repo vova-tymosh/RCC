@@ -120,6 +120,12 @@ int Storage::write(const char *filename, void *buffer, size_t size, size_t offse
     return 0;
 }
 
+bool Storage::exists(const char *filename)
+{
+    FileRecord f;
+    return getFile(filename, &f);
+}
+
 bool Storage::allocate(const char *filename, size_t size)
 {
     return (createFile(filename, size) > 0);

@@ -10,32 +10,37 @@ class Settings
 #endif
 public:
 
-    void defaults();
-
-    void begin()
-    {
-        defaults();
-    }
-
-    String get(String key, String defaultValue = "")
+    String get(const char *key)
     {
         char buffer[MAX_LENGTH];
-        int r = storage.read(key.c_str(), buffer, sizeof(buffer));
-        if (r == 0) {
-            size_t size = defaultValue.length();
-            if (size > sizeof(buffer) - 1)
-                size = sizeof(buffer) - 1;
-            memset(buffer, 0, sizeof(buffer));
-            memcpy(buffer, defaultValue.c_str(), size);
-            storage.write(key.c_str(), (void*)buffer, sizeof(buffer));
-        }
-        buffer[MAX_LENGTH - 1] = 0;
+        buffer[0] = 0;
+        storage.read(key, buffer, sizeof(buffer));
         return String(buffer);
     }
 
-    void put(String key, String value)
+    void put(const char *key, String value)
     {
-        storage.write(key.c_str(), (void*)value.c_str(), value.length() + 1);
+        if (storage.exists(key))
+            storage.write(key, (void*)value.c_str(), value.length() + 1);
+    }
+
+    void create(const char *key, const char *value)
+    {
+        char buffer[MAX_LENGTH];
+        size_t size = strlen(value);
+        if (size > sizeof(buffer) - 1)
+            size = sizeof(buffer) - 1;
+        memset(buffer, 0, sizeof(buffer));
+        memcpy(buffer, value, size);        
+        storage.write((char *)key, (void*)buffer, sizeof(buffer));
+    }
+
+    void defaults(const char *keys[], const char *values[], const int size)
+    {
+        for (int i = 0; i < size; i++) {
+            if (!storage.exists(keys[i]))
+                create(keys[i], values[i]);
+        }
     }
 };
 

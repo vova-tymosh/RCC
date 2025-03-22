@@ -176,8 +176,9 @@ public:
         if (i) {
             line[i] = '\0';
             bool result = processLine(line);
-            Serial.print(line);
-            Serial.println(result ? " ok" : " error");
+            if (!result) {
+                Serial.print("Error, can't parse");
+            }
         }
     }
 };

@@ -67,6 +67,11 @@ int Storage::write(const char *filename, void *buffer, size_t size, size_t offse
     return r;
 }
 
+bool Storage::exists(const char *filename)
+{
+    return SPIFFS.exists(String("/") + filename);
+}
+
 bool Storage::allocate(const char *filename, size_t size)
 {
     return true;

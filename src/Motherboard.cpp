@@ -1,0 +1,22 @@
+#include "Motherboard.h"
+
+
+const char *settingsKeys[] = {
+    "wifiap",
+    "wifissid",
+    "wifipwd",
+    "loconame",
+    "locoaddr",
+};
+
+const char *settingsValues[] = {
+    "on",
+    "RCC_Loco",
+    "RCC_Loco",
+    "RCC",
+    "3",
+};
+
+const int settingsSize = sizeof(settingsKeys) / sizeof(settingsKeys[0]);
+// const int settingsValueSize = sizeof(settingsValues) / sizeof(settingsValues[0]);
+

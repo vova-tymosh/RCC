@@ -20,6 +20,10 @@
 #define PIN_AUDIO_OUT D9
 #endif
 
+extern const char *settingsKeys[];
+extern const char *settingsValues[];
+extern const int settingsSize;
+
 class PinExt : public Pin, protected Tca6408a
 {
 public:

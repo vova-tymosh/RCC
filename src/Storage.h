@@ -51,6 +51,8 @@ public:
 
     int write(const char *filename, void *buffer, size_t size, size_t offset = 0);
 
+    bool exists(const char *filename);
+
     bool allocate(const char *filename, size_t size);
 };
 
