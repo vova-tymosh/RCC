@@ -62,7 +62,7 @@ private:
             if (speed > 100)
                 return false;
         }
-        onThrottle(dir, (uint8_t)speed);
+        loco->onThrottle(dir, (uint8_t)speed);
         return true;
     }
 
@@ -71,7 +71,7 @@ private:
         if (strlen(cmd) < 2)
             return false;
         uint8_t function = (uint8_t)atoi(cmd + 1);
-        onFunction(function, cmd[0] == '1');
+        loco->onFunction(function, cmd[0] == '1');
         return true;
     }
 
@@ -79,7 +79,7 @@ private:
     {
         if (strlen(cmd) == 0)
             return false;
-        onCommand(cmd[0], 0);
+        loco->onCommand(cmd[0], 0);
         return true;
     }
 
@@ -93,7 +93,8 @@ private:
         *separator = '\0';
         char *key = cmd;
         char *value = ++separator;
-        onPut(key, value);
+        loco->putValue(key, value);
+        Serial.println(String(key) + ":" + value);
         return true;
     }
 
@@ -102,62 +103,22 @@ private:
         if (strlen(cmd) < 1)
             return false;
         char *key = cmd;
-        onGet(key);
+        String value = loco->getValue(key);
+        Serial.println(String(key) + ":" + value);
         return true;
     }
 
     bool processList(char cmd[]) 
     {
-        onList();
+        Serial.println(loco->listValues());
         return true;
     }
 
     bool processClear(char cmd[]) 
     {
-        onClear();
-        return true;
-    }
-
-public:
-    RccCli(RCCLocoBase *loco) : loco(loco) {}
-
-    void onThrottle(uint8_t direction, uint8_t throttle)
-    {
-        loco->onThrottle(direction, throttle);
-    }
-
-    void onFunction(uint8_t code, bool value)
-    {
-        loco->onFunction(code, value);
-    }
-
-    void onCommand(uint8_t code, float value)
-    {
-        loco->onCommand(code, value);
-    }
-
-    void onPut(char *key, char *value)
-    {
-        loco->putValue(key, value);
-        Serial.println(String("Put=") + key + ":" + value);
-    }
-
-    void onGet(char *key)
-    {
-        String value = loco->getValue(key);
-        Serial.println(String("Get=") + key + ":" + value);
-    }
-
-    void onList()
-    {
-        Serial.print("List=");
-        Serial.println(loco->listValues());
-    }
-
-    void onClear()
-    {
         storage.clear();
         Serial.println("Clear");
+        return true;
     }
 
     int getLine(char *line)
@@ -175,6 +136,9 @@ public:
         }
         return i > 0;
     }
+
+public:
+    RccCli(RCCLocoBase *loco) : loco(loco) {}
 
     void loop() 
     {
