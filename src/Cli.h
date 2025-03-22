@@ -17,6 +17,7 @@ private:
     static const char CMD_CMD = 'C';
     static const char CMD_PUT = 'P';
     static const char CMD_GET = 'G';
+    static const char CMD_LIST = 'L';
     static const char CMD_ERASE = 'E';
     static const char CMD_REBOOT = '!';
 
@@ -27,7 +28,7 @@ private:
         if (strlen(cmd) == 0)
             return false;
         char first = toupper(cmd[0]);
-        if (strlen(cmd) > 1) {
+        if (strlen(cmd) > 0) {
             cmd++;
             if (first == CMD_SPEED)
                 return processSpeed(cmd);
@@ -39,6 +40,8 @@ private:
                 return processPut(cmd);
             else if (first == CMD_GET)
                 return processGet(cmd);
+            else if (first == CMD_LIST)
+                return processList(cmd);
             else if (first == CMD_ERASE)
                 return processClear(cmd);
             else if (first == CMD_REBOOT)
@@ -103,6 +106,12 @@ private:
         return true;
     }
 
+    bool processList(char cmd[]) 
+    {
+        onList();
+        return true;
+    }
+
     bool processClear(char cmd[]) 
     {
         onClear();
@@ -129,20 +138,26 @@ public:
 
     void onPut(char *key, char *value)
     {
-        settings.put(key, value);
-        Serial.println(String("Put=")+key+":"+value);
+        loco->putValue(key, value);
+        Serial.println(String("Put=") + key + ":" + value);
     }
 
     void onGet(char *key)
     {
-        String value = settings.get(key);
-        Serial.println(String("Get=")+key+":"+value);
+        String value = loco->getValue(key);
+        Serial.println(String("Get=") + key + ":" + value);
+    }
+
+    void onList()
+    {
+        Serial.print("List=");
+        Serial.println(loco->listValues());
     }
 
     void onClear()
     {
         storage.clear();
-        Serial.println(String("Clear"));
+        Serial.println("Clear");
     }
 
     void loop() 

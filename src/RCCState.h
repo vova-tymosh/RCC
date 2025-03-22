@@ -12,6 +12,12 @@ const char *FIELDS =
     "Time Disatnce Bitstate Speed Lost Throttle ThrOut Battery Temp Psi Water";
 const char *LOCO_FORMAT = "BIIIHBBBBBBB";
 
+const char *Keys[] = {
+    "Time", "Disatnce", "Bitstate", "Speed", "Lost", "Throttle", "ThrOut", "Battery", "Temp", "Psi", "Water"
+};
+
+
+
 // Message longer than 24 bytes will be fragmented
 //  As of now it is 22
 struct __attribute__((packed)) LocoState {
@@ -62,4 +68,18 @@ struct __attribute__((packed)) LocoState {
     uint8_t temperature;
     uint8_t psi;
     uint8_t water;
+};
+
+const size_t ValueOffsets[] = {
+    offsetof(LocoState, tick),
+    offsetof(LocoState, distance),
+    offsetof(LocoState, bitstate),
+    offsetof(LocoState, speed),
+    offsetof(LocoState, lost),
+    offsetof(LocoState, throttle),
+    offsetof(LocoState, throttle_out),
+    offsetof(LocoState, battery),
+    offsetof(LocoState, temperature),
+    offsetof(LocoState, psi),
+    offsetof(LocoState, water)
 };

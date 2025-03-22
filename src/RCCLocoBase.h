@@ -28,6 +28,9 @@ public:
     virtual void setDirection(int value) = 0;
     virtual int getThrottle() = 0;
     virtual int getDirection() = 0;
+    virtual void putValue(char *key, char *value) = 0;
+    virtual String getValue(char *key) = 0;
+    virtual String listValues() = 0;
     virtual void setup() = 0;
     virtual void loop() = 0;
 };

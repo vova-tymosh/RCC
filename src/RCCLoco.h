@@ -74,6 +74,35 @@ public:
         return state.direction;
     }
 
+    void putValue(char *key, char *value)
+    {
+        for(int i = 0; i < sizeof(Keys)/sizeof(char*); i++) {
+            if (strcmp(key, Keys[i]) == 0) {
+                *((uint8_t*)&state + ValueOffsets[i]) = atoi(value);
+                return;
+            }
+        }
+        // Make settings not writing
+        //settings.put(key, value);
+    }
+
+    String getValue(char *key)
+    {
+        for(int i = 0; i < sizeof(Keys)/sizeof(char*); i++) {
+            if (strcmp(key, Keys[i]) == 0) {
+                int value = *((uint8_t*)&state + ValueOffsets[i]);
+                return String(value);
+            }
+        }
+        return "";//settings.get(key);
+    }
+
+    String listValues()
+    {
+        return String(FIELDS);
+        //TODO add Settings
+    }
+
     void handleThrottle()
     {
         uint8_t throttle;
