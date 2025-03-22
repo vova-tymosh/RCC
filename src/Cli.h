@@ -9,7 +9,7 @@ void (*reboot)(void) = 0;
 class RccCli
 {
 private:
-    static const uint8_t INPUT_LEN_MAX = 12;
+    static const uint8_t INPUT_LEN_MAX = 32;
     static const char END_MARKER = '\n';
 
     static const char CMD_SPEED = 'S';
@@ -160,21 +160,26 @@ public:
         Serial.println("Clear");
     }
 
-    void loop() 
+    int getLine(char *line)
     {
-        char line[INPUT_LEN_MAX];
         int i = 0;
+        memset(line, 0, INPUT_LEN_MAX);
         while (Serial.available() > 0) {
             char rc = Serial.read();
             if (rc == END_MARKER)
                 break;
-            else if (i < INPUT_LEN_MAX) {
+            else if (i < INPUT_LEN_MAX - 1) {
                 line[i] = rc;
                 i++;
             }
         }
-        if (i) {
-            line[i] = '\0';
+        return i > 0;
+    }
+
+    void loop() 
+    {
+        char line[INPUT_LEN_MAX];
+        if (getLine(line)) {
             bool result = processLine(line);
             if (!result) {
                 Serial.print("Error, can't parse");
