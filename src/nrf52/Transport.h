@@ -45,8 +45,11 @@ private:
         String name = settings.get("loconame");
         String addr = settings.get("locoaddr");
         String packet = String(PACKET_REG) + " " + VERSION + " " + LOCO_FORMAT +
-                        " " + addr + " " + name + " " +
-                        String(FIELDS);
+                        " " + addr + " " + name;
+        for(int i = 0; i < sizeof(Keys)/sizeof(char*); i++) {
+            packet += " ";
+            packet += Keys[i];
+        }
         int size = packet.length();
         wireless.write(packet.c_str(), size);
         log(String("Authorize: ") + packet);

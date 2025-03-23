@@ -10,7 +10,9 @@ class RCCLocoBase
 {
 public:
     LocoState state;
-
+    String locoName;
+    String locoAddr;
+    
     int debugLevel;
 
     void log(String msg)

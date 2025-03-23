@@ -5,20 +5,22 @@
  */
 #pragma once
 
-// LocoState list of filed and their Python struct format
-//  Update every time LocoState changes. Update version too.
+// System version, update every time the protocol changes
 const char *VERSION = "0.2";
-const char *FIELDS =
-    "Time Disatnce Bitstate Speed Lost Throttle ThrOut Battery Temp Psi Water";
+
+// Following structures and constants are connected and have to be kept in sync! 
+//   Failure to do so will result in communication errors
+
+// Packet format for registration, look for Python Struct documentation. Has to be in the same order as LocoState
 const char *LOCO_FORMAT = "BIIIHBBBBBBB";
 
+// Key names for the LocoState fields. Has to be in the same order as LocoState
 const char *Keys[] = {
     "Time", "Disatnce", "Bitstate", "Speed", "Lost", "Throttle", "ThrOut", "Battery", "Temp", "Psi", "Water"
 };
 
-
-
-// Message longer than 24 bytes will be fragmented
+// The LocoState structure, represent realtime state and is sent as hearbeat to the Station
+//  In case of NRF24/52 the message longer than 24 bytes will be fragmented (longer delivery time)
 //  As of now it is 22
 struct __attribute__((packed)) LocoState {
     uint8_t packet_type;
@@ -70,6 +72,7 @@ struct __attribute__((packed)) LocoState {
     uint8_t water;
 };
 
+// Offsets of the LocoState fields, used to access the fields in the LocoState structure
 const size_t ValueOffsets[] = {
     offsetof(LocoState, tick),
     offsetof(LocoState, distance),

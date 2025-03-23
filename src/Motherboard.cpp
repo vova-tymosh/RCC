@@ -7,6 +7,8 @@ const char *settingsKeys[] = {
     "wifipwd",
     "loconame",
     "locoaddr",
+    "broker",
+    "brokerport"
 };
 
 const char *settingsValues[] = {
@@ -15,6 +17,8 @@ const char *settingsValues[] = {
     "RCC_Loco",
     "RCC",
     "3",
+    "192.168.20.61",
+    "1883"
 };
 
 const int settingsSize = sizeof(settingsKeys) / sizeof(settingsKeys[0]);

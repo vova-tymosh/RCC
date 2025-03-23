@@ -16,10 +16,12 @@ class Transport
 {
 private:
     ConfigWeb configWeb;
-    TransportClient transportClient;
+    TransportClient &transportClient = mqttClient;
 
 public:
-    Transport(RCCLocoBase *loco) : transportClient(loco) {}
+    Transport(RCCLocoBase *loco) {
+        transportClient.setLoco(loco);
+    }
 
     void wifiAP(String wifissid, String wifipwd)
     {

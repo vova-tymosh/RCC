@@ -5,6 +5,7 @@
  */
 #pragma once
 #include "RCCState.h"
+#include "Settings.h"
 #include "Transport.h"
 #include "Cli.h"
 // #include "SpeedControl.h"
@@ -98,7 +99,11 @@ public:
 
     String listValues()
     {
-        String s = FIELDS;
+        String s = Keys[0];
+        for(int i = 1; i < sizeof(Keys)/sizeof(char*); i++) {
+            s += " ";
+            s += Keys[i];
+        }
         for(int i = 0; i < settingsSize; i++) {
             s += " ";
             s += settingsKeys[i];
@@ -162,6 +167,8 @@ public:
 
     void setup()
     {
+        locoName = settings.get("loconame");
+        locoAddr = settings.get("locoaddr");
         transport->begin();
         float p = 0;
         float i = 0;
