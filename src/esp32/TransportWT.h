@@ -47,9 +47,6 @@ protected:
     LineReceiver lr;
     RCCLocoBase *loco;
 
-    String locoName;
-    String locoAddr;
-
 public:
     WiThrottleClient(RCCLocoBase *loco) : server(port), loco(loco) {}
 
@@ -197,12 +194,12 @@ public:
         conn.flush();
         conn.setTimeout(500);
 
-        uint addr = settings.get("locoaddr").toInt();
+        uint addr = loco->locoAddr.toInt();
         char addrType = (addr < 127) ? 'S' : 'L';
         locoAddr = String(addrType) + addr;
 
         reply("VN2.0");
-        reply(String("RL1]\\[") + locoName + "}|{" + addr + "}|{" + addrType);
+        reply(String("RL1]\\[") + loco->locoName + "}|{" + addr + "}|{" + addrType);
         reply("PPA1");
         reply("");
         reply("*" + String(heartbeatTimeout));
@@ -210,8 +207,6 @@ public:
 
     void begin()
     {
-        locoName = settings.get("loconame");
-
         MDNS.begin(locoName);
         server.begin();
         MDNS.addService(mdnsName, "tcp", port);

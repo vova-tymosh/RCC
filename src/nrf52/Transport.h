@@ -42,10 +42,8 @@ private:
 
     void authorize()
     {
-        String name = settings.get("loconame");
-        String addr = settings.get("locoaddr");
         String packet = String(PACKET_REG) + " " + VERSION + " " + LOCO_FORMAT +
-                        " " + addr + " " + name;
+                        " " + loco->locoAddr + " " + loco->locoName;
         for(int i = 0; i < sizeof(Keys)/sizeof(char*); i++) {
             packet += " ";
             packet += Keys[i];
@@ -107,7 +105,7 @@ public:
 
     void begin()
     {
-        int addr = settings.get("locoaddr").toInt();
+        int addr = loco->locoAddr.toInt();
         wireless.setup(addr);
         authorize();
         timer.restart();
