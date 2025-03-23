@@ -129,7 +129,6 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length)
 {
     char *value = (char*)payload;
     char *action = parseAction(topic);
-    Serial.println(String("[MQ]< ") + topic + " " + action);
     if (action == NULL)
         return;
     if (strcmp(action, throttleAction) == 0) {
