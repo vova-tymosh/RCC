@@ -21,11 +21,13 @@ class Audio
     void playInternal(uint8_t *data, size_t size, int volumeDivider = 1);
 
 public:
+    bool cycle;
     
     void begin()
     {
         beginInternal();
         running = false;
+        cycle = false;
     }
 
     void play(const uint8_t *data, size_t size, int volumeDivider = 1)
@@ -63,10 +65,13 @@ public:
         playInternal(buffer, r, this->volumeDivider);
 
         if (r < CHUNK_SIZE) {
-            playfile = "";
-            running = false;
+            offset = 0;
             memset(buffer, 0, CHUNK_SIZE);
             playInternal(buffer, CHUNK_SIZE);
+            if (!cycle) {
+                playfile = "";
+                running = false;
+            }
         }
     }
 };

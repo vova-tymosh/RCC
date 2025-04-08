@@ -11,13 +11,13 @@
 #define PIN_SPEED_PIN D6
 
 #if defined(ARDUINO_ARCH_NRF52)
-#define PIN_AUDIO_LRC 32 + 12 // D7
+#define PIN_AUDIO_OUT 32 + 12 // D7
 #define PIN_AUDIO_BCK 32 + 13 // D8
-#define PIN_AUDIO_OUT 32 + 14 // D9
+#define PIN_AUDIO_LRC 32 + 14 // D9
 #elif defined(ARDUINO_ARCH_ESP32)
-#define PIN_AUDIO_LRC D7
+#define PIN_AUDIO_OUT D7
 #define PIN_AUDIO_BCK D8
-#define PIN_AUDIO_OUT D9
+#define PIN_AUDIO_LRC D9
 #endif
 
 extern const char *settingsKeys[];

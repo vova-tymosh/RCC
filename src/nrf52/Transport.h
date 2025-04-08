@@ -108,7 +108,7 @@ public:
         int addr = loco->locoAddr.toInt();
         wireless.setup(addr);
         authorize();
-        timer.restart();
+        timer.start();
     }
 
     void loop()
