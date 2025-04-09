@@ -53,16 +53,16 @@ public:
     {
         value = constrain(value, 0, 100);
         state.throttle = value;
-        if ((state.slow == false) && (state.pid == false))
-            onThrottle(state.direction, state.throttle);
+        // if ((state.slow == false) && (state.pid == false))
+        onThrottle(state.direction, state.throttle);
     }
 
     void setDirection(int value)
     {
         value = constrain((int)value, 0, 1);
         state.direction = value;
-        if ((state.slow == false) && (state.pid == false))
-            onThrottle(state.direction, state.throttle);
+        // if ((state.slow == false) && (state.pid == false))
+        onThrottle(state.direction, state.throttle);
     }
 
     int getThrottle()
@@ -77,6 +77,7 @@ public:
 
     void putValue(char *key, char *value)
     {
+        // Serial.println("putValue: " + String(key) + "/" + String(value));
         // for(int i = 0; i < sizeof(Keys)/sizeof(char*); i++) {
         //     if (strcmp(key, Keys[i]) == 0) {
         //         *((uint8_t*)&state + ValueOffsets[i]) = atoi(value);
@@ -88,6 +89,7 @@ public:
 
     String getValue(char *key)
     {
+        // Serial.println("getValue: " + String(key));
         for(int i = 0; i < sizeof(Keys)/sizeof(char*); i++) {
             if (strcmp(key, Keys[i]) == 0) {
                 int value = *((uint8_t*)&state + ValueOffsets[i]);
