@@ -16,7 +16,7 @@ bytes
 #include "StoragePhy.h"
 
 struct FileRecord {
-    char filename[10];
+    char filename[16];
     uint32_t offset;
     uint32_t size;
 };

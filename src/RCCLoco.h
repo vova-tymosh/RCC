@@ -5,26 +5,37 @@
  */
 #pragma once
 #include "RCCState.h"
+#include "SpeedControl.h"
 #include "Settings.h"
 #include "Transport.h"
-#include "Cli.h"
-// #include "SpeedControl.h"
-#include "Storage.h"
 #include "Timer.h"
+#include "Cli.h"
 
-// fix PID, Storage
 
 class RCCLoco : public RCCLocoBase
 {
 protected:
     Transport *transport;
     RccCli rccCli;
-    Timer timer;
-    // SpeedControl pid;
-    int increment;
+
+    Timer speedTimer;
+    SpeedControl pid;
+    bool stopState = false;
+
+    enum {
+        ACCELERATION = 0,
+        MANAGESPEED,
+        MAX_REALTIME,
+    };
+    const char* realtimeKey[MAX_REALTIME] = {
+        "acceleration", "managespeed",
+    };
+    float realtimeValue[MAX_REALTIME] = {
+        0, 0,
+    };
 
 public:
-    RCCLoco() : increment(1), rccCli(this)
+    RCCLoco() : rccCli(this), speedTimer(100) 
     {
         transport = new Transport(this);
         state.direction = 1;
@@ -40,7 +51,6 @@ public:
             state.bitstate |= (uint32_t)1 << code;
         else
             state.bitstate &= ~((uint32_t)1 << code);
-        // storage->write("bitstate", &state.bitstate, sizeof(state.bitstate));
         onFunction(code, activate);
     }
 
@@ -53,16 +63,7 @@ public:
     {
         value = constrain(value, 0, 100);
         state.throttle = value;
-        // if ((state.slow == false) && (state.pid == false))
-        onThrottle(state.direction, state.throttle);
-    }
-
-    void setDirection(int value)
-    {
-        value = constrain((int)value, 0, 1);
-        state.direction = value;
-        // if ((state.slow == false) && (state.pid == false))
-        onThrottle(state.direction, state.throttle);
+        handleThrottle();
     }
 
     int getThrottle()
@@ -70,21 +71,29 @@ public:
         return state.throttle;
     }
 
+    void setDirection(int value, bool _stopState = false)
+    {
+        value = constrain(value, 0, 1);
+        state.direction = value;
+        stopState = _stopState;
+        handleThrottle();
+    }
+
     int getDirection()
     {
         return state.direction;
-    }
+    }    
 
     void putValue(char *key, char *value)
     {
         // Serial.println("putValue: " + String(key) + "/" + String(value));
-        // for(int i = 0; i < sizeof(Keys)/sizeof(char*); i++) {
-        //     if (strcmp(key, Keys[i]) == 0) {
-        //         *((uint8_t*)&state + ValueOffsets[i]) = atoi(value);
-        //         return;
-        //     }
-        // }
         settings.put(key, value);
+        for (int i = 0; i < sizeof(realtimeValue)/sizeof(realtimeValue[0]); i++) {
+            if (strcmp(key, realtimeKey[i]) == 0) {
+                realtimeValue[i] = atof(value);
+                return;
+            }
+        }
     }
 
     String getValue(char *key)
@@ -115,83 +124,55 @@ public:
 
     void handleThrottle()
     {
-        uint8_t throttle;
-        if (state.direction == 0) {
+        if (stopState) {
             state.throttle = 0;
             state.throttle_out = 0;
-            throttle = 0;
-        } else {
-            if (state.slow) {
-                static uint8_t slow_throttle = 0;
-                if (slow_throttle < state.throttle)
-                    slow_throttle += increment;
-                else if (slow_throttle > state.throttle)
-                    slow_throttle -= increment;
-                throttle = slow_throttle;
-            } else {
-                throttle = state.throttle;
-            }
-            if (state.pid) {
-                // float speed = state.speed;
-                // float scaled = pid.scale(speed);
-                // pid.setDesired(throttle);
-                // pid.setMeasured(scaled);
-                // state.throttle_out = pid.read();
-                // Serial.println("PID: " + String(speed) + " " + String(scaled)
-                // +
-                //                " " + String(state.throttle_out));
-            } else {
-                state.throttle_out = throttle;
-            }
+        } else if (realtimeValue[ACCELERATION] == 0) {
+            state.throttle_out = state.throttle;
         }
         onThrottle(state.direction, state.throttle_out);
     }
 
-    float fromBinary(uint32_t x)
+    void updateThrottle()
     {
-        union {
-            float f;
-            uint32_t i;
-        } t;
-        t.i = x;
-        return t.f;
-    }
-
-    uint32_t toBinary(float x)
-    {
-        union {
-            float f;
-            uint32_t i;
-        } t;
-        t.f = x;
-        return t.i;
+        if (realtimeValue[ACCELERATION]) {
+            if (state.throttle_out < state.throttle)
+                state.throttle_out += realtimeValue[ACCELERATION];
+            else if (state.throttle_out > state.throttle)
+                state.throttle_out -= realtimeValue[ACCELERATION];
+        } else if (realtimeValue[MANAGESPEED]) {
+            float speed = state.speed;
+            float scaled = pid.scale(speed);
+            pid.setDesired(state.throttle);
+            pid.setMeasured(scaled);
+            state.throttle_out = pid.read();
+            Serial.println("[PD] Update: " + String(speed) + " " + String(scaled) + " " + String(state.throttle_out));
+        }
+        if (realtimeValue[ACCELERATION] || realtimeValue[MANAGESPEED]) {
+            static uint8_t lastThrottle = 0;
+            if (state.throttle_out != lastThrottle) {
+                lastThrottle = state.throttle_out;
+                onThrottle(state.direction, state.throttle_out);
+            }
+        }
     }
 
     void setup()
     {
         locoName = settings.get("loconame");
         locoAddr = settings.get("locoaddr");
+        for (int i = 0; i < sizeof(realtimeValue)/sizeof(realtimeValue[0]); i++) {
+            realtimeValue[i] = settings.get(realtimeKey[i]).toFloat();
+        }
         transport->begin();
-        float p = 0;
-        float i = 0;
-        float d = 0;
-        float m = 0;
-        // if (storage) {
-        // storage->read("bitstate", &state.bitstate, sizeof(state.bitstate));
-
-        // p = fromBinary(storage->restore(1));
-        // i = fromBinary(storage->restore(2));
-        // d = fromBinary(storage->restore(3));
-        // m = fromBinary(storage->restore(4));
-        // TODO: restore all the functions
-        // }
-        // pid.setup(p, i, d, m);
-        // timer.start();
     }
 
     void loop()
     {
         transport->loop();
         rccCli.loop();
+        if (speedTimer.hasFired()) {
+            updateThrottle();
+        }
     }
 };

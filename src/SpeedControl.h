@@ -1,10 +1,10 @@
 #pragma once
-#include <ArduPID.h>
+// #include <ArduPID.h>
 
 class SpeedControl
 {
 private:
-    ArduPID pid;
+    // ArduPID pid;
 
     double setpoint;
     double input;
@@ -19,22 +19,22 @@ public:
     void setP(float value)
     {
         p = value;
-        pid.setCoefficients(p, i, d);
-        pid.reset();
+        // pid.setCoefficients(p, i, d);
+        // pid.reset();
     }
 
     void setI(float value)
     {
         i = value;
-        pid.setCoefficients(p, i, d);
-        pid.reset();
+        // pid.setCoefficients(p, i, d);
+        // pid.reset();
     }
 
     void setD(float value)
     {
         d = value;
-        pid.setCoefficients(p, i, d);
-        pid.reset();
+        // pid.setCoefficients(p, i, d);
+        // pid.reset();
     }
 
     void setUpper(float value)
@@ -54,7 +54,7 @@ public:
 
     float read()
     {
-        pid.compute();
+        // pid.compute();
         return this->output;
     }
 
@@ -70,7 +70,7 @@ public:
         i = _i;
         d = _d;
         upper = _m;
-        pid.begin(&input, &output, &setpoint, p, i, d);
-        pid.setOutputLimits(0, 100);
+        // pid.begin(&input, &output, &setpoint, p, i, d);
+        // pid.setOutputLimits(0, 100);
     }
 };

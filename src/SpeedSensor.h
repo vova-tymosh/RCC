@@ -5,7 +5,6 @@
  *
  */
 #include "Timer.h"
-#include <SimpleKalmanFilter.h>
 
 void speedHandler();
 

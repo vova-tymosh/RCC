@@ -27,8 +27,8 @@ public:
     virtual void setFunction(int code, bool activate) = 0;
     virtual bool getFunction(int code) = 0;
     virtual void setThrottle(int value) = 0;
-    virtual void setDirection(int value) = 0;
     virtual int getThrottle() = 0;
+    virtual void setDirection(int value, bool stopState = false) = 0;
     virtual int getDirection() = 0;
     virtual void putValue(char *key, char *value) = 0;
     virtual String getValue(char *key) = 0;
