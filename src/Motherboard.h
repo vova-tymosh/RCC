@@ -1,8 +1,10 @@
 #pragma once
 
+#include <math.h>
 #include <TCA6408A.h>
 #include <Adafruit_INA219.h>
 #include "Peripheral.h"
+
 
 #define PIN_NOTHING D0
 #define PIN_MOTOR_EMF D1
@@ -68,11 +70,14 @@ class PowerMeter
 {
 private:
     bool active = false;
+    const float batteryCell = 4.2;
+    const float batteryLevels[10] = {0.87, 0.88, 0.89, 0.90, 0.91, 0.92, 0.93, 0.94, 0.96, 0.98};
 
 public:
     Adafruit_INA219 ina219;
 
     PowerMeter() : ina219() {}
+
     void setup()
     {
         if (ina219.begin()) {
@@ -82,16 +87,33 @@ public:
             Serial.println("Failed to find INA219 chip");
         }
     }
+
     float readVoltage()
     {
         return active ? ina219.getBusVoltage_V() : 0;
     }
+
     float readCurrent()
     {
         return active ? ina219.getCurrent_mA() : 0;
     }
+
     float readPower()
     {
         return active ? ina219.getPower_mW() : 0;
+    }
+
+    float readBattery()
+    {
+        if (!active)
+            return 0;
+        float voltage = ina219.getBusVoltage_V();
+        int cells = ceil(voltage / batteryCell);
+        voltage = voltage / cells / batteryCell;
+        for (int i = 0; i < sizeof(batteryLevels)/sizeof(batteryLevels[0]); i++) {
+            if (voltage < batteryLevels[i])
+                return i*10;
+        }
+        return 100;
     }
 };
