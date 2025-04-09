@@ -2,7 +2,6 @@
 
 #include <WebServer.h>
 
-
 class ConfigWeb
 {
 private:
@@ -15,7 +14,8 @@ public:
 
     void begin();
 
-    void loop() {
+    void loop()
+    {
         // if (WiFi.status() != WL_CONNECTED)
         //     return;
         server.handleClient();

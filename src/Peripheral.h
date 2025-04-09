@@ -24,7 +24,6 @@ public:
     }
 };
 
-
 /*
 class ServoBase {
   protected:
@@ -71,7 +70,10 @@ protected:
     }
 
 public:
-    MotorDeprecated(int pin_back, int pin_fowd) : pin_back(pin_back), pin_fowd(pin_fowd) {}
+    MotorDeprecated(int pin_back, int pin_fowd)
+        : pin_back(pin_back), pin_fowd(pin_fowd)
+    {
+    }
 
     virtual void setup()
     {
@@ -109,9 +111,8 @@ protected:
 public:
     int bemf;
 
-    Motor(int pin_back, int pin_fowd,
-           int pin_bemf = -1, int min_thr = 20,
-           int cool_down_us = 40)
+    Motor(int pin_back, int pin_fowd, int pin_bemf = -1, int min_thr = 20,
+          int cool_down_us = 40)
         : pin_back(pin_back), pin_fowd(pin_fowd), pin_bemf(pin_bemf),
           min_thr(min_thr), cool_down(cool_down_us)
     {
@@ -235,7 +236,7 @@ private:
     int psiMax;
 
 public:
-    PreassureSensor(int pin, int psiMax = 100) : pin(pin), psiMax(psiMax)  {}
+    PreassureSensor(int pin, int psiMax = 100) : pin(pin), psiMax(psiMax) {}
     void setup()
     {
         pinMode(pin, INPUT);
@@ -250,4 +251,3 @@ public:
         return (raw - bitsMin) / (voltsRange * bitPerVolt / psiMax);
     }
 };
-

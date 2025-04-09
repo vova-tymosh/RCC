@@ -83,8 +83,7 @@ protected:
     RADIO_NETWORK network;
 
 public:
-    Wireless()
-        : RADIO_CTOR, network(radio) {};
+    Wireless() : RADIO_CTOR, network(radio) {};
 
     uint16_t read(void *payload, uint16_t size, int *from = NULL)
     {

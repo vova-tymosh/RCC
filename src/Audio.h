@@ -22,7 +22,7 @@ class Audio
 
 public:
     bool cycle;
-    
+
     void begin()
     {
         beginInternal();
@@ -47,13 +47,15 @@ public:
         running = true;
     }
 
-    void loop() {
+    void loop()
+    {
         if (!running)
             return;
 
         int r;
         if (playfile.length() != 0) {
-            r = storage.read(playfile.c_str(), (uint8_t*)buffer, CHUNK_SIZE, offset);
+            r = storage.read(playfile.c_str(), (uint8_t *)buffer, CHUNK_SIZE,
+                             offset);
         } else {
             r = size - offset;
             if (r > CHUNK_SIZE)

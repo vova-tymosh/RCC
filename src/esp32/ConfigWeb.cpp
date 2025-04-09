@@ -5,7 +5,7 @@
 #include "ConfigWeb.h"
 #include "Settings.h"
 
-const char* htmlRoot = R"(
+const char *htmlRoot = R"(
 <html>
     <head>
       <style>
@@ -59,7 +59,7 @@ const char* htmlRoot = R"(
   </html>
 )";
 
-const char* htmlSubmitted = R"(
+const char *htmlSubmitted = R"(
   <html>
     <head>
       <style>
@@ -75,8 +75,8 @@ const char* htmlSubmitted = R"(
 
 WebServer ConfigWeb::server(80);
 
-
-void ConfigWeb::handleRoot() {
+void ConfigWeb::handleRoot()
+{
     String wifiap = settings.get("wifiap");
     String wifissid = settings.get("wifissid");
     String wifipwd = settings.get("wifipwd");
@@ -92,7 +92,8 @@ void ConfigWeb::handleRoot() {
     server.send(200, "text/html", form);
 }
 
-void ConfigWeb::handleSubmit() {
+void ConfigWeb::handleSubmit()
+{
     String wifiap = server.arg("wifiap");
     String wifissid = server.arg("wifissid");
     String wifipwd = server.arg("wifipwd");
@@ -110,10 +111,10 @@ void ConfigWeb::handleSubmit() {
     server.send(200, "text/html", htmlSubmitted);
 }
 
-
-void ConfigWeb::begin() {
+void ConfigWeb::begin()
+{
     // if (WiFi.status() != WL_CONNECTED)
-    //     return; 
+    //     return;
 
     server.on("/", HTTP_GET, handleRoot);
     server.on("/submit", HTTP_POST, handleSubmit);

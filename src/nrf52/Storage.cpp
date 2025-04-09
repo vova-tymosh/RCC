@@ -3,8 +3,9 @@
 /*
 SPI flash storage for nRF52
 Important:
-    The flash writes with 4 bytes alignment, so the size of the file will be rounded up to the next multiple of 4
-    Also FileRecords has to be aligned to 4 bytes
+    The flash writes with 4 bytes alignment, so the size of the file will be
+rounded up to the next multiple of 4 Also FileRecords has to be aligned to 4
+bytes
 
 
 */
@@ -13,7 +14,6 @@ Important:
 #include <Arduino.h>
 #include "Storage.h"
 #include "StoragePhy.h"
-
 
 struct FileRecord {
     char filename[10];
@@ -41,10 +41,10 @@ uint32_t createFile(const char *filename, size_t size)
     f.offset = mr.end;
     f.size = size;
     uint32_t recordAt = mr.count * sizeof(FileRecord) + sizeof(MasterRecord);
-    phyWrite(recordAt, (const uint8_t*)&f, sizeof(f));
+    phyWrite(recordAt, (const uint8_t *)&f, sizeof(f));
     mr.count++;
     mr.end += size;
-    phyWrite(0, (const uint8_t*)&mr, sizeof(mr));
+    phyWrite(0, (const uint8_t *)&mr, sizeof(mr));
     return f.offset;
 }
 
@@ -52,8 +52,8 @@ bool getFile(const char *filename, FileRecord *record)
 {
     FileRecord f;
     uint32_t offset = sizeof(mr);
-    for(int i = 0; i < mr.count; i++) {
-        phyRead(offset + i * sizeof(f), (uint8_t*)&f, sizeof(f));
+    for (int i = 0; i < mr.count; i++) {
+        phyRead(offset + i * sizeof(f), (uint8_t *)&f, sizeof(f));
         if (strcmp(f.filename, filename) == 0) {
             memcpy(record, &f, sizeof(f));
             return true;
@@ -61,9 +61,6 @@ bool getFile(const char *filename, FileRecord *record)
     }
     return false;
 }
-
-
-
 
 void Storage::beginInternal()
 {
@@ -73,14 +70,14 @@ void Storage::beginInternal()
 uint32_t Storage::getValidation()
 {
     mr.validation = 0;
-    phyRead(0, (uint8_t*)&mr, sizeof(mr));
+    phyRead(0, (uint8_t *)&mr, sizeof(mr));
     return mr.validation;
 }
 
 void Storage::setValidation(uint32_t validation)
 {
     mr = {validation, 0, maxFiles * sizeof(FileRecord)};
-    phyWrite(0, (const uint8_t*)&mr, sizeof(mr));
+    phyWrite(0, (const uint8_t *)&mr, sizeof(mr));
 }
 
 void Storage::clearInternal()
@@ -88,7 +85,8 @@ void Storage::clearInternal()
     phyErase();
 }
 
-int Storage::read(const char *filename, void *buffer, size_t size, size_t offset)
+int Storage::read(const char *filename, void *buffer, size_t size,
+                  size_t offset)
 {
     FileRecord f;
     if (getFile(filename, &f)) {
@@ -96,12 +94,13 @@ int Storage::read(const char *filename, void *buffer, size_t size, size_t offset
             return 0;
         if (offset + size > f.size)
             size -= offset + size - f.size;
-        return phyRead(f.offset + offset, (uint8_t*)buffer, size);
+        return phyRead(f.offset + offset, (uint8_t *)buffer, size);
     }
     return 0;
 }
 
-int Storage::write(const char *filename, void *buffer, size_t size, size_t offset)
+int Storage::write(const char *filename, void *buffer, size_t size,
+                   size_t offset)
 {
     FileRecord f;
     if (getFile(filename, &f)) {
@@ -109,11 +108,11 @@ int Storage::write(const char *filename, void *buffer, size_t size, size_t offse
             return 0;
         if (offset + size > f.size)
             size -= offset + size - f.size;
-        return phyWrite(f.offset + offset, (const uint8_t*)buffer, size);
+        return phyWrite(f.offset + offset, (const uint8_t *)buffer, size);
     } else {
         uint32_t fileOffset = createFile(filename, size);
         if (fileOffset)
-            return phyWrite(fileOffset, (const uint8_t*)buffer, size);
+            return phyWrite(fileOffset, (const uint8_t *)buffer, size);
     }
     Serial.print("[FS] Failed to write file: ");
     Serial.println(filename);

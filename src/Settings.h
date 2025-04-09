@@ -9,7 +9,6 @@ class Settings
     static const int MAX_LENGTH = 16;
 #endif
 public:
-
     String get(const char *key)
     {
         char buffer[MAX_LENGTH];
@@ -21,7 +20,7 @@ public:
     void put(const char *key, String value)
     {
         if (storage.exists(key))
-            storage.write(key, (void*)value.c_str(), value.length() + 1);
+            storage.write(key, (void *)value.c_str(), value.length() + 1);
     }
 
     void create(const char *key, const char *value)
@@ -31,8 +30,8 @@ public:
         if (size > sizeof(buffer) - 1)
             size = sizeof(buffer) - 1;
         memset(buffer, 0, sizeof(buffer));
-        memcpy(buffer, value, size);        
-        storage.write((char *)key, (void*)buffer, sizeof(buffer));
+        memcpy(buffer, value, size);
+        storage.write((char *)key, (void *)buffer, sizeof(buffer));
     }
 
     void defaults(const char *keys[], const char *values[], const int size)

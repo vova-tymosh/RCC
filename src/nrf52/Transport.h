@@ -44,7 +44,7 @@ private:
     {
         String packet = String(PACKET_REG) + " " + VERSION + " " + LOCO_FORMAT +
                         " " + loco->locoAddr + " " + loco->locoName;
-        for(int i = 0; i < sizeof(Keys)/sizeof(char*); i++) {
+        for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             packet += " ";
             packet += Keys[i];
         }
@@ -93,10 +93,9 @@ private:
 
 public:
     Transport(RCCLocoBase *loco)
-        : loco(loco), timer(100)
-    {
+        : loco(loco), timer(100) {
 
-    };
+          };
 
     // bool isTransmitting()
     // {
@@ -121,9 +120,11 @@ public:
             if (command.cmd == 122) {
                 char key[256];
                 char value[256];
-                Serial.println("###1>" + String(command.keySize) + " = " + String(command.valueSize));
+                Serial.println("###1>" + String(command.keySize) + " = " +
+                               String(command.valueSize));
                 memcpy(key, buffer + sizeof(command), command.keySize);
-                memcpy(value, buffer + sizeof(command) + command.keySize, command.valueSize);
+                memcpy(value, buffer + sizeof(command) + command.keySize,
+                       command.valueSize);
                 Serial.println("###3>" + String(key) + " = " + String(value));
             }
             received(command.cmd, command.value);

@@ -5,11 +5,11 @@
 #include "Settings.h"
 
 #if defined(RCC_NO_STATION)
-    #include "esp32/TransportWT.h"
-    #define TransportClient WiThrottleClient
+#include "esp32/TransportWT.h"
+#define TransportClient WiThrottleClient
 #else
-    #include "esp32/TransportMQ.h"
-    #define TransportClient MqttClient
+#include "esp32/TransportMQ.h"
+#define TransportClient MqttClient
 #endif
 
 class Transport
@@ -19,7 +19,8 @@ private:
     TransportClient &transportClient = mqttClient;
 
 public:
-    Transport(RCCLocoBase *loco) {
+    Transport(RCCLocoBase *loco)
+    {
         transportClient.setLoco(loco);
     }
 

@@ -1,15 +1,14 @@
 #if defined(ARDUINO_ARCH_NRF52)
 
-
 #include <AutoAnalogAudio.h>
 #include "Audio.h"
 #include "Motherboard.h"
 
 AutoAnalog aaAudio;
 
-void Audio::beginInternal() 
+void Audio::beginInternal()
 {
-    aaAudio.I2S_PIN_LRCK = PIN_AUDIO_LRC; 
+    aaAudio.I2S_PIN_LRCK = PIN_AUDIO_LRC;
     aaAudio.I2S_PIN_SCK = PIN_AUDIO_BCK;
     aaAudio.I2S_PIN_SDOUT = PIN_AUDIO_OUT;
 

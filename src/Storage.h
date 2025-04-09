@@ -5,7 +5,8 @@
 #define HIGH_CAPACITY_STORAGE
 #endif
 
-class Storage {
+class Storage
+{
 private:
     const uint16_t code = 0xC0DE;
     const uint16_t version = 10;
@@ -19,7 +20,6 @@ private:
     void setValidation(uint32_t value);
 
 public:
-
     void begin()
     {
         beginInternal();
@@ -36,7 +36,8 @@ public:
         setValidation((uint32_t)code << 16 | version);
     }
 
-    int read(const char *filename, void *buffer, size_t size, size_t offset = 0);
+    int read(const char *filename, void *buffer, size_t size,
+             size_t offset = 0);
 
     int readOrCreate(const char *filename, void *buffer, size_t size)
     {
@@ -49,7 +50,8 @@ public:
         return r;
     }
 
-    int write(const char *filename, void *buffer, size_t size, size_t offset = 0);
+    int write(const char *filename, void *buffer, size_t size,
+              size_t offset = 0);
 
     bool exists(const char *filename);
 

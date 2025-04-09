@@ -90,9 +90,9 @@ public:
     String getValue(char *key)
     {
         // Serial.println("getValue: " + String(key));
-        for(int i = 0; i < sizeof(Keys)/sizeof(char*); i++) {
+        for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             if (strcmp(key, Keys[i]) == 0) {
-                int value = *((uint8_t*)&state + ValueOffsets[i]);
+                int value = *((uint8_t *)&state + ValueOffsets[i]);
                 return String(value);
             }
         }
@@ -102,11 +102,11 @@ public:
     String listValues()
     {
         String s = Keys[0];
-        for(int i = 1; i < sizeof(Keys)/sizeof(char*); i++) {
+        for (int i = 1; i < sizeof(Keys) / sizeof(char *); i++) {
             s += " ";
             s += Keys[i];
         }
-        for(int i = 0; i < settingsSize; i++) {
+        for (int i = 0; i < settingsSize; i++) {
             s += " ";
             s += settingsKeys[i];
         }
@@ -179,11 +179,11 @@ public:
         // if (storage) {
         // storage->read("bitstate", &state.bitstate, sizeof(state.bitstate));
 
-            // p = fromBinary(storage->restore(1));
-            // i = fromBinary(storage->restore(2));
-            // d = fromBinary(storage->restore(3));
-            // m = fromBinary(storage->restore(4));
-            // TODO: restore all the functions
+        // p = fromBinary(storage->restore(1));
+        // i = fromBinary(storage->restore(2));
+        // d = fromBinary(storage->restore(3));
+        // m = fromBinary(storage->restore(4));
+        // TODO: restore all the functions
         // }
         // pid.setup(p, i, d, m);
         // timer.start();

@@ -5,7 +5,6 @@
 
 void (*reboot)(void) = 0;
 
-
 class RccCli
 {
 private:
@@ -50,7 +49,7 @@ private:
         return false;
     }
 
-    bool processSpeed(char cmd[]) 
+    bool processSpeed(char cmd[])
     {
         if (strlen(cmd) == 0)
             return false;
@@ -66,7 +65,7 @@ private:
         return true;
     }
 
-    bool processFunction(char cmd[]) 
+    bool processFunction(char cmd[])
     {
         if (strlen(cmd) < 2)
             return false;
@@ -83,7 +82,7 @@ private:
         return true;
     }
 
-    bool processPut(char cmd[]) 
+    bool processPut(char cmd[])
     {
         if (strlen(cmd) < 2)
             return false;
@@ -98,7 +97,7 @@ private:
         return true;
     }
 
-    bool processGet(char cmd[]) 
+    bool processGet(char cmd[])
     {
         if (strlen(cmd) < 1)
             return false;
@@ -108,13 +107,13 @@ private:
         return true;
     }
 
-    bool processList(char cmd[]) 
+    bool processList(char cmd[])
     {
         Serial.println(loco->listValues());
         return true;
     }
 
-    bool processClear(char cmd[]) 
+    bool processClear(char cmd[])
     {
         storage.clear();
         Serial.println("Clear");
@@ -140,7 +139,7 @@ private:
 public:
     RccCli(RCCLocoBase *loco) : loco(loco) {}
 
-    void loop() 
+    void loop()
     {
         char line[INPUT_LEN_MAX];
         if (getLine(line)) {
@@ -151,4 +150,3 @@ public:
         }
     }
 };
-

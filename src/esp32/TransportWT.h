@@ -112,8 +112,11 @@ public:
     {
         String prefix = String("M") + throttleId + "A" + key + "<;>";
         reply(String("M") + throttleId + "+" + key + "<;>");
-        reply(String("M") + throttleId + "L" + key + "<;>]\\[Headlight]\\[Bell]\\[Whistle]\\[3]\\[4]\\[5]\\[6]\\[7]\\[8]\\[9");
-        /* ]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\["); */
+        reply(String("M") + throttleId + "L" + key +
+              "<;>]\\[Headlight]\\[Bell]\\[Whistle]\\[3]\\[4]\\[5]\\[6]\\[7]\\["
+              "8]\\[9");
+        /* ]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[");
+         */
         for (int i = 0; i < 9; i++) {
             bool state = loco->getFunction(i);
             char stateChar = (state) ? '1' : '0';
@@ -199,11 +202,12 @@ public:
         locoAddr = String(addrType) + addr;
 
         reply("VN2.0");
-        reply(String("RL1]\\[") + loco->locoName + "}|{" + addr + "}|{" + addrType);
+        reply(String("RL1]\\[") + loco->locoName + "}|{" + addr + "}|{" +
+              addrType);
         reply("PPA1");
         reply("");
         reply("*" + String(heartbeatTimeout));
-    }   
+    }
 
     void begin()
     {
@@ -226,6 +230,5 @@ public:
                     processLine(line);
             }
         }
-    }   
+    }
 };
-

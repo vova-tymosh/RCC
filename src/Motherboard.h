@@ -4,7 +4,7 @@
 #include <Adafruit_INA219.h>
 #include "Peripheral.h"
 
-#define PIN_NOTHING   D0
+#define PIN_NOTHING D0
 #define PIN_MOTOR_EMF D1
 #define PIN_MOTOR_BCK D2
 #define PIN_MOTOR_FWD D3
