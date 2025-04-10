@@ -19,10 +19,10 @@ const char *listTopic = "cab/{0}/keys";
 const char *throttleAct = "throttle";
 const char *directionAct = "direction";
 const char *getFunctionAct = "function/get";
+const char *setFunctionAct = "function/";
 const char *getValueAct = "value/get";
-const char *putFunctionAct = "function/";
-const char *putValueAct = "value/";
-const char *listAct = "list";
+const char *listAct = "value/list";
+const char *setValueAct = "value/";
 const char *directionFWD = "FORWARD";
 const char *directionREV = "REVERSE";
 const char *functionON = "ON";
@@ -55,7 +55,7 @@ public:
         snprintf(heartbeatPayload, sizeof(heartbeatPayload),
                  "%d %d %d %d %d %d %d %d %d %d %d", s->tick, s->distance,
                  s->bitstate, s->speed, s->lost, s->throttle, s->throttle_out,
-                 s->battery, s->temperature, s->psi, s->water);
+                 s->battery, s->temperature, s->psi, s->current);
         mqtt.publish(valuesTopicUpdated.c_str(), heartbeatPayload);
     }
 
@@ -147,8 +147,27 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
             mqttClient.loco->setThrottle(0);
             mqttClient.loco->setDirection(1, true);
         }
+    } else if (strcmp(action, getValueAct) == 0) {
+        // Value, get state
+        String key(payload, length);
+        String value = mqttClient.loco->getValue((char *)key.c_str());
+        String topic = valueTopic;
+        topic.replace("{0}", mqttClient.loco->locoAddr);
+        topic.replace("{1}", key);
+        mqttClient.mqtt.publish(topic.c_str(), value.c_str());
+    } else if (strcmp(action, listAct) == 0) {
+        // Value, list all Keys (config and runtime)
+        String topic = listTopic;
+        topic.replace("{0}", mqttClient.loco->locoAddr);
+        String value = mqttClient.loco->listValues();
+        mqttClient.mqtt.publish(topic.c_str(), value.c_str());
+    } else if (strncmp(action, setValueAct, strlen(setValueAct)) == 0) {
+        // Value, set state. Hast to be the last one, after "get" and "list"
+        char *key = action + strlen(setValueAct);
+        String value(payload, length);
+        mqttClient.loco->putValue(key, (char *)value.c_str());    
     } else if (strcmp(action, getFunctionAct) == 0) {
-        // Function get state
+        // Function, get state. 
         String key(payload, length);
         int functionCode = key.toInt();
         String value =
@@ -157,32 +176,13 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
         topic.replace("{0}", mqttClient.loco->locoAddr);
         topic.replace("{1}", key);
         mqttClient.mqtt.publish(topic.c_str(), value.c_str());
-    } else if (strcmp(action, getValueAct) == 0) {
-        // Value get state
-        String key(payload, length);
-        String value = mqttClient.loco->getValue((char *)key.c_str());
-        String topic = valueTopic;
-        topic.replace("{0}", mqttClient.loco->locoAddr);
-        topic.replace("{1}", key);
-        mqttClient.mqtt.publish(topic.c_str(), value.c_str());
-    } else if (strncmp(action, putFunctionAct, strlen(putFunctionAct)) == 0) {
-        // Function update state
-        action += strlen(putFunctionAct);
+    } else if (strncmp(action, setFunctionAct, strlen(setFunctionAct)) == 0) {
+        // Function, set state. Hast to be the last one, after "get"
+        action += strlen(setFunctionAct);
         int functionCode = atoi(action);
         if (length && strncmp(value, functionON, length) == 0)
             mqttClient.loco->setFunction(functionCode, true);
         else
             mqttClient.loco->setFunction(functionCode, false);
-    } else if (strncmp(action, putValueAct, strlen(putValueAct)) == 0) {
-        // Value update state
-        char *key = action + strlen(putValueAct);
-        String value(payload, length);
-        mqttClient.loco->putValue(key, (char *)value.c_str());
-    } else if (strcmp(action, listAct) == 0) {
-        // List all possible Keys (config and runtime)
-        String topic = listTopic;
-        topic.replace("{0}", mqttClient.loco->locoAddr);
-        String value = mqttClient.loco->listValues();
-        mqttClient.mqtt.publish(topic.c_str(), value.c_str());
     }
 }

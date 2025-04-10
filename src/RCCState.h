@@ -6,7 +6,7 @@
 #pragma once
 
 // System version, update every time the protocol changes
-const char *VERSION = "0.2";
+const char *VERSION = "0.7";
 
 // Following structures and constants are connected and have to be kept in sync!
 //   Failure to do so will result in communication errors
@@ -18,7 +18,7 @@ const char *LOCO_FORMAT = "BIIIHBBBBBBB";
 // Key names for the LocoState fields. Has to be in the same order as LocoState
 const char *Keys[] = {"Time", "Disatnce", "Bitstate", "Speed",
                       "Lost", "Throttle", "ThrOut",   "Battery",
-                      "Temp", "Psi",      "Water"};
+                      "Temp", "Psi",      "Current"};
 
 // The LocoState structure, represent realtime state and is sent as hearbeat to
 // the Station
@@ -71,7 +71,7 @@ struct __attribute__((packed)) LocoState {
     uint8_t battery;
     uint8_t temperature;
     uint8_t psi;
-    uint8_t water;
+    uint8_t current;
 };
 
 // Offsets of the LocoState fields, used to access the fields in the LocoState
@@ -82,4 +82,4 @@ const size_t ValueOffsets[] = {
     offsetof(LocoState, lost),         offsetof(LocoState, throttle),
     offsetof(LocoState, throttle_out), offsetof(LocoState, battery),
     offsetof(LocoState, temperature),  offsetof(LocoState, psi),
-    offsetof(LocoState, water)};
+    offsetof(LocoState, current)};

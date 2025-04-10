@@ -11,12 +11,15 @@ private:
     static const uint8_t INPUT_LEN_MAX = 32;
     static const char END_MARKER = '\n';
 
-    static const char CMD_SPEED = 'S';
-    static const char CMD_FUNCTION = 'F';
+    static const char CMD_THROTTLE = 'T';
+    static const char CMD_DIRECTION = 'D';
+    static const char CMD_SET_FUNCTION = 'F';
+    static const char CMD_GET_FUNCTION = 'P';
+    static const char CMD_SET_VALUE = 'S';
+    static const char CMD_GET_VALUE = 'G';
+    static const char CMD_LIST_VALUE = 'L';
+
     static const char CMD_CMD = 'C';
-    static const char CMD_PUT = 'P';
-    static const char CMD_GET = 'G';
-    static const char CMD_LIST = 'L';
     static const char CMD_ERASE = 'E';
     static const char CMD_REBOOT = '!';
 
@@ -29,17 +32,21 @@ private:
         char first = toupper(cmd[0]);
         if (strlen(cmd) > 0) {
             cmd++;
-            if (first == CMD_SPEED)
-                return processSpeed(cmd);
-            else if (first == CMD_FUNCTION)
+            if (first == CMD_THROTTLE)
+                return processThrottle(cmd);
+            else if (first == CMD_DIRECTION)
+                return processDirection(cmd);
+            else if (first == CMD_SET_FUNCTION)
                 return processFunction(cmd);
+            else if (first == CMD_GET_FUNCTION)
+                return processGetFunction(cmd);
             else if (first == CMD_CMD)
                 return processCommand(cmd);
-            else if (first == CMD_PUT)
-                return processPut(cmd);
-            else if (first == CMD_GET)
+            else if (first == CMD_SET_VALUE)
+                return processSet(cmd);
+            else if (first == CMD_GET_VALUE)
                 return processGet(cmd);
-            else if (first == CMD_LIST)
+            else if (first == CMD_LIST_VALUE)
                 return processList(cmd);
             else if (first == CMD_ERASE)
                 return processClear(cmd);
@@ -49,19 +56,21 @@ private:
         return false;
     }
 
-    bool processSpeed(char cmd[])
+    bool processThrottle(char cmd[])
     {
         if (strlen(cmd) == 0)
             return false;
-        char dir_text[2] = {cmd[0], '\0'};
-        uint8_t dir = (uint8_t)atoi(dir_text);
-        int speed = 0;
-        if (strlen(cmd) > 1) {
-            speed = atoi(cmd + 1);
-            if (speed > 100)
-                return false;
-        }
-        loco->onThrottle(dir, (uint8_t)speed);
+        uint8_t value = (uint8_t)atoi(cmd);
+        loco->setThrottle(value);
+        return true;
+    }
+
+    bool processDirection(char cmd[])
+    {
+        if (strlen(cmd) == 0)
+            return false;
+        uint8_t value = (uint8_t)atoi(cmd);
+        loco->setDirection(value);
         return true;
     }
 
@@ -70,8 +79,16 @@ private:
         if (strlen(cmd) < 2)
             return false;
         uint8_t function = (uint8_t)atoi(cmd + 1);
-        loco->onFunction(function, cmd[0] == '1');
+        loco->setFunction(function, cmd[0] == '1');
         return true;
+    }
+
+    bool processGetFunction(char cmd[])
+    {
+        if (strlen(cmd) < 1)
+            return false;
+        uint8_t function = (uint8_t)atoi(cmd);
+        return loco->getFunction(function);
     }
 
     bool processCommand(char cmd[])
@@ -82,7 +99,7 @@ private:
         return true;
     }
 
-    bool processPut(char cmd[])
+    bool processSet(char cmd[])
     {
         if (strlen(cmd) < 2)
             return false;
