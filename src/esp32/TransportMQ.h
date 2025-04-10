@@ -74,6 +74,9 @@ public:
     void reconnect()
     {
         if (millis() >= nextReconnectTime) {
+            String brokerIP = settings.get("broker");
+            String brokerPort = settings.get("brokerport");
+            mqtt.setServer(brokerIP.c_str(), brokerPort.toInt());
             if (mqtt.connect(loco->locoName.c_str())) {
                 Serial.println("[MQ] Connected");
                 String topic(rootTopic);
@@ -89,12 +92,7 @@ public:
 
     void begin()
     {
-        String broker = settings.get("broker");
-        String brokerPort = settings.get("brokerport");
-        // mqtt.setServer(broker.c_str(), brokerPort.toInt());
-        mqtt.setServer("192.168.20.61", brokerPort.toInt());
         mqtt.setCallback(onMqttMessage);
-
         valuesTopicUpdated = valuesTopic;
         valuesTopicUpdated.replace("{0}", loco->locoAddr);
         nextReconnectTime = millis();
