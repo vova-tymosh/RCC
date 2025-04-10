@@ -41,6 +41,8 @@
 #endif
 #include <RF24Network.h>
 
+//TODO: combine WirelessBase & WirelessBase
+
 class WirelessBase
 {
 protected:

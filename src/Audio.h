@@ -5,6 +5,8 @@
 #include <Arduino.h>
 #include "Storage.h"
 
+//TODO: mix multiple audios
+
 class Audio
 {
     static const int CHUNK_SIZE = 512;

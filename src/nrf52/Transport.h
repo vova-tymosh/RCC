@@ -8,7 +8,9 @@
 #include "RCCLocoBase.h"
 #include "Settings.h"
 
-// TODO - tick, pid setting (CV?)
+//TODO: tick
+//TODO: clean up the protocol and bring it close to MQ/CLI
+//TODO: remove contrains from throttle and direction
 
 struct __attribute__((packed)) Command {
     uint8_t cmd;

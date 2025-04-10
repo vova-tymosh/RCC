@@ -7,6 +7,10 @@
 #define PULSE_SHORT 116
 #define PULSE_LONG 200
 
+//TODO: add esp32 support
+//TODO: add nrf52 support
+//TODO: simplify bit stream management
+
 void dccPhy::setup()
 {
     pinMode(9, OUTPUT);

@@ -26,6 +26,8 @@ extern const char *settingsKeys[];
 extern const char *settingsValues[];
 extern const int settingsSize;
 
+//TODO: change battery formula to provide more accurate/continues values
+
 class PinExt : public Pin, protected Tca6408a
 {
 public:

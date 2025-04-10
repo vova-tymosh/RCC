@@ -5,6 +5,8 @@
 #include "ConfigWeb.h"
 #include "Settings.h"
 
+//TODO: add all settings
+
 const char *htmlRoot = R"(
 <html>
     <head>
