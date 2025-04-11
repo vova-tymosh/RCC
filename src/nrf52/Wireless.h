@@ -41,11 +41,13 @@
 #endif
 #include <RF24Network.h>
 
-//TODO: combine WirelessBase & WirelessBase
 
-class WirelessBase
+class Wireless
 {
 protected:
+    RADIO_TYPE radio;
+    RADIO_NETWORK network;
+
     static const uint16_t STATION_NODE = 0;
     uint16_t node;
     int total;
@@ -53,6 +55,8 @@ protected:
     int last_sent;
 
 public:
+    Wireless() : RADIO_CTOR, network(radio) {};
+
     uint16_t getLostRate()
     {
         uint16_t lost_rate = 0;
@@ -63,6 +67,7 @@ public:
         }
         return lost_rate;
     }
+
     bool isTransmitting()
     {
         int sent = total - lost;
@@ -70,22 +75,6 @@ public:
         last_sent = sent;
         return alive;
     }
-
-    virtual uint16_t read(void *payload, uint16_t size, int *from = NULL) = 0;
-    virtual bool write(const void *payload, uint16_t size,
-                       int to = STATION_NODE) = 0;
-    virtual bool available() = 0;
-    virtual void setup(int node) = 0;
-};
-
-class Wireless : public WirelessBase
-{
-protected:
-    RADIO_TYPE radio;
-    RADIO_NETWORK network;
-
-public:
-    Wireless() : RADIO_CTOR, network(radio) {};
 
     uint16_t read(void *payload, uint16_t size, int *from = NULL)
     {
