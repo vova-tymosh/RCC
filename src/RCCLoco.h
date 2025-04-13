@@ -73,7 +73,7 @@ public:
 
     void setDirection(int value, bool _stopState = false)
     {
-        value = constrain(value, 0, 1);
+        value = constrain(value, 0, 3);
         state.direction = value;
         stopState = _stopState;
         handleThrottle();
@@ -98,14 +98,16 @@ public:
 
     String getValue(char *key)
     {
-        // Serial.println("getValue: " + String(key));
         for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             if (strcmp(key, Keys[i]) == 0) {
                 int value = *((uint8_t *)&state + ValueOffsets[i]);
+                Serial.println("getValue r: " + String(key) + "/" + String(value));
                 return String(value);
             }
         }
-        return settings.get(key);
+        String value(settings.get(key));
+        // Serial.println("getValue s: " + String(key) + "/" + String(value));
+        return value;
     }
 
     String listValues()
