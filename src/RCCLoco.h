@@ -86,7 +86,7 @@ public:
 
     void putValue(char *key, char *value)
     {
-        // Serial.println("putValue: " + String(key) + "/" + String(value));
+        Serial.println("putValue: " + String(key) + "/" + String(value));
         settings.put(key, value);
         for (int i = 0; i < sizeof(realtimeValue)/sizeof(realtimeValue[0]); i++) {
             if (strcmp(key, realtimeKey[i]) == 0) {
@@ -106,7 +106,7 @@ public:
             }
         }
         String value(settings.get(key));
-        // Serial.println("getValue s: " + String(key) + "/" + String(value));
+        Serial.println("getValue s: " + String(key) + "/" + String(value));
         return value;
     }
 
@@ -138,10 +138,16 @@ public:
     void updateThrottle()
     {
         if (realtimeValue[ACCELERATION]) {
-            if (state.throttle_out < state.throttle)
+            if (state.throttle_out < state.throttle) {
                 state.throttle_out += realtimeValue[ACCELERATION];
-            else if (state.throttle_out > state.throttle)
+                if (state.throttle_out > state.throttle)
+                    state.throttle_out = state.throttle;
+            }
+            else if (state.throttle_out > state.throttle) {
                 state.throttle_out -= realtimeValue[ACCELERATION];
+                if (state.throttle_out < state.throttle)
+                    state.throttle_out = state.throttle;
+            }
         } else if (realtimeValue[MANAGESPEED]) {
             float speed = state.speed;
             float scaled = pid.scale(speed);

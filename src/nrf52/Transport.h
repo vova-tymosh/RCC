@@ -106,7 +106,7 @@ public:
             reply.code = CMD_SET_FUNCTION;
             reply.functionId = command->functionId;
             reply.activate = loco->getFunction(command->functionId);
-            printHex((uint8_t *)&reply, sizeof(reply));
+            // printHex((uint8_t *)&reply, sizeof(reply));
             wireless.write(&reply, sizeof(reply));
         } else if (command->code == CMD_SET_VALUE) {
             if (size >= HEADER_SIZE + command->keySize + 1) {                

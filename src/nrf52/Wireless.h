@@ -47,6 +47,7 @@ class Wireless
 protected:
     RADIO_TYPE radio;
     RADIO_NETWORK network;
+    const int RETRY = 20;
 
     static const uint16_t STATION_NODE = 0;
     uint16_t node;
@@ -87,11 +88,16 @@ public:
 
     bool write(const void *payload, uint16_t size, int to = STATION_NODE)
     {
+        bool report = false;
         total++;
         RF24NetworkHeader header(to);
-        bool report = network.write(header, payload, size);
-        if (!report)
-            lost++;
+        for (int i = 0; i < RETRY; i++) {
+            report = network.write(header, payload, size);
+            if (report)
+                break;
+            else
+                lost++;
+        }
         return report;
     }
 
