@@ -59,7 +59,7 @@ public:
         mqtt.publish(valuesTopicUpdated.c_str(), heartbeatPayload);
     }
 
-    void authorize()
+    void introduce()
     {
         String topic(keysTopic);
         topic.replace("{0}", loco->locoAddr);
@@ -82,7 +82,7 @@ public:
                 String topic(rootTopic);
                 topic.replace("{0}", loco->locoAddr);
                 mqtt.subscribe(topic.c_str());
-                authorize();
+                introduce();
             } else {
                 Serial.println("[MQ] Failed to connect");
                 nextReconnectTime = millis() + 5000;

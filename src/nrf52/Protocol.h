@@ -1,6 +1,8 @@
 #pragma once
 
-const char NRF_AUTH = 'A';
+const char NRF_INTRO = 'A';
+const char NRF_SUB = 'B';
+const char NRF_LIST_CAB = 'C';
 const char NRF_HEARTBEAT = 'H';
 
 const char NRF_THROTTLE = 'T';
@@ -10,6 +12,9 @@ const char NRF_GET_FUNCTION = 'P';
 const char NRF_SET_VALUE = 'S';
 const char NRF_GET_VALUE = 'G';
 const char NRF_LIST_VALUE = 'L';
+
+const int MAX_PACKET = 256;
+
 
 struct __attribute__((packed)) Command {
     uint8_t code;

@@ -4,41 +4,55 @@
  *
  */
 #pragma once
-#include "KeypadState.h"
-#include "Timer.h"
 #include "nrf52/Wireless.h"
+#include "nrf52/Protocol.h"
+#include "Timer.h"
+#include "RCCLocoBase.h"
 
-#define MAX_PACKET 128
+
 #define MAX_LOCO 5
 #define NAME_SIZE 5
 
-struct __attribute__((packed)) CommandExt {
-    uint8_t type;
-    uint8_t cmd;
-    float value;
-};
-struct __attribute__((packed)) Auth {
-    uint8_t cmd;
-    uint8_t addr;
-};
+// struct __attribute__((packed)) CommandExt {
+//     uint8_t type;
+//     uint8_t cmd;
+//     float value;
+// };
+// struct __attribute__((packed)) Auth {
+//     uint8_t cmd;
+//     uint8_t addr;
+// };
+
+
+void printHex(uint8_t *payload, int size)
+{
+    
+    for (int i = 0; i < size; i++) {
+        Serial.print(payload[i], HEX);
+        Serial.print(" ");
+    }
+    Serial.println("");
+}
 
 class KeypadTransport
 {
 private:
-    static const char PACKET_LOCO_AUTH = 'r';
-    static const char PACKET_THR_AUTH = 'q';
-    static const char PACKET_THR_SUB = 's';
-    static const char PACKET_THR_NORM = 'p';
-    static const char PACKET_LOCO_NORM = 'n';
+    // static const char PACKET_LOCO_AUTH = 'r';
+    // static const char PACKET_THR_AUTH = 'q';
+    // static const char PACKET_THR_SUB = 's';
+    // static const char PACKET_THR_NORM = 'p';
+    // static const char PACKET_LOCO_NORM = 'n';
 
-    const int FUNCTION_BASE = ' ';
-    const int FUNCTION_END = FUNCTION_BASE + 32 - 2; // 2 bits for direction
+    // const int FUNCTION_BASE = ' ';
+    // const int FUNCTION_END = FUNCTION_BASE + 32 - 2; // 2 bits for direction
 
-    Wireless *wireless;
-    CommandExt command;
+    Wireless wireless;
+    RCCLocoBase *loco;
+
+    // CommandExt command;
     Timer timer;
-    Timer alive_period;
-    int node;
+    // Timer alive_period;
+    bool localMode;
 
     struct AvailableLoco {
         uint8_t addr;
@@ -51,117 +65,112 @@ private:
         int len;
     } registered;
 
-    int lost;
-    int total;
-    int received;
-    bool alive;
+    // int lost;
+    // int total;
+    // int received;
+    // bool alive;
+
+    uint8_t payload[MAX_PACKET];
+
+
 
 public:
-    ThrComms() : timer(100)
-    {
-        wireless = new Wireless();
-    };
+    bool isLocalMode;
 
-    uint16_t getLostRate()
+    KeypadTransport(RCCLocoBase *loco) : loco(loco), timer(100) {};
+
+    void log(String msg)
     {
-        uint16_t lostRate = 0;
-        if (total) {
-            lostRate = 100 * lost / total;
-            if (lostRate > 100)
-                lostRate = 100;
-        }
-        return lostRate;
-    }
-    bool isAlive()
-    {
-        return alive;
+        if (loco->debugLevel > 1)
+            Serial.println(msg);
     }
 
-    char *getSelectedName()
+    void send(uint8_t *payload, uint8_t size)
     {
-        return registered.locos[registered.selected].name;
+        wireless.write(payload, size);
+        // Serial.println("[MQ] >" + String((const char *)payload, (unsigned int)size));
+        Serial.print("[NR] >"); printHex(payload, size);
     }
 
-    int getSelectedAddr()
+    void send(Command *cmd)
     {
-        return registered.locos[registered.selected].addr;
+        send((uint8_t *)cmd, sizeof(*cmd));
     }
 
-    void cycleSelected()
+    void writeThrottle(uint8_t value)
     {
-        if (registered.selected < registered.len - 1)
-            registered.selected++;
-        else
-            registered.selected = 0;
-        Serial.println("cycleSelected " + String(registered.selected) + " " +
-                       String(registered.len));
+        Command cmd = {.code = NRF_THROTTLE, .value = value};
+        send(&cmd);
     }
 
-    void send(char cmd, float value)
-    {
-        command.type = PACKET_THR_NORM;
-        command.cmd = cmd;
-        command.value = value;
-        Serial.println("Send " + String(cmd) + "/" + String(value));
-    }
+    // uint16_t getLostRate()
+    // {
+    //     uint16_t lostRate = 0;
+    //     if (total) {
+    //         lostRate = 100 * lost / total;
+    //         if (lostRate > 100)
+    //             lostRate = 100;
+    //     }
+    //     return lostRate;
+    // }
+    // bool isAlive()
+    // {
+    //     return alive;
+    // }
 
-    void sendFunction(char function, int value)
-    {
-        function = FUNCTION_BASE + function;
-        send(function, (float)value);
-    }
+    // char *getSelectedName()
+    // {
+    //     return registered.locos[registered.selected].name;
+    // }
 
-    void subsribe()
-    {
-        int addr = 1; // if no locos register try to subsribe to the 1st one
-        if (registered.selected < registered.len)
-            addr = registered.locos[registered.selected].addr;
-        command.type = PACKET_THR_SUB;
-        command.cmd = addr;
-        command.value = 0;
-        Serial.println("Subscribe to " + String(addr));
-    }
+    // int getSelectedAddr()
+    // {
+    //     return registered.locos[registered.selected].addr;
+    // }
 
-    void handleAuthorizeRequest(char *packet, uint16_t size)
-    {
-        Serial.println("Request to authorize");
-        packet[size] = 0;
-        int i = 0;
-        char *token = strtok(packet, " ");
-        while (token && i < MAX_LOCO) {
-            registered.locos[i].addr = atoi(token);
-            token = strtok(NULL, " ");
-            if (token) {
-                strcpy(registered.locos[i].name, token);
-                token = strtok(NULL, " ");
-            }
-            i++;
-        }
-        registered.len = i;
-    }
+    // void cycleSelected()
+    // {
+    //     if (registered.selected < registered.len - 1)
+    //         registered.selected++;
+    //     else
+    //         registered.selected = 0;
+    //     Serial.println("cycleSelected " + String(registered.selected) + " " +
+    //                    String(registered.len));
+    // }
 
-    void askToAuthorize(int from)
-    {
-        Command cmd = {PACKET_LOCO_AUTH, 0};
-        wireless->write(&cmd, sizeof(cmd), from);
-        Serial.println("Local mode. Ask to auth " + String(from));
-    }
+    // void send(char cmd, float value)
+    // {
+    //     command.type = PACKET_THR_NORM;
+    //     command.cmd = cmd;
+    //     command.value = value;
+    //     Serial.println("Send " + String(cmd) + "/" + String(value));
+    // }
 
-    bool isLocalMode()
-    {
-        return (node == 0);
-    }
+    // void sendFunction(char function, int value)
+    // {
+    //     function = FUNCTION_BASE + function;
+    //     send(function, (float)value);
+    // }
 
-    bool isRegistered(int addr)
-    {
-        for (int i = 0; i < registered.len; i++) {
-            if (addr == registered.locos[i].addr)
-                return true;
-        }
-        return false;
-    }
 
-    void handleLocalAuth(char *payload, uint16_t size, int from)
+    // void askToAuthorize(int from)
+    // {
+    //     Command cmd = {PACKET_LOCO_AUTH, 0};
+    //     wireless->write(&cmd, sizeof(cmd), from);
+    //     Serial.println("Local mode. Ask to auth " + String(from));
+    // }
+
+
+    // bool isRegistered(int addr)
+    // {
+    //     for (int i = 0; i < registered.len; i++) {
+    //         if (addr == registered.locos[i].addr)
+    //             return true;
+    //     }
+    //     return false;
+    // }
+
+    void processIntro(char *payload, uint16_t size, int from)
     {
         payload[size] = 0;
         Serial.println("Reg " + String(payload));
@@ -172,7 +181,7 @@ public:
         if (token)
             token = strtok(NULL, " "); // skip format
         if (token) {
-            registered.locos[i].addr = atoi(token);
+            registered.locos[i].addr = from;
             token = strtok(NULL, " ");
             if (token) {
                 strcpy(registered.locos[i].name, token);
@@ -184,78 +193,203 @@ public:
                        String(registered.locos[0].addr));
     }
 
-    bool handleNormal(char *payload, uint16_t size, int from)
+    void introduce()
     {
-        bool mine = false;
-        if (isLocalMode()) {
-            if (from == getSelectedAddr())
-                mine = true;
-            else if (!isRegistered(from))
-                askToAuthorize(from);
-        } else {
-            mine = true;
+        String packet = String(NRF_INTRO) + " " + VERSION + " " + LOCO_FORMAT +
+                        " " + loco->locoAddr + " RCC_Keypad";
+        int size = packet.length();
+        send((uint8_t*)packet.c_str(), size);
+        log(String("Authorize: ") + packet);
+    }
+
+    void askListCabs()
+    {
+        Command cmd = {.code = NRF_LIST_CAB, .value = 0};
+        send(&cmd);
+    }
+
+    void processListCabs(char *packet, uint16_t size)
+    {
+        if (size < 2)
+            return;
+        packet[size] = 0;
+        int i = 0;
+        char *token = strtok(packet + 1, " ");
+        while (token && i < MAX_LOCO) {
+            registered.locos[i].addr = atoi(token);
+            token = strtok(NULL, " ");
+            if (token) {
+                strncpy(registered.locos[i].name, token, NAME_SIZE);
+                token = strtok(NULL, " ");
+            }
+            i++;
         }
+        registered.len = i;
+    }
+
+    void subsribe()
+    {
+        uint8_t addr = 1; // if no locos register try to subsribe to the 1st one
+        if (registered.selected < registered.len)
+            addr = registered.locos[registered.selected].addr;
+        Command cmd = {.code = NRF_SUB, .value = addr};
+        send(&cmd);
+        Serial.println("Subscribe to " + String(addr));
+    }
+
+
+    bool processHeartbeat(uint8_t *payload, uint16_t size, int from)
+    {
+        // bool mine = false;
+        // if (isLocalMode) {
+        //     if (from == getSelectedAddr())
+        //         mine = true;
+        //     else if (!isRegistered(from))
+        //         askToAuthorize(from);
+        // } else {
+        //     mine = true;
+        // }
+
+        bool mine = true;
         if (mine) {
-            memcpy(&loco, payload, size);
-            Serial.println("Update " + String(size) + "/" + String(loco.tick));
+            memcpy(&loco->state, payload, size);
+            Serial.println("Update " + String(size) + "/" + String(loco->state.tick));
         }
         return mine;
     }
 
-    void setup(int node)
+
+
+    void received(uint8_t *payload, uint16_t size, int from)
+    {
+        if (size < HEADER_SIZE)
+            return;
+        struct Command *command = (struct Command *)payload;
+        // log("Got: " + String((char)command->code) + "/" + String(command->value));
+        
+        if (command->code == NRF_INTRO) {
+            if (isLocalMode) {
+                processIntro((char *)payload, size, from);
+            } else {
+                introduce();
+                askListCabs();
+            }            
+        } else if (command->code == NRF_LIST_CAB) {
+            processListCabs((char *)payload, size);
+            subsribe();
+        } else if (command->code == NRF_HEARTBEAT) {
+            processHeartbeat(payload, size, from);
+        } else if (command->code == NRF_THROTTLE) {
+            loco->setThrottle(command->value);
+        }
+
+
+
+
+        // } else if (command->code == NRF_DIRECTION) {
+        //     loco->setDirection(command->value);
+        // } else if (command->code == NRF_SET_FUNCTION) {
+        //     loco->setFunction(command->functionId, command->activate);
+        // } else if (command->code == NRF_GET_FUNCTION) {
+        //     Command reply;
+        //     reply.code = NRF_SET_FUNCTION;
+        //     reply.functionId = command->functionId;
+        //     reply.activate = loco->getFunction(command->functionId);
+        //     wireless.write(&reply, sizeof(reply));
+        // } else if (command->code == NRF_SET_VALUE) {
+        //     if (size >= HEADER_SIZE + command->keySize + 1) {                
+        //         payload[HEADER_SIZE + command->keySize] = 0;
+        //         payload[size - 1] = 0;
+        //         char *key = (char *)(payload + HEADER_SIZE);
+        //         char *value = (char *)(key + command->keySize + 1);
+        //         loco->putValue(key, value);
+        //     }
+        // } else if (command->code == NRF_GET_VALUE) {
+        //     if (size >= HEADER_SIZE + 1) {
+        //         payload[size - 1] = 0;
+        //         char *key = (char *)(payload + HEADER_SIZE);
+        //         String value = loco->getValue(key);
+        //         char reply[MAX_PACKET];
+        //         memcpy(reply, payload, size);
+        //         memcpy(reply + size, value.c_str(), value.length());
+        //         reply[0] = NRF_SET_VALUE;
+        //         size += value.length() + 1;
+        //         reply[size - 1] = 0;
+        //         wireless.write(reply, size);
+        //     }
+        // } else if (command->code == NRF_LIST_VALUE) {
+        //     String reply = String(NRF_LIST_VALUE) + loco->listValues();
+        //     wireless.write(reply.c_str(), reply.length());
+        //     //TODO: remove
+        //     Serial.println(String("List:") + reply);
+        // } else {
+        //     loco->onCommand(command->code, command->value);
+        // }
+    }
+
+
+    void setup()
     {
         memset(&registered, 0, sizeof(registered));
-        this->node = node;
-        wireless->setup(node);
-        command.type = PACKET_THR_AUTH;
-        timer.start();
-        alive_period.start(1000);
+        int addr = loco->locoAddr.toInt();
+        wireless.setup(addr);
+        isLocalMode = (addr == 0);
+        registered.selected = 0;
+        // command.type = PACKET_THR_AUTH;
+        // timer.start();
+        // alive_period.start(1000);
     }
 
     bool loop()
     {
         bool update = false;
-        if (wireless->available()) {
-            char packet[MAX_PACKET];
+        if (wireless.available()) {
             int from;
-            uint16_t size = wireless->read(packet, sizeof(packet), &from);
-            if (size > 1) {
-                char cmd = packet[0];
-                char *payload = packet + 1;
-                switch (cmd) {
-                case PACKET_THR_AUTH:
-                    if (!isLocalMode()) {
-                        handleAuthorizeRequest(payload, size - 1);
-                        subsribe();
-                    }
-                    break;
-                case PACKET_LOCO_NORM:
-                    update = handleNormal(packet, size, from);
-                    received++;
-                    break;
-                case PACKET_LOCO_AUTH:
-                    handleLocalAuth(payload, size - 1, from);
-                    break;
-                }
-            }
+            uint16_t size = wireless.read(payload, sizeof(payload), &from);
+            received(payload, size, from);
         }
-        if (timer.hasFired()) {
-            if (isLocalMode()) {
-                int to = getSelectedAddr();
-                Command cmd = {command.cmd, command.value};
-                if (!wireless->write(&cmd, sizeof(cmd), to))
-                    lost++;
-            } else {
-                if (!wireless->write(&command, sizeof(command)))
-                    lost++;
-            }
-            total++;
-        }
-        if (alive_period.hasFired()) {
-            static int lastPackets;
-            alive = received > lastPackets;
-            lastPackets = received;
-        }
+
+        // if (wireless->available()) {
+        //     char packet[MAX_PACKET];
+        //     int from;
+        //     uint16_t size = wireless->read(packet, sizeof(packet), &from);
+        //     if (size > 1) {
+        //         char cmd = packet[0];
+        //         char *payload = packet + 1;
+        //         switch (cmd) {
+        //         case PACKET_THR_AUTH:
+        //             if (!isLocalMode()) {
+        //                 handleAuthorizeRequest(payload, size - 1);
+        //                 subsribe();
+        //             }
+        //             break;
+        //         case PACKET_LOCO_NORM:
+        //             update = handleNormal(packet, size, from);
+        //             received++;
+        //             break;
+        //         case PACKET_LOCO_AUTH:
+        //             handleLocalAuth(payload, size - 1, from);
+        //             break;
+        //         }
+        //     }
+        // }
+        // if (timer.hasFired()) {
+        //     if (isLocalMode()) {
+        //         int to = getSelectedAddr();
+        //         Command cmd = {command.cmd, command.value};
+        //         if (!wireless->write(&cmd, sizeof(cmd), to))
+        //             lost++;
+        //     } else {
+        //         if (!wireless->write(&command, sizeof(command)))
+        //             lost++;
+        //     }
+        //     total++;
+        // }
+        // if (alive_period.hasFired()) {
+        //     static int lastPackets;
+        //     alive = received > lastPackets;
+        //     lastPackets = received;
+        // }
         return update;
     }
 };

@@ -7,19 +7,18 @@
 #include "nrf52/Protocol.h"
 #include "Timer.h"
 #include "RCCLocoBase.h"
-#include "Settings.h"
 
 
 
-void printHex(uint8_t *payload, int size)
-{
-    Serial.print("@@@:"); 
-    for (int i = 0; i < size; i++) {
-        Serial.print(payload[i], HEX);
-        Serial.print(" ");
-    }
-    Serial.println("$");
-}
+// void printHex(uint8_t *payload, int size)
+// {
+//     Serial.print("@@@:"); 
+//     for (int i = 0; i < size; i++) {
+//         Serial.print(payload[i], HEX);
+//         Serial.print(" ");
+//     }
+//     Serial.println("$");
+// }
 
 class Transport
 {
@@ -28,8 +27,6 @@ private:
     Timer heartbeatTimer;
     Wireless wireless;
     RCCLocoBase *loco;
-
-    static const int MAX_PACKET = 256;
     uint8_t payload[MAX_PACKET];
 
 public:
@@ -42,9 +39,9 @@ public:
             Serial.println(msg);
     }
 
-    void authorize()
+    void introduce()
     {
-        String packet = String(NRF_AUTH) + " " + VERSION + " " + LOCO_FORMAT +
+        String packet = String(NRF_INTRO) + " " + VERSION + " " + LOCO_FORMAT +
                         " " + loco->locoAddr + " " + loco->locoName;
         for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             packet += " ";
@@ -69,8 +66,8 @@ public:
         struct Command *command = (struct Command *)payload;
         log("Got: " + String((char)command->code) + "/" + String(command->value));
         
-        if (command->code == NRF_AUTH) {
-            authorize();
+        if (command->code == NRF_INTRO) {
+            introduce();
         } else if (command->code == NRF_THROTTLE) {
             loco->setThrottle(command->value);
         } else if (command->code == NRF_DIRECTION) {
@@ -118,7 +115,7 @@ public:
     {
         int addr = loco->locoAddr.toInt();
         wireless.setup(addr);
-        authorize();
+        introduce();
         heartbeatTimer.start();
     }
 
