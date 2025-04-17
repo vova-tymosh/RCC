@@ -40,11 +40,11 @@ private:
 
 public:
     PubSubClient mqtt;
-    RCCLocoBase *loco;
+    RCCNode *loco;
 
     MqttClient() : mqtt(conn), heartbeatTimer(1000) {};
 
-    void setLoco(RCCLocoBase *_loco)
+    void setLoco(RCCNode *_loco)
     {
         loco = _loco;
     }

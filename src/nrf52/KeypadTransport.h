@@ -13,16 +13,6 @@
 #define MAX_LOCO 5
 #define NAME_SIZE 5
 
-// struct __attribute__((packed)) CommandExt {
-//     uint8_t type;
-//     uint8_t cmd;
-//     float value;
-// };
-// struct __attribute__((packed)) Auth {
-//     uint8_t cmd;
-//     uint8_t addr;
-// };
-
 
 void printHex(uint8_t *payload, int size)
 {
@@ -37,21 +27,11 @@ void printHex(uint8_t *payload, int size)
 class KeypadTransport
 {
 private:
-    // static const char PACKET_LOCO_AUTH = 'r';
-    // static const char PACKET_THR_AUTH = 'q';
-    // static const char PACKET_THR_SUB = 's';
-    // static const char PACKET_THR_NORM = 'p';
-    // static const char PACKET_LOCO_NORM = 'n';
-
-    // const int FUNCTION_BASE = ' ';
-    // const int FUNCTION_END = FUNCTION_BASE + 32 - 2; // 2 bits for direction
 
     Wireless wireless;
-    RCCLocoBase *loco;
+    RCCNode *loco;
 
-    // CommandExt command;
     Timer timer;
-    // Timer alive_period;
     bool localMode;
 
     struct AvailableLoco {
@@ -77,7 +57,7 @@ private:
 public:
     bool isLocalMode;
 
-    KeypadTransport(RCCLocoBase *loco) : loco(loco), timer(100) {};
+    KeypadTransport(RCCNode *loco) : loco(loco), timer(100) {};
 
     void log(String msg)
     {
@@ -138,29 +118,6 @@ public:
     //                    String(registered.len));
     // }
 
-    // void send(char cmd, float value)
-    // {
-    //     command.type = PACKET_THR_NORM;
-    //     command.cmd = cmd;
-    //     command.value = value;
-    //     Serial.println("Send " + String(cmd) + "/" + String(value));
-    // }
-
-    // void sendFunction(char function, int value)
-    // {
-    //     function = FUNCTION_BASE + function;
-    //     send(function, (float)value);
-    // }
-
-
-    // void askToAuthorize(int from)
-    // {
-    //     Command cmd = {PACKET_LOCO_AUTH, 0};
-    //     wireless->write(&cmd, sizeof(cmd), from);
-    //     Serial.println("Local mode. Ask to auth " + String(from));
-    // }
-
-
     // bool isRegistered(int addr)
     // {
     //     for (int i = 0; i < registered.len; i++) {
@@ -195,8 +152,9 @@ public:
 
     void introduce()
     {
-        String packet = String(NRF_INTRO) + " " + VERSION + " " + LOCO_FORMAT +
-                        " " + loco->locoAddr + " RCC_Keypad";
+        String packet = String(NRF_INTRO) + " " + NRF_TYPE_KEYPAD + " " + 
+                        loco->locoAddr + " RCC_Keypad " + VERSION;
+
         int size = packet.length();
         send((uint8_t*)packet.c_str(), size);
         log(String("Authorize: ") + packet);
@@ -216,12 +174,18 @@ public:
         int i = 0;
         char *token = strtok(packet + 1, " ");
         while (token && i < MAX_LOCO) {
-            registered.locos[i].addr = atoi(token);
+            char nodeType = *token;
             token = strtok(NULL, " ");
-            if (token) {
+            if (!token)
+                break;
+            if (nodeType == NRF_TYPE_LOCO)
+                registered.locos[i].addr = atoi(token);
+            token = strtok(NULL, " ");
+            if (!token)
+                break;
+            if (nodeType == NRF_TYPE_LOCO)
                 strncpy(registered.locos[i].name, token, NAME_SIZE);
-                token = strtok(NULL, " ");
-            }
+            token = strtok(NULL, " ");
             i++;
         }
         registered.len = i;

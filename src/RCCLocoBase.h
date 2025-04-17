@@ -6,7 +6,7 @@
 #pragma once
 #include "RCCState.h"
 
-class RCCLocoBase
+class RCCNode
 {
 public:
     LocoState state;

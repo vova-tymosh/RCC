@@ -13,8 +13,11 @@ const char NRF_SET_VALUE = 'S';
 const char NRF_GET_VALUE = 'G';
 const char NRF_LIST_VALUE = 'L';
 
-const int MAX_PACKET = 256;
+const char NRF_TYPE_LOCO = 'L';
+const char NRF_TYPE_KEYPAD = 'K';
 
+
+const int MAX_PACKET = 256;
 
 struct __attribute__((packed)) Command {
     uint8_t code;

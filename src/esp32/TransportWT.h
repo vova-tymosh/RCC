@@ -48,10 +48,10 @@ protected:
     WiFiServer server;
     WiFiClient conn;
     LineReceiver lr;
-    RCCLocoBase *loco;
+    RCCNode *loco;
 
 public:
-    WiThrottleClient(RCCLocoBase *loco) : server(port), loco(loco) {}
+    WiThrottleClient(RCCNode *loco) : server(port), loco(loco) {}
 
     void log(String msg)
     {

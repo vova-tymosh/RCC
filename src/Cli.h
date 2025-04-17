@@ -25,7 +25,7 @@ private:
     static const uint8_t INPUT_LEN_MAX = 32;
     static const char END_MARKER = '\n';
 
-    RCCLocoBase *loco;
+    RCCNode *loco;
 
     bool processLine(char cmd[])
     {
@@ -156,7 +156,7 @@ private:
     }
 
 public:
-    RccCli(RCCLocoBase *loco) : loco(loco) {}
+    RccCli(RCCNode *loco) : loco(loco) {}
 
     void loop()
     {

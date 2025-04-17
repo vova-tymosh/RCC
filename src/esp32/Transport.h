@@ -19,7 +19,7 @@ private:
     TransportClient &transportClient = mqttClient;
 
 public:
-    Transport(RCCLocoBase *loco)
+    Transport(RCCNode *loco)
     {
         transportClient.setLoco(loco);
     }

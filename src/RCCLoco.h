@@ -12,7 +12,7 @@
 #include "Cli.h"
 
 
-class RCCLoco : public RCCLocoBase
+class RCCLoco : public RCCNode
 {
 protected:
     Transport *transport;

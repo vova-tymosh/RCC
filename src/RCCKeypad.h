@@ -10,7 +10,7 @@
 #include "Timer.h"
 #include "Cli.h"
 
-class RCCKeypad : public RCCLocoBase
+class RCCKeypad : public RCCNode
 {
 protected:
     KeypadTransport *transport;

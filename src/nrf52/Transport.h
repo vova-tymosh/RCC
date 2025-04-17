@@ -26,12 +26,12 @@ private:
 
     Timer heartbeatTimer;
     Wireless wireless;
-    RCCLocoBase *loco;
+    RCCNode *loco;
     uint8_t payload[MAX_PACKET];
 
 public:
 
-    Transport(RCCLocoBase *loco) : loco(loco), heartbeatTimer(5000) {};
+    Transport(RCCNode *loco) : loco(loco), heartbeatTimer(5000) {};
 
     void log(String msg)
     {
@@ -41,8 +41,10 @@ public:
 
     void introduce()
     {
-        String packet = String(NRF_INTRO) + " " + VERSION + " " + LOCO_FORMAT +
-                        " " + loco->locoAddr + " " + loco->locoName;
+        String packet = String(NRF_INTRO) + " " + NRF_TYPE_LOCO + " " + 
+                        loco->locoAddr + " " + loco->locoName + " " + 
+                        VERSION + " " + LOCO_FORMAT;
+                        
         for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             packet += " ";
             packet += Keys[i];
