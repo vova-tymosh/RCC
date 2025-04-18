@@ -31,16 +31,16 @@ private:
     Timer timer;
     bool localMode;
 
-    struct AvailableLoco {
+    struct Node {
         uint8_t addr;
         char name[NAME_SIZE];
     };
 
-    struct RegisteredLoco {
-        struct AvailableLoco locos[MAX_LOCO];
+    struct Known {
+        struct Node nodes[MAX_LOCO];
         int selected;
         int len;
-    } registered;
+    } known;
 
     // int lost;
     // int total;
@@ -97,28 +97,28 @@ public:
 
     // char *getSelectedName()
     // {
-    //     return registered.locos[registered.selected].name;
+    //     return known.nodes[known.selected].name;
     // }
 
     // int getSelectedAddr()
     // {
-    //     return registered.locos[registered.selected].addr;
+    //     return known.nodes[known.selected].addr;
     // }
 
     // void cycleSelected()
     // {
-    //     if (registered.selected < registered.len - 1)
-    //         registered.selected++;
+    //     if (known.selected < known.len - 1)
+    //         known.selected++;
     //     else
-    //         registered.selected = 0;
-    //     Serial.println("cycleSelected " + String(registered.selected) + " " +
-    //                    String(registered.len));
+    //         known.selected = 0;
+    //     Serial.println("cycleSelected " + String(known.selected) + " " +
+    //                    String(known.len));
     // }
 
     // bool isRegistered(int addr)
     // {
-    //     for (int i = 0; i < registered.len; i++) {
-    //         if (addr == registered.locos[i].addr)
+    //     for (int i = 0; i < known.len; i++) {
+    //         if (addr == known.nodes[i].addr)
     //             return true;
     //     }
     //     return false;
@@ -128,23 +128,23 @@ public:
     {
         payload[size] = 0;
         Serial.println("Reg " + String(payload));
-        int i = registered.len;
+        int i = known.len;
         char *token = strtok(payload, " ");
         if (token)
             token = strtok(NULL, " "); // skip version
         if (token)
             token = strtok(NULL, " "); // skip format
         if (token) {
-            registered.locos[i].addr = from;
+            known.nodes[i].addr = from;
             token = strtok(NULL, " ");
             if (token) {
-                strcpy(registered.locos[i].name, token);
+                strcpy(known.nodes[i].name, token);
                 token = strtok(NULL, " ");
-                registered.len = ++i;
+                known.len = ++i;
             }
         }
-        Serial.println("Reg end " + String(registered.len) + " " +
-                       String(registered.locos[0].addr));
+        Serial.println("Reg end " + String(known.len) + " " +
+                       String(known.nodes[0].addr));
     }
 
     void introduce()
@@ -176,23 +176,23 @@ public:
             if (!token)
                 break;
             if (nodeType == NRF_TYPE_LOCO)
-                registered.locos[i].addr = atoi(token);
+                known.nodes[i].addr = atoi(token);
             token = strtok(NULL, " ");
             if (!token)
                 break;
             if (nodeType == NRF_TYPE_LOCO)
-                strncpy(registered.locos[i].name, token, NAME_SIZE);
+                strncpy(known.nodes[i].name, token, NAME_SIZE);
             token = strtok(NULL, " ");
             i++;
         }
-        registered.len = i;
+        known.len = i;
     }
 
     void subsribe()
     {
-        uint8_t addr = 1; // if no locos register try to subsribe to the 1st one
-        if (registered.selected < registered.len)
-            addr = registered.locos[registered.selected].addr;
+        uint8_t addr = 1; // if no nodes register try to subsribe to the 1st one
+        if (known.selected < known.len)
+            addr = known.nodes[known.selected].addr;
         Command cmd = {.code = NRF_SUB, .value = addr};
         send(&cmd);
         Serial.println("Subscribe to " + String(addr));
@@ -286,11 +286,11 @@ public:
 
     void setup()
     {
-        memset(&registered, 0, sizeof(registered));
+        memset(&known, 0, sizeof(known));
         int addr = loco->locoAddr.toInt();
         wireless.setup(addr);
         isLocalMode = (addr == 0);
-        registered.selected = 0;
+        known.selected = 0;
         // command.type = PACKET_THR_AUTH;
         // timer.start();
         // alive_period.start(1000);
