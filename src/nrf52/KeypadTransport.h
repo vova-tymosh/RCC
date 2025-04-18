@@ -9,14 +9,12 @@
 #include "Timer.h"
 #include "RCCLocoBase.h"
 
-
 #define MAX_LOCO 5
 #define NAME_SIZE 5
 
-
 void printHex(uint8_t *payload, int size)
 {
-    
+
     for (int i = 0; i < size; i++) {
         Serial.print(payload[i], HEX);
         Serial.print(" ");
@@ -27,7 +25,6 @@ void printHex(uint8_t *payload, int size)
 class KeypadTransport
 {
 private:
-
     Wireless wireless;
     RCCNode *loco;
 
@@ -52,8 +49,6 @@ private:
 
     uint8_t payload[MAX_PACKET];
 
-
-
 public:
     bool isLocalMode;
 
@@ -68,8 +63,10 @@ public:
     void send(uint8_t *payload, uint8_t size)
     {
         wireless.write(payload, size);
-        // Serial.println("[MQ] >" + String((const char *)payload, (unsigned int)size));
-        Serial.print("[NR] >"); printHex(payload, size);
+        // Serial.println("[MQ] >" + String((const char *)payload, (unsigned
+        // int)size));
+        Serial.print("[NR] >");
+        printHex(payload, size);
     }
 
     void send(Command *cmd)
@@ -152,11 +149,11 @@ public:
 
     void introduce()
     {
-        String packet = String(NRF_INTRO) + " " + NRF_TYPE_KEYPAD + " " + 
+        String packet = String(NRF_INTRO) + " " + NRF_TYPE_KEYPAD + " " +
                         loco->locoAddr + " RCC_Keypad " + VERSION;
 
         int size = packet.length();
-        send((uint8_t*)packet.c_str(), size);
+        send((uint8_t *)packet.c_str(), size);
         log(String("Authorize: ") + packet);
     }
 
@@ -201,7 +198,6 @@ public:
         Serial.println("Subscribe to " + String(addr));
     }
 
-
     bool processHeartbeat(uint8_t *payload, uint16_t size, int from)
     {
         // bool mine = false;
@@ -217,27 +213,27 @@ public:
         bool mine = true;
         if (mine) {
             memcpy(&loco->state, payload, size);
-            Serial.println("Update " + String(size) + "/" + String(loco->state.tick));
+            Serial.println("Update " + String(size) + "/" +
+                           String(loco->state.tick));
         }
         return mine;
     }
-
-
 
     void received(uint8_t *payload, uint16_t size, int from)
     {
         if (size < HEADER_SIZE)
             return;
         struct Command *command = (struct Command *)payload;
-        // log("Got: " + String((char)command->code) + "/" + String(command->value));
-        
+        // log("Got: " + String((char)command->code) + "/" +
+        // String(command->value));
+
         if (command->code == NRF_INTRO) {
             if (isLocalMode) {
                 processIntro((char *)payload, size, from);
             } else {
                 introduce();
                 askListCabs();
-            }            
+            }
         } else if (command->code == NRF_LIST_CAB) {
             processListCabs((char *)payload, size);
             subsribe();
@@ -246,9 +242,6 @@ public:
         } else if (command->code == NRF_THROTTLE) {
             loco->setThrottle(command->value);
         }
-
-
-
 
         // } else if (command->code == NRF_DIRECTION) {
         //     loco->setDirection(command->value);
@@ -261,7 +254,7 @@ public:
         //     reply.activate = loco->getFunction(command->functionId);
         //     wireless.write(&reply, sizeof(reply));
         // } else if (command->code == NRF_SET_VALUE) {
-        //     if (size >= HEADER_SIZE + command->keySize + 1) {                
+        //     if (size >= HEADER_SIZE + command->keySize + 1) {
         //         payload[HEADER_SIZE + command->keySize] = 0;
         //         payload[size - 1] = 0;
         //         char *key = (char *)(payload + HEADER_SIZE);
@@ -290,7 +283,6 @@ public:
         //     loco->onCommand(command->code, command->value);
         // }
     }
-
 
     void setup()
     {

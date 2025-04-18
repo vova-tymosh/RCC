@@ -11,7 +11,6 @@
 #include "Timer.h"
 #include "Cli.h"
 
-
 class RCCLoco : public RCCNode
 {
 protected:
@@ -27,15 +26,17 @@ protected:
         MANAGESPEED,
         MAX_REALTIME,
     };
-    const char* realtimeKey[MAX_REALTIME] = {
-        "acceleration", "managespeed",
+    const char *realtimeKey[MAX_REALTIME] = {
+        "acceleration",
+        "managespeed",
     };
     float realtimeValue[MAX_REALTIME] = {
-        0, 0,
+        0,
+        0,
     };
 
 public:
-    RCCLoco() : rccCli(this), speedTimer(100) 
+    RCCLoco() : rccCli(this), speedTimer(100)
     {
         transport = new Transport(this);
         state.direction = 1;
@@ -82,13 +83,14 @@ public:
     int getDirection()
     {
         return state.direction;
-    }    
+    }
 
     void putValue(char *key, char *value)
     {
         Serial.println("putValue: " + String(key) + "/" + String(value));
         settings.put(key, value);
-        for (int i = 0; i < sizeof(realtimeValue)/sizeof(realtimeValue[0]); i++) {
+        for (int i = 0; i < sizeof(realtimeValue) / sizeof(realtimeValue[0]);
+             i++) {
             if (strcmp(key, realtimeKey[i]) == 0) {
                 realtimeValue[i] = atof(value);
                 return;
@@ -101,7 +103,8 @@ public:
         for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             if (strcmp(key, Keys[i]) == 0) {
                 int value = *((uint8_t *)&state + ValueOffsets[i]);
-                Serial.println("getValue r: " + String(key) + "/" + String(value));
+                Serial.println("getValue r: " + String(key) + "/" +
+                               String(value));
                 return String(value);
             }
         }
@@ -142,8 +145,7 @@ public:
                 state.throttle_out += realtimeValue[ACCELERATION];
                 if (state.throttle_out > state.throttle)
                     state.throttle_out = state.throttle;
-            }
-            else if (state.throttle_out > state.throttle) {
+            } else if (state.throttle_out > state.throttle) {
                 state.throttle_out -= realtimeValue[ACCELERATION];
                 if (state.throttle_out < state.throttle)
                     state.throttle_out = state.throttle;
@@ -154,7 +156,8 @@ public:
             pid.setDesired(state.throttle);
             pid.setMeasured(scaled);
             state.throttle_out = pid.read();
-            Serial.println("[PD] Update: " + String(speed) + " " + String(scaled) + " " + String(state.throttle_out));
+            Serial.println("[PD] Update: " + String(speed) + " " +
+                           String(scaled) + " " + String(state.throttle_out));
         }
         if (realtimeValue[ACCELERATION] || realtimeValue[MANAGESPEED]) {
             static uint8_t lastThrottle = 0;
@@ -169,7 +172,8 @@ public:
     {
         locoName = settings.get("loconame");
         locoAddr = settings.get("locoaddr");
-        for (int i = 0; i < sizeof(realtimeValue)/sizeof(realtimeValue[0]); i++) {
+        for (int i = 0; i < sizeof(realtimeValue) / sizeof(realtimeValue[0]);
+             i++) {
             realtimeValue[i] = settings.get(realtimeKey[i]).toFloat();
         }
         transport->begin();

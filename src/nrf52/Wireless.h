@@ -41,7 +41,6 @@
 #endif
 #include <RF24Network.h>
 
-
 class Wireless
 {
 protected:

@@ -16,7 +16,6 @@ const char NRF_LIST_VALUE = 'L';
 const char NRF_TYPE_LOCO = 'L';
 const char NRF_TYPE_KEYPAD = 'K';
 
-
 const int MAX_PACKET = 256;
 
 struct __attribute__((packed)) Command {
@@ -53,4 +52,3 @@ struct PadControls {
 //     };
 // };
 // extern struct PadSetting setting;
-

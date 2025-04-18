@@ -9,8 +9,7 @@
 // https://www.jmri.org/help/en/package/jmri/jmrit/withrottle/Protocol.shtml
 //
 
-
-//TODO: fix Function names
+// TODO: fix Function names
 
 class LineReceiver
 {

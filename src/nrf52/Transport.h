@@ -8,11 +8,9 @@
 #include "Timer.h"
 #include "RCCLocoBase.h"
 
-
-
 // void printHex(uint8_t *payload, int size)
 // {
-//     Serial.print("@@@:"); 
+//     Serial.print("@@@:");
 //     for (int i = 0; i < size; i++) {
 //         Serial.print(payload[i], HEX);
 //         Serial.print(" ");
@@ -23,14 +21,12 @@
 class Transport
 {
 private:
-
     Timer heartbeatTimer;
     Wireless wireless;
     RCCNode *loco;
     uint8_t payload[MAX_PACKET];
 
 public:
-
     Transport(RCCNode *loco) : loco(loco), heartbeatTimer(5000) {};
 
     void log(String msg)
@@ -41,10 +37,10 @@ public:
 
     void introduce()
     {
-        String packet = String(NRF_INTRO) + " " + NRF_TYPE_LOCO + " " + 
-                        loco->locoAddr + " " + loco->locoName + " " + 
-                        VERSION + " " + LOCO_FORMAT;
-                        
+        String packet = String(NRF_INTRO) + " " + NRF_TYPE_LOCO + " " +
+                        loco->locoAddr + " " + loco->locoName + " " + VERSION +
+                        " " + LOCO_FORMAT;
+
         for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             packet += " ";
             packet += Keys[i];
@@ -66,8 +62,9 @@ public:
         if (size < HEADER_SIZE)
             return;
         struct Command *command = (struct Command *)payload;
-        log("Got: " + String((char)command->code) + "/" + String(command->value));
-        
+        log("Got: " + String((char)command->code) + "/" +
+            String(command->value));
+
         if (command->code == NRF_INTRO) {
             introduce();
         } else if (command->code == NRF_THROTTLE) {
@@ -83,7 +80,7 @@ public:
             reply.activate = loco->getFunction(command->functionId);
             wireless.write(&reply, sizeof(reply));
         } else if (command->code == NRF_SET_VALUE) {
-            if (size >= HEADER_SIZE + command->keySize + 1) {                
+            if (size >= HEADER_SIZE + command->keySize + 1) {
                 payload[HEADER_SIZE + command->keySize] = 0;
                 payload[size - 1] = 0;
                 char *key = (char *)(payload + HEADER_SIZE);
@@ -106,7 +103,7 @@ public:
         } else if (command->code == NRF_LIST_VALUE) {
             String reply = String(NRF_LIST_VALUE) + loco->listValues();
             wireless.write(reply.c_str(), reply.length());
-            //TODO: remove
+            // TODO: remove
             Serial.println(String("List:") + reply);
         } else {
             loco->onCommand(command->code, command->value);

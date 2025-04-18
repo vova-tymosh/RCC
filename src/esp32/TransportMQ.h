@@ -165,9 +165,9 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
         // Value, set state. Hast to be the last one, after "get" and "list"
         char *key = action + strlen(setValueAct);
         String value(payload, length);
-        mqttClient.loco->putValue(key, (char *)value.c_str());    
+        mqttClient.loco->putValue(key, (char *)value.c_str());
     } else if (strcmp(action, getFunctionAct) == 0) {
-        // Function, get state. 
+        // Function, get state.
         String key(payload, length);
         int functionCode = key.toInt();
         String value =

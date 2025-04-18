@@ -37,6 +37,5 @@ public:
     {
         transport->loop();
         rccCli.loop();
-    }    
-
+    }
 };
