@@ -12,6 +12,7 @@
 #define MAX_LOCO 5
 #define NAME_SIZE 5
 
+
 void printHex(uint8_t *payload, int size)
 {
 
@@ -26,7 +27,7 @@ class KeypadTransport
 {
 private:
     Wireless wireless;
-    RCCNode *loco;
+    RCCNode *node;
 
     Timer timer;
     bool localMode;
@@ -52,11 +53,11 @@ private:
 public:
     bool isLocalMode;
 
-    KeypadTransport(RCCNode *loco) : loco(loco), timer(100) {};
+    KeypadTransport(RCCNode *node) : node(node), timer(100) {};
 
     void log(String msg)
     {
-        if (loco->debugLevel > 1)
+        if (node->debugLevel > 1)
             Serial.println(msg);
     }
 
@@ -72,12 +73,6 @@ public:
     void send(Command *cmd)
     {
         send((uint8_t *)cmd, sizeof(*cmd));
-    }
-
-    void writeThrottle(uint8_t value)
-    {
-        Command cmd = {.code = NRF_THROTTLE, .value = value};
-        send(&cmd);
     }
 
     // uint16_t getLostRate()
@@ -150,7 +145,7 @@ public:
     void introduce()
     {
         String packet = String(NRF_INTRO) + " " + NRF_TYPE_KEYPAD + " " +
-                        loco->locoAddr + " RCC_Keypad " + VERSION;
+                        node->locoAddr + " RCC_Keypad " + VERSION;
 
         int size = packet.length();
         send((uint8_t *)packet.c_str(), size);
@@ -168,24 +163,26 @@ public:
         if (size < 2)
             return;
         packet[size] = 0;
-        int i = 0;
-        char *token = strtok(packet + 1, " ");
-        while (token && i < MAX_LOCO) {
-            char nodeType = *token;
-            token = strtok(NULL, " ");
-            if (!token)
-                break;
-            if (nodeType == NRF_TYPE_LOCO)
-                known.nodes[i].addr = atoi(token);
-            token = strtok(NULL, " ");
-            if (!token)
-                break;
-            if (nodeType == NRF_TYPE_LOCO)
-                strncpy(known.nodes[i].name, token, NAME_SIZE);
-            token = strtok(NULL, " ");
-            i++;
+        int index = 0;
+        char *buffer[33];
+        char nodeType = '\0';
+        int tokens = split(packet + 1, (char**)&buffer, sizeof(buffer)/sizeof(char *));
+        for (int i = 0; i < tokens; i++) {
+            if (i % 3 == 0)
+                nodeType = buffer[i][0];
+            if (nodeType == NRF_TYPE_LOCO) {
+                if (i % 3 == 1)
+                    known.nodes[index].addr = atoi(buffer[i]);
+                if (i % 3 == 2) {
+                    strncpy(known.nodes[index].name, buffer[i], NAME_SIZE);
+                    index++;
+                }
+            }
         }
-        known.len = i;
+        known.len = index;
+        // Serial.println("Known len=" + String(known.len));
+        // Serial.println(String("  ##") + known.nodes[0].addr + " " +
+        //                known.nodes[0].name);
     }
 
     void subsribe()
@@ -212,9 +209,9 @@ public:
 
         bool mine = true;
         if (mine) {
-            memcpy(&loco->state, payload, size);
+            memcpy(&node->state, payload, size);
             Serial.println("Update " + String(size) + "/" +
-                           String(loco->state.tick));
+                           String(node->state.tick));
         }
         return mine;
     }
@@ -240,54 +237,33 @@ public:
         } else if (command->code == NRF_HEARTBEAT) {
             processHeartbeat(payload, size, from);
         } else if (command->code == NRF_THROTTLE) {
-            loco->setThrottle(command->value);
+            node->state.throttle = command->value;
+        } else if (command->code == NRF_DIRECTION) {
+            node->state.direction = command->value;
+        } else if (command->code == NRF_SET_FUNCTION) {
+            if (command->functionId < 30)
+                if (command->activate)
+                    node->state.bitstate |= (1 << command->functionId);
+                else
+                    node->state.bitstate &= ~(1 << command->functionId);
+        } else if (command->code == NRF_SET_VALUE) {
+            if (size >= HEADER_SIZE + command->keySize + 1) {
+                payload[HEADER_SIZE + command->keySize] = 0;
+                payload[size - 1] = 0;
+                char *key = (char *)(payload + HEADER_SIZE);
+                char *value = (char *)(key + command->keySize + 1);               
+                Serial.println(String("NRF_SET_VALUE: ") + key + " " + value);
+            }
+        } else if (command->code == NRF_LIST_VALUE) {
+            payload[size - 1] = 0;
+            Serial.println("NRF_LIST_VALUE: " + String((const char*)payload));
         }
-
-        // } else if (command->code == NRF_DIRECTION) {
-        //     loco->setDirection(command->value);
-        // } else if (command->code == NRF_SET_FUNCTION) {
-        //     loco->setFunction(command->functionId, command->activate);
-        // } else if (command->code == NRF_GET_FUNCTION) {
-        //     Command reply;
-        //     reply.code = NRF_SET_FUNCTION;
-        //     reply.functionId = command->functionId;
-        //     reply.activate = loco->getFunction(command->functionId);
-        //     wireless.write(&reply, sizeof(reply));
-        // } else if (command->code == NRF_SET_VALUE) {
-        //     if (size >= HEADER_SIZE + command->keySize + 1) {
-        //         payload[HEADER_SIZE + command->keySize] = 0;
-        //         payload[size - 1] = 0;
-        //         char *key = (char *)(payload + HEADER_SIZE);
-        //         char *value = (char *)(key + command->keySize + 1);
-        //         loco->putValue(key, value);
-        //     }
-        // } else if (command->code == NRF_GET_VALUE) {
-        //     if (size >= HEADER_SIZE + 1) {
-        //         payload[size - 1] = 0;
-        //         char *key = (char *)(payload + HEADER_SIZE);
-        //         String value = loco->getValue(key);
-        //         char reply[MAX_PACKET];
-        //         memcpy(reply, payload, size);
-        //         memcpy(reply + size, value.c_str(), value.length());
-        //         reply[0] = NRF_SET_VALUE;
-        //         size += value.length() + 1;
-        //         reply[size - 1] = 0;
-        //         wireless.write(reply, size);
-        //     }
-        // } else if (command->code == NRF_LIST_VALUE) {
-        //     String reply = String(NRF_LIST_VALUE) + loco->listValues();
-        //     wireless.write(reply.c_str(), reply.length());
-        //     //TODO: remove
-        //     Serial.println(String("List:") + reply);
-        // } else {
-        //     loco->onCommand(command->code, command->value);
-        // }
     }
 
     void setup()
     {
         memset(&known, 0, sizeof(known));
-        int addr = loco->locoAddr.toInt();
+        int addr = node->locoAddr.toInt();
         wireless.setup(addr);
         isLocalMode = (addr == 0);
         known.selected = 0;
@@ -305,30 +281,6 @@ public:
             received(payload, size, from);
         }
 
-        // if (wireless->available()) {
-        //     char packet[MAX_PACKET];
-        //     int from;
-        //     uint16_t size = wireless->read(packet, sizeof(packet), &from);
-        //     if (size > 1) {
-        //         char cmd = packet[0];
-        //         char *payload = packet + 1;
-        //         switch (cmd) {
-        //         case PACKET_THR_AUTH:
-        //             if (!isLocalMode()) {
-        //                 handleAuthorizeRequest(payload, size - 1);
-        //                 subsribe();
-        //             }
-        //             break;
-        //         case PACKET_LOCO_NORM:
-        //             update = handleNormal(packet, size, from);
-        //             received++;
-        //             break;
-        //         case PACKET_LOCO_AUTH:
-        //             handleLocalAuth(payload, size - 1, from);
-        //             break;
-        //         }
-        //     }
-        // }
         // if (timer.hasFired()) {
         //     if (isLocalMode()) {
         //         int to = getSelectedAddr();

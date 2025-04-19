@@ -16,6 +16,8 @@ const char NRF_LIST_VALUE = 'L';
 const char NRF_TYPE_LOCO = 'L';
 const char NRF_TYPE_KEYPAD = 'K';
 
+const char NRF_SEPARATOR = ' ';
+
 const int MAX_PACKET = 256;
 
 struct __attribute__((packed)) Command {
@@ -31,7 +33,17 @@ struct __attribute__((packed)) Command {
 };
 #define HEADER_SIZE sizeof(struct Command)
 
-// extern struct LocoState loco;
+int split(char *input, char **output, uint8_t size)
+{
+    int index = 0;
+    char *token = strtok(input, " ");
+    while (token && index < size) {
+        output[index] = token;
+        token = strtok(NULL, " ");
+        index++;
+    }
+    return index;
+}
 
 struct PadControls {
     uint16_t throttle;
@@ -39,16 +51,3 @@ struct PadControls {
     uint16_t lost;
     uint32_t timerBase;
 };
-// extern struct PadControls controls;
-
-// struct PadSetting {
-//     union {
-//         uint16_t bitstate;
-//         struct {
-//             uint16_t local    : 1;
-//             uint16_t bigui    : 1;
-//             uint16_t reserved : 14;
-//         };
-//     };
-// };
-// extern struct PadSetting setting;

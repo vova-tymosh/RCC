@@ -88,7 +88,10 @@ private:
         if (strlen(cmd) < 1)
             return false;
         uint8_t function = (uint8_t)atoi(cmd);
-        return loco->getFunction(function);
+        bool activate = loco->getFunction(function);
+        Serial.println(String("F") + cmd + ": " +
+                       (activate ? "ON" : "OFF"));
+        return true;
     }
 
     bool processCommand(char cmd[])
@@ -162,7 +165,8 @@ public:
         if (getLine(line)) {
             bool result = processLine(line);
             if (!result) {
-                Serial.print("Error, can't parse");
+                Serial.print("Error, can't parse: ");
+                Serial.println(line);
             }
         }
     }
