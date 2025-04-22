@@ -122,21 +122,14 @@ public:
     void processIntro(char *payload, uint16_t size, int from)
     {
         payload[size] = 0;
+        char *buffer[5];
         Serial.println("Reg " + String(payload));
-        int i = known.len;
-        char *token = strtok(payload, " ");
-        if (token)
-            token = strtok(NULL, " "); // skip version
-        if (token)
-            token = strtok(NULL, " "); // skip format
-        if (token) {
-            known.nodes[i].addr = from;
-            token = strtok(NULL, " ");
-            if (token) {
-                strcpy(known.nodes[i].name, token);
-                token = strtok(NULL, " ");
-                known.len = ++i;
-            }
+        int tokens = split(payload + 1, (char**)&buffer, sizeofarray(buffer));
+   
+        if (tokens > 3) {
+            known.nodes[known.len].addr = atoi(buffer[1]);
+            strncpy(known.nodes[known.len].name, buffer[2], NAME_SIZE);
+            known.len++;
         }
         Serial.println("Reg end " + String(known.len) + " " +
                        String(known.nodes[0].addr));
@@ -144,8 +137,8 @@ public:
 
     void introduce()
     {
-        String packet = String(NRF_INTRO) + " " + NRF_TYPE_KEYPAD + " " +
-                        node->locoAddr + " RCC_Keypad " + VERSION;
+        String packet = String(NRF_INTRO) + NRF_TYPE_KEYPAD + NRF_SEPARATOR +
+                        node->locoAddr + NRF_SEPARATOR + "RCC_Keypad" + NRF_SEPARATOR + VERSION;
 
         int size = packet.length();
         send((uint8_t *)packet.c_str(), size);
@@ -160,29 +153,18 @@ public:
 
     void processListCabs(char *packet, uint16_t size)
     {
-        if (size < 2)
-            return;
         packet[size] = 0;
         int index = 0;
-        char *buffer[33];
-        char nodeType = '\0';
-        int tokens = split(packet + 1, (char**)&buffer, sizeof(buffer)/sizeof(char *));
-        for (int i = 0; i < tokens; i++) {
-            if (i % 3 == 0)
-                nodeType = buffer[i][0];
-            if (nodeType == NRF_TYPE_LOCO) {
-                if (i % 3 == 1)
-                    known.nodes[index].addr = atoi(buffer[i]);
-                if (i % 3 == 2) {
-                    strncpy(known.nodes[index].name, buffer[i], NAME_SIZE);
-                    index++;
-                }
+        char *buffer[10*3];
+        int tokens = split(packet + 1, (char**)&buffer, sizeofarray(buffer));
+        for (int i = 0; i < tokens/3; i++) {
+            if (buffer[i*3][0] == NRF_TYPE_LOCO) {
+                known.nodes[index].addr = atoi(buffer[i*3 + 1]);
+                strncpy(known.nodes[index].name, buffer[i*3 + 2], NAME_SIZE);
+                index++;
             }
         }
         known.len = index;
-        // Serial.println("Known len=" + String(known.len));
-        // Serial.println(String("  ##") + known.nodes[0].addr + " " +
-        //                known.nodes[0].name);
     }
 
     void subsribe()
@@ -218,7 +200,7 @@ public:
 
     void received(uint8_t *payload, uint16_t size, int from)
     {
-        if (size < HEADER_SIZE)
+        if (size < COMMAND_SIZE)
             return;
         struct Command *command = (struct Command *)payload;
         // log("Got: " + String((char)command->code) + "/" +
@@ -247,12 +229,15 @@ public:
                 else
                     node->state.bitstate &= ~(1 << command->functionId);
         } else if (command->code == NRF_SET_VALUE) {
-            if (size >= HEADER_SIZE + command->keySize + 1) {
-                payload[HEADER_SIZE + command->keySize] = 0;
-                payload[size - 1] = 0;
-                char *key = (char *)(payload + HEADER_SIZE);
-                char *value = (char *)(key + command->keySize + 1);               
-                Serial.println(String("NRF_SET_VALUE: ") + key + " " + value);
+            if (size >= CODE_SIZE + 1) {
+                payload[size] = 0;
+                char *buffer[2];
+                int tokens = split((char*)payload + CODE_SIZE, (char**)&buffer, sizeofarray(buffer));
+                if (tokens >= 2) {
+                    char *key = buffer[0];
+                    char *value = buffer[1];
+                    Serial.println(String("NRF_SET_VALUE: ") + key + " " + value);
+                }
             }
         } else if (command->code == NRF_LIST_VALUE) {
             payload[size - 1] = 0;

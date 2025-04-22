@@ -27,6 +27,9 @@ const char *directionFWD = "FORWARD";
 const char *directionREV = "REVERSE";
 const char *functionON = "ON";
 
+const char *SEPARATOR = " ";
+
+
 void onMqttMessage(char *topic, byte *payload, unsigned int length);
 
 class MqttClient
@@ -65,7 +68,7 @@ public:
         topic.replace("{0}", loco->locoAddr);
         String value = Keys[0];
         for (int i = 1; i < sizeof(Keys) / sizeof(char *); i++) {
-            value += " ";
+            value += SEPARATOR;
             value += Keys[i];
         }
         mqtt.publish(topic.c_str(), value.c_str(), true);

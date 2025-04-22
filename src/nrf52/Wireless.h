@@ -23,12 +23,14 @@
 #pragma once
 
 #ifdef ARDUINO_ARCH_NRF52
+#define MAX_PAYLOAD_SIZE 256
 #include <nrf_to_nrf.h>
 #define RADIO_LEVEL NRF_PA_HIGH
 #define RADIO_BW NRF_250KBPS
 #define RADIO_TYPE nrf_to_nrf
 #define RADIO_NETWORK RF52Network
 #define RADIO_CTOR radio()
+
 #elif defined(ARDUINO_AVR_LEONARDO)
 #include <RF24.h>
 #define RADIO_LEVEL RF24_PA_HIGH

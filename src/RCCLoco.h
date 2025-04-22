@@ -117,11 +117,11 @@ public:
     {
         String s = Keys[0];
         for (int i = 1; i < sizeof(Keys) / sizeof(char *); i++) {
-            s += " ";
+            s += NRF_SEPARATOR;
             s += Keys[i];
         }
         for (int i = 0; i < settingsSize; i++) {
-            s += " ";
+            s += NRF_SEPARATOR;
             s += settingsKeys[i];
         }
         return s;

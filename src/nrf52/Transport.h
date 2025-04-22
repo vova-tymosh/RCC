@@ -37,17 +37,25 @@ public:
 
     void introduce()
     {
-        String packet = String(NRF_INTRO) + " " + NRF_TYPE_LOCO + " " +
-                        loco->locoAddr + " " + loco->locoName + " " + VERSION +
-                        " " + LOCO_FORMAT;
+        String packet = String(NRF_INTRO) + NRF_TYPE_LOCO + NRF_SEPARATOR +
+                        loco->locoAddr + NRF_SEPARATOR + loco->locoName + NRF_SEPARATOR + VERSION +
+                        NRF_SEPARATOR + LOCO_FORMAT;
 
         for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
-            packet += " ";
+            packet += NRF_SEPARATOR;
             packet += Keys[i];
         }
         int size = packet.length();
         wireless.write(packet.c_str(), size);
         log(String("Authorize: ") + packet);
+    }
+
+    void processList()
+    {
+        String packet = String(NRF_LIST_VALUE_RES) + loco->listValues();
+        int size = packet.length();
+        wireless.write(packet.c_str(), size);
+        log(String("List: ") + packet);        
     }
 
     void heartbeat()
@@ -59,7 +67,7 @@ public:
 
     void received(uint8_t *payload, uint16_t size)
     {
-        if (size < HEADER_SIZE)
+        if (size < COMMAND_SIZE)
             return;
         struct Command *command = (struct Command *)payload;
         log("Got: " + String((char)command->code) + "/" +
@@ -80,31 +88,38 @@ public:
             reply.activate = loco->getFunction(command->functionId);
             wireless.write(&reply, sizeof(reply));
         } else if (command->code == NRF_SET_VALUE) {
-            if (size >= HEADER_SIZE + command->keySize + 1) {
-                payload[HEADER_SIZE + command->keySize] = 0;
-                payload[size - 1] = 0;
-                char *key = (char *)(payload + HEADER_SIZE);
-                char *value = (char *)(key + command->keySize + 1);
-                loco->putValue(key, value);
+            if (size >= CODE_SIZE + 1) {
+                payload[size] = 0;
+                char *buffer[2];
+                int tokens = split((char*)payload + CODE_SIZE, (char**)&buffer, sizeofarray(buffer));
+                if (tokens >= 2) {
+                    char *key = buffer[0];
+                    char *value = buffer[1];
+                    loco->putValue(key, value);
+                }
             }
         } else if (command->code == NRF_GET_VALUE) {
-            if (size >= HEADER_SIZE + 1) {
-                payload[size - 1] = 0;
-                char *key = (char *)(payload + HEADER_SIZE);
+            if (size >= CODE_SIZE + 1) {
+                payload[size] = 0;
+                char *key = (char *)(payload + CODE_SIZE);
                 String value = loco->getValue(key);
                 char reply[MAX_PACKET];
                 memcpy(reply, payload, size);
+                reply[size] = NRF_SEPARATOR;
+                size++;
                 memcpy(reply + size, value.c_str(), value.length());
                 reply[0] = NRF_SET_VALUE;
-                size += value.length() + 1;
-                reply[size - 1] = 0;
+                size += value.length();
+                if (size > MAX_PACKET)
+                    size = MAX_PACKET;
                 wireless.write(reply, size);
             }
-        } else if (command->code == NRF_LIST_VALUE) {
-            String reply = String(NRF_LIST_VALUE) + loco->listValues();
-            wireless.write(reply.c_str(), reply.length());
-            // TODO: remove
-            Serial.println(String("List:") + reply);
+        } else if (command->code == NRF_LIST_VALUE_ASK) {
+            processList();
+            // String reply = String(NRF_LIST_VALUE_RES) + loco->listValues();
+            // wireless.write(reply.c_str(), reply.length());
+            // // TODO: remove
+            // Serial.println(String("List:") + reply);
         } else {
             loco->onCommand(command->code, command->value);
         }
@@ -121,7 +136,7 @@ public:
     void loop()
     {
         if (wireless.available()) {
-            uint16_t size = wireless.read(payload, sizeof(payload));
+            uint16_t size = wireless.read(payload, sizeof(payload) - 1);
             received(payload, size);
         }
 
