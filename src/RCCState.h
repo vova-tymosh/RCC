@@ -5,6 +5,8 @@
  */
 #pragma once
 
+const char SEPARATOR = ' ';
+
 // System version, update every time the protocol changes
 const char *VERSION = "0.7";
 

@@ -23,11 +23,11 @@ const char *setFunctionAct = "function/";
 const char *getValueAct = "value/get";
 const char *listAct = "value/list";
 const char *setValueAct = "value/";
-const char *directionFWD = "FORWARD";
-const char *directionREV = "REVERSE";
+const char *directions[4] = {"REVERSE", "FORWARD", "STOP", "NEUTRAL"};
 const char *functionON = "ON";
+const char *functionOFF = "OFF";
 
-const char *SEPARATOR = " ";
+const char MQ_SEPARATOR = SEPARATOR;
 
 
 void onMqttMessage(char *topic, byte *payload, unsigned int length);
@@ -68,7 +68,7 @@ public:
         topic.replace("{0}", loco->locoAddr);
         String value = Keys[0];
         for (int i = 1; i < sizeof(Keys) / sizeof(char *); i++) {
-            value += SEPARATOR;
+            value += MQ_SEPARATOR;
             value += Keys[i];
         }
         mqtt.publish(topic.c_str(), value.c_str(), true);
@@ -142,13 +142,11 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
         mqttClient.loco->setThrottle(atoi(throttle));
     } else if (strcmp(action, directionAct) == 0) {
         // Direction
-        if (strncmp(value, directionFWD, length) == 0) {
-            mqttClient.loco->setDirection(1);
-        } else if (strncmp(value, directionREV, length) == 0) {
-            mqttClient.loco->setDirection(0);
-        } else {
-            mqttClient.loco->setThrottle(0);
-            mqttClient.loco->setDirection(1, true);
+        for (int i = 0; i < 4; i++) {
+            if ((strncmp(value, directions[i], length) == 0) || (value[0] == i + '0')) {
+                mqttClient.loco->setDirection(i);
+                break;
+            }
         }
     } else if (strcmp(action, getValueAct) == 0) {
         // Value, get state

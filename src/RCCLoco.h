@@ -19,7 +19,6 @@ protected:
 
     Timer speedTimer;
     SpeedControl pid;
-    bool stopState = false;
 
     enum {
         ACCELERATION = 0,
@@ -36,6 +35,13 @@ protected:
     };
 
 public:
+    enum {
+        DIR_REVERSE = 0,
+        DIR_FORWARD = 1,
+        DIR_STOP = 2,
+        DIR_NEUTRAL = 3
+    };
+
     RCCLoco() : rccCli(this), speedTimer(100)
     {
         transport = new Transport(this);
@@ -72,11 +78,10 @@ public:
         return state.throttle;
     }
 
-    void setDirection(int value, bool _stopState = false)
+    void setDirection(int value)
     {
         value = constrain(value, 0, 3);
         state.direction = value;
-        stopState = _stopState;
         handleThrottle();
     }
 
@@ -117,11 +122,11 @@ public:
     {
         String s = Keys[0];
         for (int i = 1; i < sizeof(Keys) / sizeof(char *); i++) {
-            s += NRF_SEPARATOR;
+            s += SEPARATOR;
             s += Keys[i];
         }
         for (int i = 0; i < settingsSize; i++) {
-            s += NRF_SEPARATOR;
+            s += SEPARATOR;
             s += settingsKeys[i];
         }
         return s;
@@ -129,7 +134,7 @@ public:
 
     void handleThrottle()
     {
-        if (stopState) {
+        if (state.direction == DIR_STOP) {
             state.throttle = 0;
             state.throttle_out = 0;
         } else if (realtimeValue[ACCELERATION] == 0) {
@@ -140,6 +145,8 @@ public:
 
     void updateThrottle()
     {
+        if (state.direction == DIR_STOP)
+            return;
         if (realtimeValue[ACCELERATION]) {
             if (state.throttle_out < state.throttle) {
                 state.throttle_out += realtimeValue[ACCELERATION];

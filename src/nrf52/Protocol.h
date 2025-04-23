@@ -17,7 +17,7 @@ const char NRF_LIST_VALUE_RES = 'J';
 const char NRF_TYPE_LOCO = 'L';
 const char NRF_TYPE_KEYPAD = 'K';
 
-const char NRF_SEPARATOR = ' ';
+const char NRF_SEPARATOR = SEPARATOR;
 
 const int MAX_PACKET = 256;
 

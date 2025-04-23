@@ -54,8 +54,10 @@ public:
     {
         String packet = String(NRF_LIST_VALUE_RES) + loco->listValues();
         int size = packet.length();
+        if (size > MAX_PACKET)
+            size = MAX_PACKET;
         wireless.write(packet.c_str(), size);
-        log(String("List: ") + packet);        
+        log(String("List: ") + packet);
     }
 
     void heartbeat()
@@ -116,10 +118,6 @@ public:
             }
         } else if (command->code == NRF_LIST_VALUE_ASK) {
             processList();
-            // String reply = String(NRF_LIST_VALUE_RES) + loco->listValues();
-            // wireless.write(reply.c_str(), reply.length());
-            // // TODO: remove
-            // Serial.println(String("List:") + reply);
         } else {
             loco->onCommand(command->code, command->value);
         }
