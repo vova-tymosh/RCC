@@ -34,7 +34,7 @@ public:
     {
         return 0;
     }
-    virtual void setDirection(int value, bool stopState = false) {}
+    virtual void setDirection(int value) {}
     virtual int getDirection()
     {
         return 0;

@@ -1,5 +1,4 @@
 .DS_Store
 .vscode/
 build/
-# WiFi and other secret creadentials
-Secrets.h
+*.log

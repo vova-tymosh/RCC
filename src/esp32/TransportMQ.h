@@ -9,23 +9,22 @@
 // https://www.jmri.org/help/en/html/hardware/mqtt/index.shtml
 //
 
-const char *rootTopic = "cab/{0}/#";
-const char *keysTopic = "cab/{0}/heartbeat/keys";
-const char *valuesTopic = "cab/{0}/heartbeat/values";
-const char *functionTopic = "cab/{0}/function/{1}";
-const char *valueTopic = "cab/{0}/value/{1}";
-const char *listTopic = "cab/{0}/keys";
+const char *MQ_PREFIX = "cab";
+const char *MQ_INTRO = "intro";
+const char *MQ_HEARTBEAT_VALUES = "heartbeat/values";
 
-const char *throttleAct = "throttle";
-const char *directionAct = "direction";
-const char *getFunctionAct = "function/get";
-const char *setFunctionAct = "function/";
-const char *getValueAct = "value/get";
-const char *listAct = "value/list";
-const char *setValueAct = "value/";
-const char *directions[4] = {"REVERSE", "FORWARD", "STOP", "NEUTRAL"};
-const char *functionON = "ON";
-const char *functionOFF = "OFF";
+const char *MQ_SET_THROTTLE = "throttle";
+const char *MQ_SET_DIRECTION = "direction";
+const char *MQ_GET_FUNCTION = "function/get";
+const char *MQ_SET_FUNCTION = "function/";
+const char *MQ_GET_VALUE = "value/get";
+const char *MQ_SET_VALUE = "value/";
+const char *MQ_LIST_VALUE_ASK = "value/list";
+const char *MQ_LIST_VALUE_RES = "keys";
+
+const char *MQ_DIRECTIONS[4] = {"REVERSE", "FORWARD", "STOP", "NEUTRAL"};
+const char *MQ_ON = "ON";
+const char *MQ_OFF = "OFF";
 
 const char MQ_SEPARATOR = SEPARATOR;
 
@@ -36,7 +35,7 @@ class MqttClient
 {
 private:
     WiFiClient conn;
-    String valuesTopicUpdated;
+    String heartbeatTopic;
     unsigned long nextReconnectTime;
     Timer heartbeatTimer;
     char heartbeatPayload[128];
@@ -44,6 +43,7 @@ private:
 public:
     PubSubClient mqtt;
     RCCNode *loco;
+    String topicPrefix;
 
     MqttClient() : mqtt(conn), heartbeatTimer(1000) {};
 
@@ -59,13 +59,12 @@ public:
                  "%d %d %d %d %d %d %d %d %d %d %d", s->tick, s->distance,
                  s->bitstate, s->speed, s->lost, s->throttle, s->throttle_out,
                  s->battery, s->temperature, s->psi, s->current);
-        mqtt.publish(valuesTopicUpdated.c_str(), heartbeatPayload);
+        mqtt.publish(heartbeatTopic.c_str(), heartbeatPayload);
     }
 
     void introduce()
     {
-        String topic(keysTopic);
-        topic.replace("{0}", loco->locoAddr);
+        String topic = topicPrefix + String(MQ_INTRO);
         String value = Keys[0];
         for (int i = 1; i < sizeof(Keys) / sizeof(char *); i++) {
             value += MQ_SEPARATOR;
@@ -82,8 +81,7 @@ public:
             mqtt.setServer(brokerIP.c_str(), brokerPort.toInt());
             if (mqtt.connect(loco->locoName.c_str())) {
                 Serial.println("[MQ] Connected");
-                String topic(rootTopic);
-                topic.replace("{0}", loco->locoAddr);
+                String topic = topicPrefix + "#";
                 mqtt.subscribe(topic.c_str());
                 introduce();
             } else {
@@ -96,8 +94,8 @@ public:
     void begin()
     {
         mqtt.setCallback(onMqttMessage);
-        valuesTopicUpdated = valuesTopic;
-        valuesTopicUpdated.replace("{0}", loco->locoAddr);
+        topicPrefix = String(MQ_PREFIX) + "/" + loco->locoAddr + "/";
+        heartbeatTopic = topicPrefix + String(MQ_HEARTBEAT_VALUES);
         nextReconnectTime = millis();
     }
 
@@ -133,55 +131,50 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
     char *action = parseAction(topic);
     if (action == NULL)
         return;
-    if (strcmp(action, throttleAct) == 0) {
+    if (strcmp(action, MQ_SET_THROTTLE) == 0) {
         // Throttle/speed
         int l = (length > 4) ? 4 : length;
         char throttle[5];
         strncpy(throttle, value, l);
         throttle[l] = '\0';
         mqttClient.loco->setThrottle(atoi(throttle));
-    } else if (strcmp(action, directionAct) == 0) {
+    } else if (strcmp(action, MQ_SET_DIRECTION) == 0) {
         // Direction
         for (int i = 0; i < 4; i++) {
-            if ((strncmp(value, directions[i], length) == 0) || (value[0] == i + '0')) {
+            if ((strncmp(value, MQ_DIRECTIONS[i], length) == 0) || (value[0] == '0' + i)) {
                 mqttClient.loco->setDirection(i);
                 break;
             }
         }
-    } else if (strcmp(action, getValueAct) == 0) {
+    } else if (strcmp(action, MQ_GET_VALUE) == 0) {
         // Value, get state
         String key(payload, length);
         String value = mqttClient.loco->getValue((char *)key.c_str());
-        String topic = valueTopic;
-        topic.replace("{0}", mqttClient.loco->locoAddr);
-        topic.replace("{1}", key);
+        String topic = mqttClient.topicPrefix + MQ_SET_VALUE + key; 
         mqttClient.mqtt.publish(topic.c_str(), value.c_str());
-    } else if (strcmp(action, listAct) == 0) {
+    } else if (strcmp(action, MQ_LIST_VALUE_ASK) == 0) {
         // Value, list all Keys (config and runtime)
-        String topic = listTopic;
-        topic.replace("{0}", mqttClient.loco->locoAddr);
+        String topic = mqttClient.topicPrefix + MQ_LIST_VALUE_RES;
         String value = mqttClient.loco->listValues();
         mqttClient.mqtt.publish(topic.c_str(), value.c_str());
-    } else if (strncmp(action, setValueAct, strlen(setValueAct)) == 0) {
+    } else if (strncmp(action, MQ_SET_VALUE, strlen(MQ_SET_VALUE)) == 0) {
         // Value, set state. Hast to be the last one, after "get" and "list"
-        char *key = action + strlen(setValueAct);
+        char *key = action + strlen(MQ_SET_VALUE);
         String value(payload, length);
         mqttClient.loco->putValue(key, (char *)value.c_str());
-    } else if (strcmp(action, getFunctionAct) == 0) {
+    } else if (strcmp(action, MQ_GET_FUNCTION) == 0) {
         // Function, get state.
         String key(payload, length);
         int functionCode = key.toInt();
         String value =
-            mqttClient.loco->getFunction(functionCode) ? "ON" : "OFF";
-        String topic = functionTopic;
-        topic.replace("{0}", mqttClient.loco->locoAddr);
-        topic.replace("{1}", key);
+            mqttClient.loco->getFunction(functionCode) ? MQ_ON : MQ_OFF;
+        String topic = mqttClient.topicPrefix + MQ_SET_FUNCTION + key;
         mqttClient.mqtt.publish(topic.c_str(), value.c_str());
-    } else if (strncmp(action, setFunctionAct, strlen(setFunctionAct)) == 0) {
+    } else if (strncmp(action, MQ_SET_FUNCTION, strlen(MQ_SET_FUNCTION)) == 0) {
         // Function, set state. Hast to be the last one, after "get"
-        action += strlen(setFunctionAct);
+        action += strlen(MQ_SET_FUNCTION);
         int functionCode = atoi(action);
-        if (length && strncmp(value, functionON, length) == 0)
+        if (length && strncmp(value, MQ_ON, length) == 0)
             mqttClient.loco->setFunction(functionCode, true);
         else
             mqttClient.loco->setFunction(functionCode, false);

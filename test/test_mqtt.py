@@ -64,7 +64,7 @@ class TransportMqtt:
             return
         message = str(msg.payload, 'UTF-8')
 
-        logging.info(f"[MQ] <: {msg.topic} {message}")
+        logging.info(f"[MQ] <: {msg.topic}+{message}")
         self.message = msg.topic + '+' + message
 
 
@@ -167,4 +167,3 @@ def test_list(s):
 tests_mq = [test_mqtt_start, test_throttle, test_direction_1, test_direction_2, test_direction_3, test_direction_0, 
             test_function, test_value, test_list]
 
-# tests_mq = [test_mqtt_start, test_direction_2, test_direction_3]

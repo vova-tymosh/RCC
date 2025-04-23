@@ -29,7 +29,7 @@ public:
         transport->send(&cmd);
     }
 
-    void setDirection(int value, bool stopState = false)
+    void setDirection(int value)
     {
         Command cmd = {.code = NRF_DIRECTION, .value = (uint8_t)value};
         transport->send(&cmd);
