@@ -7,7 +7,7 @@
 #include "RCCState.h"
 #include "Settings.h"
 #include "nrf52/KeypadTransport.h"
-#include "nrf52/Protocol.h"
+#include "Protocol.h"
 #include "Timer.h"
 #include "Cli.h"
 
@@ -64,7 +64,7 @@ public:
     // }
     String listValues()
     {
-        Command cmd = {.code = NRF_LIST_VALUE, .value = 0};
+        Command cmd = {.code = NRF_LIST_VALUE_ASK, .value = 0};
         transport->send(&cmd);
         return "";
     }

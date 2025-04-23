@@ -5,9 +5,10 @@
  */
 #pragma once
 #include "nrf52/Wireless.h"
-#include "nrf52/Protocol.h"
-#include "Timer.h"
+#include "nrf52/Transport.h"
 #include "RCCLocoBase.h"
+#include "Protocol.h"
+#include "Timer.h"
 
 #define MAX_LOCO 5
 #define NAME_SIZE 5
@@ -239,9 +240,9 @@ public:
                     Serial.println(String("NRF_SET_VALUE: ") + key + " " + value);
                 }
             }
-        } else if (command->code == NRF_LIST_VALUE) {
+        } else if (command->code == NRF_LIST_VALUE_RES) {
             payload[size - 1] = 0;
-            Serial.println("NRF_LIST_VALUE: " + String((const char*)payload));
+            Serial.println("NRF_LIST_VALUE_RES: " + String((const char*)payload));
         }
     }
 
