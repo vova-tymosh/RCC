@@ -4,29 +4,13 @@
 #include <PubSubClient.h>
 #include "Timer.h"
 #include "Settings.h"
+#include "Protocol.h"
+
 
 //
 // https://www.jmri.org/help/en/html/hardware/mqtt/index.shtml
 //
 
-const char *MQ_PREFIX = "cab";
-const char *MQ_INTRO = "intro";
-const char *MQ_HEARTBEAT_VALUES = "heartbeat/values";
-
-const char *MQ_SET_THROTTLE = "throttle";
-const char *MQ_SET_DIRECTION = "direction";
-const char *MQ_GET_FUNCTION = "function/get";
-const char *MQ_SET_FUNCTION = "function/";
-const char *MQ_GET_VALUE = "value/get";
-const char *MQ_SET_VALUE = "value/";
-const char *MQ_LIST_VALUE_ASK = "value/list";
-const char *MQ_LIST_VALUE_RES = "keys";
-
-const char *MQ_DIRECTIONS[4] = {"REVERSE", "FORWARD", "STOP", "NEUTRAL"};
-const char *MQ_ON = "ON";
-const char *MQ_OFF = "OFF";
-
-const char MQ_SEPARATOR = SEPARATOR;
 
 
 void onMqttMessage(char *topic, byte *payload, unsigned int length);
@@ -55,11 +39,20 @@ public:
     void heartbeat()
     {
         LocoState *s = &loco->state;
-        snprintf(heartbeatPayload, sizeof(heartbeatPayload),
-                 "%d %d %d %d %d %d %d %d %d %d %d", s->tick, s->distance,
-                 s->bitstate, s->speed, s->lost, s->throttle, s->throttle_out,
-                 s->battery, s->temperature, s->psi, s->current);
-        mqtt.publish(heartbeatTopic.c_str(), heartbeatPayload);
+        String heartbeatPayload;
+        heartbeatPayload.reserve(64);
+        heartbeatPayload = String(s->tick) + MQ_SEPARATOR +
+                            String(s->distance) + MQ_SEPARATOR +
+                            String(s->bitstate) + MQ_SEPARATOR +
+                            String(s->speed) + MQ_SEPARATOR +
+                            String(s->lost) + MQ_SEPARATOR +
+                            String(s->throttle) + MQ_SEPARATOR +
+                            String(s->throttle_out) + MQ_SEPARATOR +
+                            String(s->battery) + MQ_SEPARATOR +
+                            String(s->temperature) + MQ_SEPARATOR +
+                            String(s->psi) + MQ_SEPARATOR +
+                            String(s->current);
+        mqtt.publish(heartbeatTopic.c_str(), heartbeatPayload.c_str());
     }
 
     void introduce()

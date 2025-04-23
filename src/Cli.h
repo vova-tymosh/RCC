@@ -2,18 +2,9 @@
 #include <stdint.h>
 #include "RCCLocoBase.h"
 #include "Settings.h"
+#include "Protocol.h"
 
-const char CMD_THROTTLE = 'T';
-const char CMD_DIRECTION = 'D';
-const char CMD_SET_FUNCTION = 'F';
-const char CMD_GET_FUNCTION = 'P';
-const char CMD_SET_VALUE = 'S';
-const char CMD_GET_VALUE = 'G';
-const char CMD_LIST_VALUE = 'L';
 
-const char CMD_CMD = 'C';
-const char CMD_ERASE = 'E';
-const char CMD_REBOOT = '!';
 
 void (*reboot)(void) = 0;
 

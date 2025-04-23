@@ -4,9 +4,9 @@
  *
  */
 #include "nrf52/Wireless.h"
-#include "nrf52/Protocol.h"
-#include "Timer.h"
 #include "RCCLocoBase.h"
+#include "Protocol.h"
+#include "Timer.h"
 
 // void printHex(uint8_t *payload, int size)
 // {
@@ -17,6 +17,37 @@
 //     }
 //     Serial.println("$");
 // }
+
+const int MAX_PACKET = 256;
+
+#define COMMAND_SIZE sizeof(struct Command)
+#define CODE_SIZE 1
+#define sizeofarray(x) (sizeof(x) / sizeof(x[0]))
+
+struct __attribute__((packed)) Command {
+    uint8_t code;
+    union {
+        uint8_t value;
+        struct {
+            uint8_t functionId : 7;
+            uint8_t activate   : 1;
+        };
+    };
+};
+
+int split(char *input, char **output, uint8_t size, char delimiter = NRF_SEPARATOR)
+{
+    int index = 0;
+    char d[2] = {delimiter, 0};
+    char *token = strtok(input, d);
+    while (token && index < size) {
+        output[index] = token;
+        token = strtok(NULL, d);
+        index++;
+    }
+    return index;
+}
+
 
 class Transport
 {
