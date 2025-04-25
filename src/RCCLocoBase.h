@@ -39,7 +39,7 @@ public:
     {
         return 0;
     }
-    virtual void putValue(char *key, char *value) {}
+    virtual void setValue(char *key, char *value) {}
     virtual String getValue(char *key)
     {
         return "";

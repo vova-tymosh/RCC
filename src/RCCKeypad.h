@@ -51,7 +51,7 @@ public:
         return false;
     }
 
-    // void putValue(char *key, char *value)
+    // void setValue(char *key, char *value)
     // {
     //     Command cmd = {.code = NRF_GET_FUNCTION, .functionId = functionId};
     //     send(&cmd);

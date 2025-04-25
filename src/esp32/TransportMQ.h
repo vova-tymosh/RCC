@@ -154,7 +154,7 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
         // Value, set state. Hast to be the last one, after "get" and "list"
         char *key = action + strlen(MQ_SET_VALUE);
         String value(payload, length);
-        mqttClient.loco->putValue(key, (char *)value.c_str());
+        mqttClient.loco->setValue(key, (char *)value.c_str());
     } else if (strcmp(action, MQ_GET_FUNCTION) == 0) {
         // Function, get state.
         String key(payload, length);

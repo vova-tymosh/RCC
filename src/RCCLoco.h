@@ -90,9 +90,9 @@ public:
         return state.direction;
     }
 
-    void putValue(char *key, char *value)
+    void setValue(char *key, char *value)
     {
-        Serial.println("putValue: " + String(key) + "/" + String(value));
+        Serial.println("setValue: " + String(key) + "/" + String(value));
         settings.put(key, value);
         for (int i = 0; i < sizeof(realtimeValue) / sizeof(realtimeValue[0]);
              i++) {

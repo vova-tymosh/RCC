@@ -128,7 +128,7 @@ public:
                 if (tokens >= 2) {
                     char *key = buffer[0];
                     char *value = buffer[1];
-                    loco->putValue(key, value);
+                    loco->setValue(key, value);
                 }
             }
         } else if (command->code == NRF_GET_VALUE) {

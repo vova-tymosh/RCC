@@ -90,15 +90,15 @@ public:
     bool write(const void *payload, uint16_t size, int to = STATION_NODE)
     {
         bool report = false;
-        total++;
         RF24NetworkHeader header(to);
         for (int i = 0; i < RETRY; i++) {
             report = network.write(header, payload, size);
             if (report)
                 break;
-            else
-                lost++;
         }
+        total++;
+        if (!report)
+            lost++;
         return report;
     }
 

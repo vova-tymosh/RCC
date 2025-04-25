@@ -103,7 +103,7 @@ private:
         *separator = '\0';
         char *key = cmd;
         char *value = ++separator;
-        loco->putValue(key, value);
+        loco->setValue(key, value);
         Serial.println(String(key) + ":" + value);
         return true;
     }
