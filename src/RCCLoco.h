@@ -29,13 +29,16 @@ protected:
     enum {
         ACCELERATION = 0,
         MANAGESPEED,
+        HEARTBEAT,
         MAX_REALTIME,
     };
     const char *realtimeKey[MAX_REALTIME] = {
         "acceleration",
         "managespeed",
+        "heartbeat"
     };
     float realtimeValue[MAX_REALTIME] = {
+        0,
         0,
         0,
     };
@@ -56,20 +59,16 @@ public:
 
     virtual void onFunction(uint8_t code, bool activate) {}
     virtual void onThrottle(uint8_t direction, uint8_t throttle) {}
-    virtual void onCommand(uint8_t code, float value) {}
+    virtual void onCommand(uint8_t code, char* value, uint8_t size) {}
 
-    void setFunction(int code, bool activate)
+    virtual int getHeartbeat()
     {
-        if (activate)
-            state.bitstate |= (uint32_t)1 << code;
-        else
-            state.bitstate &= ~((uint32_t)1 << code);
-        onFunction(code, activate);
+        return realtimeValue[HEARTBEAT];
     }
 
-    bool getFunction(int code)
+    int getThrottle()
     {
-        return (state.bitstate & ((uint32_t)1 << code)) != 0;
+        return state.throttle;
     }
 
     void setThrottle(int value)
@@ -79,9 +78,9 @@ public:
         handleThrottle();
     }
 
-    int getThrottle()
+    int getDirection()
     {
-        return state.throttle;
+        return state.direction;
     }
 
     void setDirection(int value)
@@ -91,22 +90,18 @@ public:
         handleThrottle();
     }
 
-    int getDirection()
+    bool getFunction(int code)
     {
-        return state.direction;
+        return (state.bitstate & ((uint32_t)1 << code)) != 0;
     }
 
-    void setValue(char *key, char *value)
+    void setFunction(int code, bool activate)
     {
-        Serial.println("setValue: " + String(key) + "/" + String(value));
-        settings.put(key, value);
-        for (int i = 0; i < sizeof(realtimeValue) / sizeof(realtimeValue[0]);
-             i++) {
-            if (strcmp(key, realtimeKey[i]) == 0) {
-                realtimeValue[i] = atof(value);
-                return;
-            }
-        }
+        if (activate)
+            state.bitstate |= (uint32_t)1 << code;
+        else
+            state.bitstate &= ~((uint32_t)1 << code);
+        onFunction(code, activate);
     }
 
     String getValue(char *key)
@@ -122,6 +117,19 @@ public:
         String value(settings.get(key));
         Serial.println("getValue s: " + String(key) + "/" + String(value));
         return value;
+    }
+
+    void setValue(char *key, char *value)
+    {
+        Serial.println("setValue: " + String(key) + "/" + String(value));
+        settings.put(key, value);
+        for (int i = 0; i < sizeof(realtimeValue) / sizeof(realtimeValue[0]);
+             i++) {
+            if (strcmp(key, realtimeKey[i]) == 0) {
+                realtimeValue[i] = atof(value);
+                return;
+            }
+        }
     }
 
     String listValues()

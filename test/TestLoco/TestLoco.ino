@@ -65,7 +65,7 @@ public:
         motor.apply(direction, throttle);
     }
 
-    void onCommand(uint8_t code, float value)
+    void onCommand(uint8_t code, char* value, uint8_t size)
     {
         switch (code) {
         case 'B':
@@ -84,6 +84,7 @@ public:
             writeAllAudio(audio_data, sizeof(audio_data));
             break;
         }
+
     }
 };
 TestLoco loco;

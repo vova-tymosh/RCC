@@ -14,16 +14,6 @@
 #define NAME_SIZE 5
 
 
-void printHex(uint8_t *payload, int size)
-{
-
-    for (int i = 0; i < size; i++) {
-        Serial.print(payload[i], HEX);
-        Serial.print(" ");
-    }
-    Serial.println("");
-}
-
 class KeypadTransport
 {
 private:
@@ -52,7 +42,7 @@ private:
     uint8_t payload[MAX_PACKET];
 
 public:
-    bool isLocalMode;
+    bool isLocal;
 
     KeypadTransport(RCCNode *node) : node(node), timer(100) {};
 
@@ -62,18 +52,21 @@ public:
             Serial.println(msg);
     }
 
-    void send(uint8_t *payload, uint8_t size)
+    void send(uint8_t *payload, uint8_t size, int to = -1)
     {
-        wireless.write(payload, size);
-        // Serial.println("[MQ] >" + String((const char *)payload, (unsigned
-        // int)size));
+        if (to < 0)
+            to = (isLocal) ? known.nodes[known.selected].addr : 0;
+        wireless.write(payload, size, to);
         Serial.print("[NR] >");
+        Serial.print(to);
+        Serial.print(">");
         printHex(payload, size);
+        Serial.println("");
     }
 
-    void send(Command *cmd)
+    void send(Command *cmd, int to = -1)
     {
-        send((uint8_t *)cmd, sizeof(*cmd));
+        send((uint8_t *)cmd, sizeof(*cmd), to);
     }
 
     // uint16_t getLostRate()
@@ -91,40 +84,43 @@ public:
     //     return alive;
     // }
 
-    // char *getSelectedName()
-    // {
-    //     return known.nodes[known.selected].name;
-    // }
+    char *getSelectedName()
+    {
+        return known.nodes[known.selected].name;
+    }
 
-    // int getSelectedAddr()
-    // {
-    //     return known.nodes[known.selected].addr;
-    // }
+    void cycleSelected()
+    {
+        if (known.selected < known.len - 1)
+            known.selected++;
+        else
+            known.selected = 0;
+        Serial.println("cycleSelected " + String(known.selected) + " " +
+                       String(known.len));
+    }
 
-    // void cycleSelected()
-    // {
-    //     if (known.selected < known.len - 1)
-    //         known.selected++;
-    //     else
-    //         known.selected = 0;
-    //     Serial.println("cycleSelected " + String(known.selected) + " " +
-    //                    String(known.len));
-    // }
+    bool isKnown(int addr)
+    {
+        for (int i = 0; i < known.len; i++) {
+            if (addr == known.nodes[i].addr)
+                return true;
+        }
+        return false;
+    }
 
-    // bool isRegistered(int addr)
-    // {
-    //     for (int i = 0; i < known.len; i++) {
-    //         if (addr == known.nodes[i].addr)
-    //             return true;
-    //     }
-    //     return false;
-    // }
+    bool isMine(int addr)
+    {
+        if (isLocal)
+            return (addr == known.nodes[known.selected].addr);
+        else
+            return true;
+    }
 
     void processIntro(char *payload, uint16_t size, int from)
     {
         payload[size] = 0;
         char *buffer[5];
-        Serial.println("Reg " + String(payload));
+        Serial.println("Local intro " + String(payload));
         int tokens = split(payload + 1, (char**)&buffer, sizeofarray(buffer));
    
         if (tokens > 3) {
@@ -132,7 +128,7 @@ public:
             strncpy(known.nodes[known.len].name, buffer[2], NAME_SIZE);
             known.len++;
         }
-        Serial.println("Reg end " + String(known.len) + " " +
+        Serial.println("Intro end " + String(known.len) + " " +
                        String(known.nodes[0].addr));
     }
 
@@ -143,7 +139,14 @@ public:
 
         int size = packet.length();
         send((uint8_t *)packet.c_str(), size);
-        log(String("Authorize: ") + packet);
+        log(String("Intro: ") + packet);
+    }
+
+    void askToIntro(int addr)
+    {
+        Command cmd = {.code = NRF_INTRO, .value = 0};
+        send(&cmd, addr);
+        Serial.println("Ask to intro " + String(addr));
     }
 
     void askListCabs()
@@ -180,21 +183,9 @@ public:
 
     bool processHeartbeat(uint8_t *payload, uint16_t size, int from)
     {
-        // bool mine = false;
-        // if (isLocalMode) {
-        //     if (from == getSelectedAddr())
-        //         mine = true;
-        //     else if (!isRegistered(from))
-        //         askToAuthorize(from);
-        // } else {
-        //     mine = true;
-        // }
-
         bool mine = true;
         if (mine) {
             memcpy(&node->state, payload, size);
-            Serial.println("Update " + String(size) + "/" +
-                           String(node->state.tick));
         }
         return mine;
     }
@@ -204,33 +195,40 @@ public:
         if (size < COMMAND_SIZE)
             return;
         struct Command *command = (struct Command *)payload;
-        // log("Got: " + String((char)command->code) + "/" +
-        // String(command->value));
+        log("[NR] <" + String((char)command->code) + " " + String(command->value));
+
 
         if (command->code == NRF_INTRO) {
-            if (isLocalMode) {
+            if (isLocal) {
                 processIntro((char *)payload, size, from);
             } else {
                 introduce();
                 askListCabs();
             }
+        } else if (isLocal && !isKnown(from)){
+            askToIntro(from);
         } else if (command->code == NRF_LIST_CAB) {
             processListCabs((char *)payload, size);
             subsribe();
         } else if (command->code == NRF_HEARTBEAT) {
-            processHeartbeat(payload, size, from);
+            if (isMine(from))
+                processHeartbeat(payload, size, from);
         } else if (command->code == NRF_THROTTLE) {
-            node->state.throttle = command->value;
+            if (isMine(from))
+                node->state.throttle = command->value;
         } else if (command->code == NRF_DIRECTION) {
-            node->state.direction = command->value;
+            if (isMine(from))
+                node->state.direction = command->value;
         } else if (command->code == NRF_SET_FUNCTION) {
-            if (command->functionId < 30)
-                if (command->activate)
-                    node->state.bitstate |= (1 << command->functionId);
-                else
-                    node->state.bitstate &= ~(1 << command->functionId);
+            if (isMine(from)) {
+                if (command->functionId < 30)
+                    if (command->activate)
+                        node->state.bitstate |= (1 << command->functionId);
+                    else
+                        node->state.bitstate &= ~(1 << command->functionId);
+            }
         } else if (command->code == NRF_SET_VALUE) {
-            if (size >= CODE_SIZE + 1) {
+            if ((isMine(from)) && (size >= CODE_SIZE + 1)) {
                 payload[size] = 0;
                 char *buffer[2];
                 int tokens = split((char*)payload + CODE_SIZE, (char**)&buffer, sizeofarray(buffer));
@@ -241,8 +239,10 @@ public:
                 }
             }
         } else if (command->code == NRF_LIST_VALUE_RES) {
-            payload[size - 1] = 0;
-            Serial.println("NRF_LIST_VALUE_RES: " + String((const char*)payload));
+            if (isMine(from)) {
+                payload[size - 1] = 0;
+                Serial.println("NRF_LIST_VALUE_RES: " + String((const char*)payload));
+            }
         }
     }
 
@@ -251,11 +251,8 @@ public:
         memset(&known, 0, sizeof(known));
         int addr = node->locoAddr.toInt();
         wireless.setup(addr);
-        isLocalMode = (addr == 0);
+        isLocal = (addr == 0);
         known.selected = 0;
-        // command.type = PACKET_THR_AUTH;
-        // timer.start();
-        // alive_period.start(1000);
     }
 
     bool loop()
@@ -267,18 +264,6 @@ public:
             received(payload, size, from);
         }
 
-        // if (timer.hasFired()) {
-        //     if (isLocalMode()) {
-        //         int to = getSelectedAddr();
-        //         Command cmd = {command.cmd, command.value};
-        //         if (!wireless->write(&cmd, sizeof(cmd), to))
-        //             lost++;
-        //     } else {
-        //         if (!wireless->write(&command, sizeof(command)))
-        //             lost++;
-        //     }
-        //     total++;
-        // }
         // if (alive_period.hasFired()) {
         //     static int lastPackets;
         //     alive = received > lastPackets;

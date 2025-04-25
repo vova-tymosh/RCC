@@ -39,7 +39,7 @@ private:
     uint8_t payload[MAX_PACKET];
 
 public:
-    Transport(RCCNode *loco) : loco(loco), heartbeatTimer(5000) {};
+    Transport(RCCNode *loco, int heartbeatPeriod = 1000) : loco(loco), heartbeatTimer(heartbeatPeriod) {};
 
     void log(String msg)
     {
@@ -59,7 +59,7 @@ public:
         }
         int size = packet.length();
         wireless.write(packet.c_str(), size);
-        log(String("Authorize: ") + packet);
+        log(String("Intro: ") + packet);
     }
 
     void processList()
@@ -84,7 +84,7 @@ public:
         if (size < COMMAND_SIZE)
             return;
         struct Command *command = (struct Command *)payload;
-        log("Got: " + String((char)command->code) + "/" +
+        log("[NR] <" + String((char)command->code) + " " +
             String(command->value));
 
         if (command->code == NRF_INTRO) {
@@ -131,7 +131,7 @@ public:
         } else if (command->code == NRF_LIST_VALUE_ASK) {
             processList();
         } else {
-            loco->onCommand(command->code, command->value);
+            loco->onCommand(command->code, (char*)payload + CODE_SIZE, size);
         }
     }
 
@@ -150,8 +150,9 @@ public:
             received(payload, size);
         }
 
-        if (heartbeatTimer.hasFired()) {
+        if (heartbeatTimer.hasFiredOnce()) {
             heartbeat();
+            heartbeatTimer.start(loco->getHeartbeat());
         }
     }
 };

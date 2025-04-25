@@ -89,7 +89,7 @@ private:
     {
         if (strlen(cmd) == 0)
             return false;
-        loco->onCommand(cmd[0], 0);
+        loco->onCommand(cmd[0], cmd + 1, strlen(cmd) - 1);
         return true;
     }
 

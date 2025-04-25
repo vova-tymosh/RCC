@@ -9,12 +9,10 @@
 
 void printHex(uint8_t *payload, int size)
 {
-    Serial.print("@@@:");
     for (int i = 0; i < size; i++) {
         Serial.print(payload[i], HEX);
         Serial.print(" ");
     }
-    Serial.println("$");
 }
 
 int split(char *input, char **output, uint8_t size, char delimiter)

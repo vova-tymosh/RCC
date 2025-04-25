@@ -28,23 +28,29 @@ public:
         transport = new KeypadTransport(this);
     }
 
+    virtual void onFunction(uint8_t code, bool activate) {}
+    virtual void onThrottle(uint8_t direction, uint8_t throttle) {}
+    virtual void onCommand(uint8_t code, char* value, uint8_t size) {}
+
+    int getThrottle()
+    {
+        return 0;
+    }
+
     void setThrottle(int value)
     {
         Command cmd = {.code = NRF_THROTTLE, .value = (uint8_t)value};
         transport->send(&cmd);
     }
 
+    int getDirection()
+    {
+        return 0;
+    }
+
     void setDirection(int value)
     {
         Command cmd = {.code = NRF_DIRECTION, .value = (uint8_t)value};
-        transport->send(&cmd);
-    }
-
-    void setFunction(int functionId, bool activate)
-    {
-        Command cmd = {.code = NRF_SET_FUNCTION};
-        cmd.functionId = functionId;
-        cmd.activate = activate;
         transport->send(&cmd);
     }
 
@@ -56,21 +62,39 @@ public:
         return false;
     }
 
-    void setValue(char *key, char *value)
+    void setFunction(int functionId, bool activate)
     {
-        // Command cmd = {.code = NRF_GET_FUNCTION, .functionId = functionId};
-        // send(&cmd);
+        Command cmd = {.code = NRF_SET_FUNCTION};
+        cmd.functionId = functionId;
+        cmd.activate = activate;
+        transport->send(&cmd);
     }
     
-
     String getValue(char *key)
     {
+        String packet = String(NRF_GET_VALUE) + key;
+        int size = packet.length();
+        transport->send((uint8_t *)packet.c_str(), size);   
         return "";
+    }
+
+    void setValue(char *key, char *value)
+    {
+        String packet = String(NRF_SET_VALUE) + key + NRF_SEPARATOR + value;
+        int size = packet.length();
+        transport->send((uint8_t *)packet.c_str(), size);   
+    }
+
+    String getValueLocal(char *key)
+    {
+        String value(settings.get(key));
+        Serial.println("getValueLoc: " + String(key) + "/" + String(value));
+        return value;
     }
 
     void setValueLocal(char *key, char *value)
     {
-        Serial.println("setValue: " + String(key) + "/" + String(value));
+        Serial.println("setValueLoc: " + String(key) + "/" + String(value));
         settings.put(key, value);
         // for (int i = 0; i < sizeof(realtimeValue) / sizeof(realtimeValue[0]);
         //      i++) {
@@ -80,14 +104,6 @@ public:
         //     }
         // }
     }
-
-    String getValueLocal(char *key)
-    {
-        String value(settings.get(key));
-        Serial.println("getValue s: " + String(key) + "/" + String(value));
-        return value;
-    }
-
 
     String listValues()
     {
