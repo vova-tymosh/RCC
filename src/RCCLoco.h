@@ -4,12 +4,18 @@
  *
  */
 #pragma once
+
 #include "RCCState.h"
 #include "SpeedControl.h"
 #include "Settings.h"
 #include "Transport.h"
 #include "Timer.h"
 #include "Cli.h"
+
+extern const char *locoKeys[];
+extern const char *locoValues[];
+extern const int locoKeySize;
+
 
 class RCCLoco : public RCCNode
 {
@@ -125,9 +131,9 @@ public:
             s += SEPARATOR;
             s += Keys[i];
         }
-        for (int i = 0; i < settingsSize; i++) {
+        for (int i = 0; i < locoKeySize; i++) {
             s += SEPARATOR;
-            s += settingsKeys[i];
+            s += locoKeys[i];
         }
         return s;
     }

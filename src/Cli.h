@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "RCCLocoBase.h"
+#include "RCCNode.h"
 #include "Settings.h"
 #include "Protocol.h"
 

@@ -11,6 +11,11 @@
 #include "Timer.h"
 #include "Cli.h"
 
+extern const char *keypadKeys[];
+extern const char *keypadValues[];
+extern const int keypadKeySize;
+
+
 class RCCKeypad : public RCCNode
 {
 protected:
@@ -51,17 +56,39 @@ public:
         return false;
     }
 
-    // void setValue(char *key, char *value)
-    // {
-    //     Command cmd = {.code = NRF_GET_FUNCTION, .functionId = functionId};
-    //     send(&cmd);
-    // }
+    void setValue(char *key, char *value)
+    {
+        // Command cmd = {.code = NRF_GET_FUNCTION, .functionId = functionId};
+        // send(&cmd);
+    }
     
 
-    // String getValue(char *key)
-    // {
-    //     return "";
-    // }
+    String getValue(char *key)
+    {
+        return "";
+    }
+
+    void setValueLocal(char *key, char *value)
+    {
+        Serial.println("setValue: " + String(key) + "/" + String(value));
+        settings.put(key, value);
+        // for (int i = 0; i < sizeof(realtimeValue) / sizeof(realtimeValue[0]);
+        //      i++) {
+        //     if (strcmp(key, realtimeKey[i]) == 0) {
+        //         realtimeValue[i] = atof(value);
+        //         return;
+        //     }
+        // }
+    }
+
+    String getValueLocal(char *key)
+    {
+        String value(settings.get(key));
+        Serial.println("getValue s: " + String(key) + "/" + String(value));
+        return value;
+    }
+
+
     String listValues()
     {
         Command cmd = {.code = NRF_LIST_VALUE_ASK, .value = 0};

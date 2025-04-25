@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RCCLocoBase.h"
+#include "RCCNode.h"
 
 #if defined(ARDUINO_ARCH_NRF52) || defined(ARDUINO_AVR_LEONARDO)
 #include "nrf52/Transport.h"

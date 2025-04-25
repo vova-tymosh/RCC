@@ -6,7 +6,7 @@
 #pragma once
 #include "nrf52/Wireless.h"
 #include "nrf52/Transport.h"
-#include "RCCLocoBase.h"
+#include "RCCNode.h"
 #include "Protocol.h"
 #include "Timer.h"
 

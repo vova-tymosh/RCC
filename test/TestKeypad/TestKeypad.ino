@@ -14,19 +14,13 @@ class TestKeypad : public RCCKeypad
 TestKeypad keypad;
 
 
-const char *sk[] = {"loconame",     "locoaddr"};
-
-const char *sv[] = {"RCC_Keypad",   "4"};
-
-const int ss = sizeof(sk) / sizeof(sk[0]);
-
 
 void setup()
 {
     Serial.begin(115200);
     Serial.println("Started");
     storage.begin();
-    settings.defaults(sk, sv, ss);
+    settings.defaults(keypadKeys, keypadValues, keypadKeySize);
 
 
     keypad.debugLevel = 10;

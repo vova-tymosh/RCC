@@ -4,14 +4,12 @@
  *
  */
 // #define RCC_NO_STATION
-#include "Peripheral.h"
 #include "Motherboard.h"
 #include "RCCLoco.h"
-#include "Storage.h"
-#include "Settings.h"
-#include "Timer.h"
 #include "Audio.h"
 #include "audio_data2.h"
+
+
 
 // defined(CONFIG_IDF_TARGET_ESP32C3)
 // defined(CONFIG_IDF_TARGET_ESP32C6)
@@ -98,7 +96,7 @@ void setup()
     delay(250);
 
     storage.begin();
-    settings.defaults(settingsKeys, settingsValues, settingsSize);
+    settings.defaults(locoKeys, locoValues, locoKeySize);
 
     motor.setup();
     yellow.begin();
