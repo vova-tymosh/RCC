@@ -4,8 +4,6 @@
 #include "Settings.h"
 #include "Protocol.h"
 
-
-
 void (*reboot)(void) = 0;
 
 class RccCli
@@ -80,8 +78,7 @@ private:
             return false;
         uint8_t function = (uint8_t)atoi(cmd);
         bool activate = loco->getFunction(function);
-        Serial.println(String("F") + cmd + ": " +
-                       (activate ? "ON" : "OFF"));
+        Serial.println(String("F") + cmd + ": " + (activate ? "ON" : "OFF"));
         return true;
     }
 

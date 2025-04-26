@@ -21,7 +21,6 @@
 #define PIN_AUDIO_LRC D9
 #endif
 
-
 // TODO: change battery formula to provide more accurate/continues values
 
 class PinExt : public Pin, protected Tca6408a

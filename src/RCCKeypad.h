@@ -15,7 +15,6 @@ extern const char *keypadKeys[];
 extern const char *keypadValues[];
 extern const int keypadKeySize;
 
-
 class RCCKeypad : public RCCNode
 {
 protected:
@@ -30,7 +29,7 @@ public:
 
     virtual void onFunction(uint8_t code, bool activate) {}
     virtual void onThrottle(uint8_t direction, uint8_t throttle) {}
-    virtual void onCommand(uint8_t code, char* value, uint8_t size) {}
+    virtual void onCommand(uint8_t code, char *value, uint8_t size) {}
 
     int getThrottle()
     {
@@ -69,12 +68,12 @@ public:
         cmd.activate = activate;
         transport->send(&cmd);
     }
-    
+
     String getValue(char *key)
     {
         String packet = String(NRF_GET_VALUE) + key;
         int size = packet.length();
-        transport->send((uint8_t *)packet.c_str(), size);   
+        transport->send((uint8_t *)packet.c_str(), size);
         return "";
     }
 
@@ -82,7 +81,7 @@ public:
     {
         String packet = String(NRF_SET_VALUE) + key + NRF_SEPARATOR + value;
         int size = packet.length();
-        transport->send((uint8_t *)packet.c_str(), size);   
+        transport->send((uint8_t *)packet.c_str(), size);
     }
 
     String getValueLocal(char *key)

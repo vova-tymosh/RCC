@@ -1,6 +1,5 @@
 #pragma once
 
-
 const char SEPARATOR = ' ';
 
 // NRF Protocol Message codes

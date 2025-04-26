@@ -6,12 +6,9 @@
 #include "Settings.h"
 #include "Protocol.h"
 
-
 //
 // https://www.jmri.org/help/en/html/hardware/mqtt/index.shtml
 //
-
-
 
 void onMqttMessage(char *topic, byte *payload, unsigned int length);
 
@@ -41,17 +38,14 @@ public:
         LocoState *s = &loco->state;
         String heartbeatPayload;
         heartbeatPayload.reserve(64);
-        heartbeatPayload = String(s->tick) + MQ_SEPARATOR +
-                            String(s->distance) + MQ_SEPARATOR +
-                            String(s->bitstate) + MQ_SEPARATOR +
-                            String(s->speed) + MQ_SEPARATOR +
-                            String(s->lost) + MQ_SEPARATOR +
-                            String(s->throttle) + MQ_SEPARATOR +
-                            String(s->throttle_out) + MQ_SEPARATOR +
-                            String(s->battery) + MQ_SEPARATOR +
-                            String(s->temperature) + MQ_SEPARATOR +
-                            String(s->psi) + MQ_SEPARATOR +
-                            String(s->current);
+        heartbeatPayload =
+            String(s->tick) + MQ_SEPARATOR + String(s->distance) +
+            MQ_SEPARATOR + String(s->bitstate) + MQ_SEPARATOR +
+            String(s->speed) + MQ_SEPARATOR + String(s->lost) + MQ_SEPARATOR +
+            String(s->throttle) + MQ_SEPARATOR + String(s->throttle_out) +
+            MQ_SEPARATOR + String(s->battery) + MQ_SEPARATOR +
+            String(s->temperature) + MQ_SEPARATOR + String(s->psi) +
+            MQ_SEPARATOR + String(s->current);
         mqtt.publish(heartbeatTopic.c_str(), heartbeatPayload.c_str());
     }
 
@@ -134,7 +128,8 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
     } else if (strcmp(action, MQ_SET_DIRECTION) == 0) {
         // Direction
         for (int i = 0; i < 4; i++) {
-            if ((strncmp(value, MQ_DIRECTIONS[i], length) == 0) || (value[0] == '0' + i)) {
+            if ((strncmp(value, MQ_DIRECTIONS[i], length) == 0) ||
+                (value[0] == '0' + i)) {
                 mqttClient.loco->setDirection(i);
                 break;
             }
@@ -143,7 +138,7 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
         // Value, get state
         String key(payload, length);
         String value = mqttClient.loco->getValue((char *)key.c_str());
-        String topic = mqttClient.topicPrefix + MQ_SET_VALUE + key; 
+        String topic = mqttClient.topicPrefix + MQ_SET_VALUE + key;
         mqttClient.mqtt.publish(topic.c_str(), value.c_str());
     } else if (strcmp(action, MQ_LIST_VALUE_ASK) == 0) {
         // Value, list all Keys (config and runtime)

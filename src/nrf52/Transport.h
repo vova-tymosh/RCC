@@ -9,7 +9,8 @@
 #include "Timer.h"
 
 void printHex(uint8_t *payload, int size);
-int split(char *input, char **output, uint8_t size, char delimiter = NRF_SEPARATOR);
+int split(char *input, char **output, uint8_t size,
+          char delimiter = NRF_SEPARATOR);
 
 const int MAX_PACKET = 256;
 
@@ -28,8 +29,6 @@ struct __attribute__((packed)) Command {
     };
 };
 
-
-
 class Transport
 {
 private:
@@ -39,7 +38,8 @@ private:
     uint8_t payload[MAX_PACKET];
 
 public:
-    Transport(RCCNode *loco, int heartbeatPeriod = 1000) : loco(loco), heartbeatTimer(heartbeatPeriod) {};
+    Transport(RCCNode *loco, int heartbeatPeriod = 1000)
+        : loco(loco), heartbeatTimer(heartbeatPeriod) {};
 
     void log(String msg)
     {
@@ -50,8 +50,8 @@ public:
     void introduce()
     {
         String packet = String(NRF_INTRO) + NRF_TYPE_LOCO + NRF_SEPARATOR +
-                        loco->locoAddr + NRF_SEPARATOR + loco->locoName + NRF_SEPARATOR + VERSION +
-                        NRF_SEPARATOR + LOCO_FORMAT;
+                        loco->locoAddr + NRF_SEPARATOR + loco->locoName +
+                        NRF_SEPARATOR + VERSION + NRF_SEPARATOR + LOCO_FORMAT;
 
         for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             packet += NRF_SEPARATOR;
@@ -105,7 +105,8 @@ public:
             if (size >= CODE_SIZE + 1) {
                 payload[size] = 0;
                 char *buffer[2];
-                int tokens = split((char*)payload + CODE_SIZE, (char**)&buffer, sizeofarray(buffer));
+                int tokens = split((char *)payload + CODE_SIZE,
+                                   (char **)&buffer, sizeofarray(buffer));
                 if (tokens >= 2) {
                     char *key = buffer[0];
                     char *value = buffer[1];
@@ -131,7 +132,7 @@ public:
         } else if (command->code == NRF_LIST_VALUE_ASK) {
             processList();
         } else {
-            loco->onCommand(command->code, (char*)payload + CODE_SIZE, size);
+            loco->onCommand(command->code, (char *)payload + CODE_SIZE, size);
         }
     }
 

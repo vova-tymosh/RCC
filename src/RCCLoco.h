@@ -16,7 +16,6 @@ extern const char *locoKeys[];
 extern const char *locoValues[];
 extern const int locoKeySize;
 
-
 class RCCLoco : public RCCNode
 {
 protected:
@@ -32,11 +31,8 @@ protected:
         HEARTBEAT,
         MAX_REALTIME,
     };
-    const char *realtimeKey[MAX_REALTIME] = {
-        "acceleration",
-        "managespeed",
-        "heartbeat"
-    };
+    const char *realtimeKey[MAX_REALTIME] = {"acceleration", "managespeed",
+                                             "heartbeat"};
     float realtimeValue[MAX_REALTIME] = {
         0,
         0,
@@ -44,12 +40,7 @@ protected:
     };
 
 public:
-    enum {
-        DIR_REVERSE = 0,
-        DIR_FORWARD = 1,
-        DIR_STOP = 2,
-        DIR_NEUTRAL = 3
-    };
+    enum { DIR_REVERSE = 0, DIR_FORWARD = 1, DIR_STOP = 2, DIR_NEUTRAL = 3 };
 
     RCCLoco() : rccCli(this), speedTimer(100)
     {
@@ -59,7 +50,7 @@ public:
 
     virtual void onFunction(uint8_t code, bool activate) {}
     virtual void onThrottle(uint8_t direction, uint8_t throttle) {}
-    virtual void onCommand(uint8_t code, char* value, uint8_t size) {}
+    virtual void onCommand(uint8_t code, char *value, uint8_t size) {}
 
     virtual int getHeartbeat()
     {

@@ -13,14 +13,16 @@
 #define MAX_LOCO 5
 #define NAME_SIZE 5
 
+// TODO: add local mode tests
+// TODO: in the mq test make heartbeat fast to speed up the test
 
-//TODO: add local mode tests
-//TODO: in the mq test make heartbeat fast to speed up the test
+#define log(msg)                                                               \
+    {                                                                          \
+        if (node->debugLevel > 2)                                              \
+            Serial.println(String("[NR] ") + (msg));                           \
+    };
 
-#define log(msg) { if (node->debugLevel > 2) Serial.println(String("[NR] ") + (msg)); };
-
-struct Qos
-{
+struct Qos {
     int sendExp = 0;
     int sendAct = 0;
     int hearbeatAct = 0;
@@ -53,7 +55,6 @@ struct Qos
         }
     }
 };
-
 
 class KeypadTransport
 {
@@ -138,8 +139,8 @@ public:
     {
         payload[size] = 0;
         char *buffer[5];
-        int tokens = split(payload + 1, (char**)&buffer, sizeofarray(buffer));
-   
+        int tokens = split(payload + 1, (char **)&buffer, sizeofarray(buffer));
+
         if (tokens > 3) {
             known.nodes[known.len].addr = atoi(buffer[1]);
             strncpy(known.nodes[known.len].name, buffer[2], NAME_SIZE);
@@ -151,7 +152,8 @@ public:
     void introduce()
     {
         String packet = String(NRF_INTRO) + NRF_TYPE_KEYPAD + NRF_SEPARATOR +
-                        node->locoAddr + NRF_SEPARATOR + "RCC_Keypad" + NRF_SEPARATOR + VERSION;
+                        node->locoAddr + NRF_SEPARATOR + "RCC_Keypad" +
+                        NRF_SEPARATOR + VERSION;
 
         int size = packet.length();
         send((uint8_t *)packet.c_str(), size);
@@ -180,12 +182,12 @@ public:
     {
         packet[size] = 0;
         int index = 0;
-        char *buffer[10*3];
-        int tokens = split(packet + 1, (char**)&buffer, sizeofarray(buffer));
-        for (int i = 0; i < tokens/3; i++) {
-            if (buffer[i*3][0] == NRF_TYPE_LOCO) {
-                known.nodes[index].addr = atoi(buffer[i*3 + 1]);
-                strncpy(known.nodes[index].name, buffer[i*3 + 2], NAME_SIZE);
+        char *buffer[10 * 3];
+        int tokens = split(packet + 1, (char **)&buffer, sizeofarray(buffer));
+        for (int i = 0; i < tokens / 3; i++) {
+            if (buffer[i * 3][0] == NRF_TYPE_LOCO) {
+                known.nodes[index].addr = atoi(buffer[i * 3 + 1]);
+                strncpy(known.nodes[index].name, buffer[i * 3 + 2], NAME_SIZE);
                 index++;
             }
         }
@@ -208,10 +210,11 @@ public:
         qos.hearbeatAct++;
     }
 
-    void processSetValue(char* payload)
+    void processSetValue(char *payload)
     {
         char *buffer[2];
-        int tokens = split((char*)payload + CODE_SIZE, (char**)&buffer, sizeofarray(buffer));
+        int tokens = split((char *)payload + CODE_SIZE, (char **)&buffer,
+                           sizeofarray(buffer));
         if (tokens >= 2) {
             char *key = buffer[0];
             char *value = buffer[1];
@@ -229,7 +232,6 @@ public:
         struct Command *command = (struct Command *)payload;
         log("<" + String((char)command->code) + " " + String(command->value));
 
-
         if (command->code == NRF_INTRO) {
             if (isLocal) {
                 processLocalIntro((char *)payload, size, from);
@@ -238,7 +240,7 @@ public:
                 askListCabs();
             }
             askHearbteat();
-        } else if (isLocal && !isKnown(from)){
+        } else if (isLocal && !isKnown(from)) {
             askToIntro(from);
         } else if (command->code == NRF_LIST_CAB) {
             processListCabs((char *)payload, size);
@@ -268,7 +270,7 @@ public:
         } else if (command->code == NRF_LIST_VALUE_RES) {
             if (isMine(from)) {
                 payload[size - 1] = 0;
-                log("List: " + String((const char*)payload));
+                log("List: " + String((const char *)payload));
             }
         }
     }

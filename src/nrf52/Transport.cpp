@@ -6,7 +6,6 @@
 #if defined(ARDUINO_ARCH_NRF52) || defined(ARDUINO_AVR_LEONARDO)
 #include <Arduino.h>
 
-
 void printHex(uint8_t *payload, int size)
 {
     for (int i = 0; i < size; i++) {
