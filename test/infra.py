@@ -1,9 +1,13 @@
+import re
 import serial
 import time
 import subprocess
 import select
 import sys
 import logging
+import paho.mqtt.client as mqtt
+from paho.mqtt.subscribeoptions import SubscribeOptions
+
 
 
 def millis():
@@ -20,10 +24,15 @@ def findSerial():
     usbmodem = output.decode('utf-8').strip().split('\n')
     if len(usbmodem) == 0:
         return None
-    return usbmodem[0]
+    return usbmodem
 
-def openSerial(ser_name):
-    return serial.Serial(ser_name, 115200)
+def openSerial(idx = 0):
+    ser_names = findSerial()
+    if len(ser_names) == 0:
+        print('No serial port found')
+        exit(1)
+    if idx < len(ser_names):
+        return serial.Serial(ser_names[idx], 115200)
 
 def writeSerial(s, data):
     d = data.encode('utf-8')
@@ -56,3 +65,47 @@ def readSerialFloat(s):
     except:
         pass
     return 0.0
+
+MQTT_NODE_NAME = 'RCC_Test'
+MQTT_BROKER = '192.168.20.61'
+MQ_PREFIX = "cab"
+MQ_MESSAGE = re.compile("cab/(.*?)/(.*)")
+
+class TransportMqtt:
+    def __init__(self):
+        self.mqttClient = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, MQTT_NODE_NAME)
+        self.mqttClient.on_message = self.onReceive
+        self.message = ""
+
+    def start(self):
+        self.mqttClient.connect(MQTT_BROKER)
+        options = SubscribeOptions(qos = 1, noLocal = True)
+        self.mqttClient.subscribe(f'{MQ_PREFIX}/#', options=options)
+
+    def loop(self, message = None):
+        for i in range(5):
+            self.mqttClient.loop(timeout=1.0)
+            if message and self.message.startswith(message):
+                self.message = ""
+                return True
+        return False
+
+    def waitForHearbeat(self, message):
+        for i in range(10):
+            self.mqttClient.loop(timeout=1.0)
+            if self.message.startswith(message):
+                return self.message.split('+', 1)[1]
+
+    def write(self, message, retain = False):
+        logging.info(f"[MQ] >: {message}")
+        topic, message = message.split('+', 1)
+        self.mqttClient.publish(topic, message, retain)
+
+    def onReceive(self, client, userdata, msg):
+        topic = MQ_MESSAGE.match(msg.topic)
+        if (topic is None):
+            return
+        message = str(msg.payload, 'UTF-8')
+
+        logging.info(f"[MQ] <: {msg.topic}+{message}")
+        self.message = msg.topic + '+' + message

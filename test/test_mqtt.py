@@ -1,9 +1,6 @@
 import time, re
 from infra import *
-import paho.mqtt.client as mqtt
-from paho.mqtt.subscribeoptions import SubscribeOptions
 
-MQ_MESSAGE = re.compile("cab/(.*?)/(.*)")
 MQ_PREFIX = "cab"
 MQ_INTRO = "intro"
 MQ_SET_THROTTLE = "throttle";
@@ -22,59 +19,21 @@ MQ_OFF = "OFF"
 
 MQ_SEPARATOR = ' '
 
-MQTT_NODE_NAME = 'RCC_Test'
-MQTT_BROKER = '192.168.20.61'
 
 ADDR = 3
 
 
-class TransportMqtt:
-    def __init__(self):
-        self.mqttClient = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, MQTT_NODE_NAME)
-        self.mqttClient.on_message = self.onReceive
-        self.message = ""
-
-    def start(self):
-        self.mqttClient.connect(MQTT_BROKER)
-        options = SubscribeOptions(qos = 1, noLocal = True)
-        self.mqttClient.subscribe(f'{MQ_PREFIX}/#', options=options)
-
-    def loop(self, message = None):
-        for i in range(5):
-            self.mqttClient.loop(timeout=1.0)
-            if message and self.message.startswith(message):
-                self.message = ""
-                return True
-        return False
-
-    def waitForHearbeat(self):
-        for i in range(10):
-            self.mqttClient.loop(timeout=1.0)
-            if self.message.startswith(f'cab/{ADDR}/{MQ_HEARTBEAT_VALUES}'):
-                return self.message.split('+', 1)[1]
-
-    def write(self, message, retain = False):
-        logging.info(f"[MQ] >: {message}")
-        topic, message = message.split('+', 1)
-        self.mqttClient.publish(topic, message, retain)
-
-    def onReceive(self, client, userdata, msg):
-        topic = MQ_MESSAGE.match(msg.topic)
-        if (topic is None):
-            return
-        message = str(msg.payload, 'UTF-8')
-
-        logging.info(f"[MQ] <: {msg.topic}+{message}")
-        self.message = msg.topic + '+' + message
-
-
 mq = TransportMqtt()
 
-def test_mqtt_start(s):
+def test_mqtt_start():
     mq.start()
-    return (True, 'Test MQ Setup')
+    time.sleep(1)
+    setValueMsg = f'cab/{ADDR}/value/heartbeat+10000'
+    mq.write(setValueMsg)
+    mq.loop(setValueMsg)
+    return (True, 'Test MQ Start')
 
-def test_throttle(s):
+def test_throttle():
     test_name = 'Test MQ Throttle'
     setValueMsg = f'cab/{ADDR}/throttle+63'
     mq.write(setValueMsg)
@@ -89,7 +48,7 @@ def _do_test_direction(dircode, dirmsg):
     setDirectionMsg = f'cab/{ADDR}/direction+{dirmsg}'
     mq.write(setDirectionMsg)
     mq.loop(setDirectionMsg)
-    hb = mq.waitForHearbeat()
+    hb = mq.waitForHearbeat(f'cab/{ADDR}/{MQ_HEARTBEAT_VALUES}')
     testResult = False
     if hb:
         hb = hb.split(MQ_SEPARATOR)
@@ -104,20 +63,31 @@ def _test_direction(dircode):
     testResult = testResult and _do_test_direction(dircode, direction)
     return (testResult, test_name)
 
-def test_direction_0(s):
+def test_direction_start():
+    setValueMsg = f'cab/{ADDR}/value/heartbeat+100'
+    mq.write(setValueMsg)
+    testResult = mq.loop(setValueMsg)
+    return (testResult, 'Test MQ fast heartbeat')
+
+def test_direction_0():
     return _test_direction(0)
 
-def test_direction_1(s):
+def test_direction_1():
     return _test_direction(1)
 
-def test_direction_2(s):
+def test_direction_2():
     return _test_direction(2)
 
-def test_direction_3(s):
+def test_direction_3():
     return _test_direction(3)
 
+def test_direction_end():
+    setValueMsg = f'cab/{ADDR}/value/heartbeat+1000'
+    mq.write(setValueMsg)
+    testResult = mq.loop(setValueMsg)
+    return (testResult, 'Test MQ normal heartbeat')
 
-def test_function(s):
+def test_function():
     test_name = 'Test MQ Function'
     function_id = 1
     setFunctionMsg = f'cab/{ADDR}/function/{function_id}+{MQ_ON}'
@@ -142,7 +112,7 @@ def test_function(s):
 
     return (True, test_name)
 
-def test_value(s):
+def test_value():
     test_name = 'Test MQ Value'
     setValueMsg = f'cab/{ADDR}/value/acceleration+63'
     mq.write(setValueMsg)
@@ -155,7 +125,7 @@ def test_value(s):
     mq.write(setValueMsg)
     return (testResult, test_name)
 
-def test_list(s):
+def test_list():
     test_name = 'Test MQ List'
     setValueMsg = f'cab/{ADDR}/{MQ_LIST_VALUE_ASK}+ '
     mq.write(setValueMsg)
@@ -164,6 +134,13 @@ def test_list(s):
     testResult = mq.loop(getValueRes)
     return (testResult, test_name)
 
-tests_mq = [test_mqtt_start, test_throttle, test_direction_1, test_direction_2, test_direction_3, test_direction_0, 
-            test_function, test_value, test_list]
+def test_mqtt_end():
+    setValueMsg = f'cab/{ADDR}/value/heartbeat+1000'
+    mq.write(setValueMsg)
+    mq.loop(setValueMsg)
+    return (True, 'Test MQ End')
+
+tests_mq = [test_mqtt_start, test_throttle, test_direction_start, 
+            test_direction_1, test_direction_2, test_direction_3, test_direction_0, 
+            test_direction_end, test_function, test_value, test_list, test_mqtt_end]
 

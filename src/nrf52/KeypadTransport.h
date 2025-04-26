@@ -281,6 +281,7 @@ public:
         isLocal = (addr == 0);
         known.selected = 0;
         qos.begin();
+        introduce();
     }
 
     bool loop()
