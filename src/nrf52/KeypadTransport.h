@@ -17,6 +17,8 @@
 //TODO: add local mode tests
 //TODO: in the mq test make heartbeat fast to speed up the test
 
+#define log(msg) { if (node->debugLevel > 2) Serial.println(String("[NR] ") + (msg)); };
+
 struct Qos
 {
     int sendExp = 0;
@@ -78,12 +80,6 @@ public:
 
     KeypadTransport(RCCNode *node) : node(node) {};
 
-    void log(String msg)
-    {
-        if (node->debugLevel > 1)
-            Serial.println(msg);
-    }
-
     int getConnSuccessRate()
     {
         return qos.rate;
@@ -96,11 +92,11 @@ public:
         qos.sendExp++;
         if (wireless.write(payload, size, to))
             qos.sendAct++;
-        Serial.print("[NR] >");
-        Serial.print(to);
-        Serial.print(">");
-        printHex(payload, size);
-        Serial.println("");
+        if (size == 2) {
+            log(String(to) + ">" + String((char)payload[0]) + payload[1]);
+        } else {
+            log(String(to) + ">" + String((char)payload[0]) + " size:" + size);
+        }
     }
 
     void send(Command *cmd, int to = -1)
@@ -119,8 +115,6 @@ public:
             known.selected++;
         else
             known.selected = 0;
-        Serial.println("cycleSelected " + String(known.selected) + " " +
-                       String(known.len));
     }
 
     bool isKnown(int addr)
@@ -140,20 +134,18 @@ public:
             return true;
     }
 
-    void processIntro(char *payload, uint16_t size, int from)
+    void processLocalIntro(char *payload, uint16_t size, int from)
     {
         payload[size] = 0;
         char *buffer[5];
-        Serial.println("Local intro " + String(payload));
         int tokens = split(payload + 1, (char**)&buffer, sizeofarray(buffer));
    
         if (tokens > 3) {
             known.nodes[known.len].addr = atoi(buffer[1]);
             strncpy(known.nodes[known.len].name, buffer[2], NAME_SIZE);
+            log("Local Intro: " + String(known.nodes[known.len].addr));
             known.len++;
         }
-        Serial.println("Intro end " + String(known.len) + " " +
-                       String(known.nodes[0].addr));
     }
 
     void introduce()
@@ -163,14 +155,13 @@ public:
 
         int size = packet.length();
         send((uint8_t *)packet.c_str(), size);
-        log(String("Intro: ") + packet);
+        log("Intro: " + packet);
     }
 
     void askToIntro(int addr)
     {
         Command cmd = {.code = NRF_INTRO, .value = 0};
         send(&cmd, addr);
-        Serial.println("Ask to intro " + String(addr));
     }
 
     void askListCabs()
@@ -208,7 +199,7 @@ public:
             addr = known.nodes[known.selected].addr;
         Command cmd = {.code = NRF_SUB, .value = addr};
         send(&cmd);
-        Serial.println("Subscribe to " + String(addr));
+        log("Subscribe to " + addr);
     }
 
     void processHeartbeat(uint8_t *payload, uint16_t size, int from)
@@ -227,7 +218,7 @@ public:
             if (strcmp(key, HEARTBEAT) == 0) {
                 qos.hearbeatPeriod = atoi(value);
             }
-            Serial.println(String("NRF_SET_VALUE: ") + key + " " + value);
+            log("Set value: " + String(key) + " " + String(value));
         }
     }
 
@@ -236,12 +227,12 @@ public:
         if (size < COMMAND_SIZE)
             return;
         struct Command *command = (struct Command *)payload;
-        log("[NR] <" + String((char)command->code) + " " + String(command->value));
+        log("<" + String((char)command->code) + " " + String(command->value));
 
 
         if (command->code == NRF_INTRO) {
             if (isLocal) {
-                processIntro((char *)payload, size, from);
+                processLocalIntro((char *)payload, size, from);
             } else {
                 introduce();
                 askListCabs();
@@ -277,7 +268,7 @@ public:
         } else if (command->code == NRF_LIST_VALUE_RES) {
             if (isMine(from)) {
                 payload[size - 1] = 0;
-                Serial.println("NRF_LIST_VALUE_RES: " + String((const char*)payload));
+                log("List: " + String((const char*)payload));
             }
         }
     }

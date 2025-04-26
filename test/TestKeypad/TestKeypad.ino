@@ -67,7 +67,5 @@ void setup()
 void loop()
 {
     keypad.loop();
-
-
 }
  
