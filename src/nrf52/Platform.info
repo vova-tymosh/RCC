@@ -1,0 +1,3 @@
+adafruit-nrfutil -> do chmod +x on it
+nrf52 -> update platform.txt, replace pyhton with python3
+

@@ -109,8 +109,10 @@ class TransportMqtt:
             if message:
                 while not self.messageQueue.empty():
                     m = self.messageQueue.get()
-                    if m.startswith(message):
+                    if type(message) == str and m.startswith(message):
                         return m.split('+', 1)[1]
+                    elif callable(message) and message(m):
+                        return True
         return None
 
     def write(self, message, retain = False):

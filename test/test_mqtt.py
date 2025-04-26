@@ -5,6 +5,19 @@ from infra import *
 
 mq = TransportMqtt()
 
+class VerifyHeartbeat:
+    def __init__(self, dir):
+        self.dir = dir
+    def __call__(self, msg):
+        if msg.startswith(f'cab/{ADDR}/{MQ_HEARTBEAT_VALUES}'):
+            hb = msg.split(MQ_SEPARATOR)
+            if len(hb) >= 3:
+                bitstate = int(hb[2]) % (2**32)
+                dircode = (bitstate >> 30)
+                if dircode == self.dir:
+                    return True
+        return False
+
 def test_mqtt_start():
     mq.start()
     setValueMsg = f'cab/{ADDR}/value/heartbeat+300'
@@ -27,12 +40,7 @@ def _do_test_direction(dircode, dirmsg):
     setDirectionMsg = f'cab/{ADDR}/direction+{dirmsg}'
     mq.write(setDirectionMsg)
     mq.waitForMessage(setDirectionMsg)
-    hb = mq.waitForMessage(f'cab/{ADDR}/{MQ_HEARTBEAT_VALUES}')
-    testResult = False
-    if hb:
-        hb = hb.split(MQ_SEPARATOR)
-        bitstate = int(hb[2]) % (2**32)
-        testResult = dircode == (bitstate >> 30)
+    testResult = mq.waitForMessage(VerifyHeartbeat(dircode))
     return testResult
 
 def _test_direction(dircode):
