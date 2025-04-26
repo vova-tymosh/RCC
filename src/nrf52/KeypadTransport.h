@@ -14,12 +14,11 @@
 #define NAME_SIZE 5
 
 // TODO: add local mode tests
-// TODO: in the mq test make heartbeat fast to speed up the test
 
 #define log(msg)                                                               \
     {                                                                          \
         if (node->debugLevel > 2)                                              \
-            Serial.println(String("[NR] ") + (msg));                           \
+            Serial.println(String("[Nrf] ") + (msg));                          \
     };
 
 struct Qos {

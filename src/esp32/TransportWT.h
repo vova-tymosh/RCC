@@ -11,6 +11,13 @@
 
 // TODO: fix Function names
 
+#define log(msg)                                                               \
+    {                                                                          \
+        if (node->debugLevel > 2)                                              \
+            Serial.println(String("[WT] ") + (msg));                          \
+    };
+
+
 class LineReceiver
 {
 private:
@@ -47,26 +54,20 @@ protected:
     WiFiServer server;
     WiFiClient conn;
     LineReceiver lr;
-    RCCNode *loco;
+    RCCNode *node;
 
 public:
-    WiThrottleClient(RCCNode *loco) : server(port), loco(loco) {}
-
-    void log(String msg)
-    {
-        if (loco->debugLevel > 1)
-            Serial.println(msg);
-    }
+    WiThrottleClient(RCCNode *node) : server(port), node(node) {}
 
     void reply(String msg)
     {
-        log(String("[WT]> ") + msg);
+        log(String("> ") + msg);
         conn.println(msg);
     }
 
     void processLine(char *line)
     {
-        log(String("[WT]< ") + line);
+        log(String("< ") + line);
         if (strlen(line) < 1)
             return;
         char first = *line;
@@ -120,12 +121,12 @@ public:
         /* ]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[");
          */
         for (int i = 0; i < 9; i++) {
-            bool state = loco->getFunction(i);
+            bool state = node->getFunction(i);
             char stateChar = (state) ? '1' : '0';
             reply(prefix + "F" + String(state) + i);
         }
         reply(prefix + "V" + getThrottle());
-        reply(prefix + "R" + loco->getDirection());
+        reply(prefix + "R" + node->getDirection());
         reply(prefix + "s1");
     }
 
@@ -149,14 +150,14 @@ public:
             setThrottle(value);
             break;
         case 'R':
-            loco->setDirection(atoi(value));
+            node->setDirection(atoi(value));
             break;
         case 'q':
             if (*value == 'V') {
                 int v = getThrottle();
                 reply(String("M") + throttleId + "A" + locoAddr + "<;>V" + v);
             } else if (*value == 'R') {
-                int d = loco->getDirection();
+                int d = node->getDirection();
                 reply(String("M") + throttleId + "A" + locoAddr + "<;>R" + d);
             }
             break;
@@ -169,10 +170,10 @@ public:
             return;
         bool press = !(value[0] == '0');
         int functId = atoi(value + 1);
-        bool state = loco->getFunction(functId);
+        bool state = node->getFunction(functId);
         if (press) {
             state = !state;
-            loco->setFunction(functId, state);
+            node->setFunction(functId, state);
         }
         char stateChar = (state) ? '1' : '0';
         reply(String("M") + throttleId + "A" + locoAddr + "<;>" + "F" +
@@ -181,7 +182,7 @@ public:
 
     int getThrottle()
     {
-        int v = loco->getThrottle();
+        int v = node->getThrottle();
         v = map(v, 0, 100, 0, 126);
         return v;
     }
@@ -190,7 +191,7 @@ public:
     {
         int v = atoi(value);
         v = map(v, 0, 126, 0, 100);
-        loco->setThrottle(v);
+        node->setThrottle(v);
     }
 
     void connect()
@@ -199,12 +200,12 @@ public:
         conn.flush();
         conn.setTimeout(500);
 
-        uint addr = loco->locoAddr.toInt();
+        uint addr = node->locoAddr.toInt();
         char addrType = (addr < 127) ? 'S' : 'L';
         locoAddr = String(addrType) + addr;
 
         reply("VN2.0");
-        reply(String("RL1]\\[") + loco->locoName + "}|{" + addr + "}|{" +
+        reply(String("RL1]\\[") + node->locoName + "}|{" + addr + "}|{" +
               addrType);
         reply("PPA1");
         reply("");
