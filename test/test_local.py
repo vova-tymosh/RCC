@@ -7,10 +7,10 @@ def test_local_start():
     s = openSerial()
     return (True, 'Test Local Start')
 
-def test_boot():
-    test_name = 'Boot the thing'
-    yn = input('\tBoot/reset the device and confirm the Red light is on. (Y/n)')
-    return (yn.lower() != 'n', test_name)
+# def test_boot():
+#     test_name = 'Boot the thing'
+#     yn = input('\tBoot/reset the device and confirm the Red light is on. (Y/n)')
+#     return (yn.lower() != 'n', test_name)
 
 def test_f0_on():
     test_name = 'Test Function 0 ON'
@@ -136,7 +136,7 @@ def test_local_end():
     s.close()
     return (True, 'Test Local End')
 
-tests_local = [test_local_start, test_boot, test_voltage,
+tests_local = [test_local_start, test_voltage,
     test_current, test_current_with_load, test_motor_bemf,
     test_f0_on, test_f0_blinking, test_f1_blinking,
     test_motor_forward, test_motor_backward, test_local_end]

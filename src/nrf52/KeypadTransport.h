@@ -281,7 +281,11 @@ public:
         isLocal = (addr == 0);
         known.selected = 0;
         qos.begin();
-        introduce();
+        if (!isLocal) {
+            introduce();
+            askListCabs();
+        }
+        askHearbteat();
     }
 
     bool loop()

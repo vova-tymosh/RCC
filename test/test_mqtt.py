@@ -1,26 +1,6 @@
 import time, re
 from infra import *
 
-MQ_PREFIX = "cab"
-MQ_INTRO = "intro"
-MQ_SET_THROTTLE = "throttle";
-MQ_SET_DIRECTION = "direction";
-MQ_HEARTBEAT_VALUES = "heartbeat/values"
-MQ_GET_FUNCTION = "function/get"
-MQ_SET_FUNCTION = "function/"
-MQ_GET_VALUE = "value/get"
-MQ_LIST_VALUE_ASK = "value/list"
-MQ_LIST_VALUE_RES = "keys"
-MQ_SET_VALUE = "value/"
-
-MQ_DIRECTIONS = ["REVERSE", "FORWARD", "STOP", "NEUTRAL"]
-MQ_ON = "ON"
-MQ_OFF = "OFF"
-
-MQ_SEPARATOR = ' '
-
-
-ADDR = 3
 
 
 mq = TransportMqtt()

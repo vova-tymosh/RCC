@@ -2,14 +2,23 @@
 
 import time
 import logging
+from infra import *
 from test_local import tests_local
 from test_mqtt import tests_mq
 from test_nrf_local import tests_nrf
 
+def test_boot():
+    s = openSerial()
+    writeSerial(s, '!')
+    s.close()
+    time.sleep(1)
+    return (True, 'Test Boot, bring device to known state')
+
 tests = []
+# tests += [test_boot]
 tests += tests_mq
+tests += tests_nrf
 # tests += tests_local
-# tests += tests_nrf
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(message)s',
