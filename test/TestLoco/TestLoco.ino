@@ -17,15 +17,19 @@
 Storage storage;
 Settings settings;
 PinExt yellow(2);
+PinExt led(5);
 Pin blue(D0);
 PowerMeter powerMeter;
 Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD);
 Timer timer;
 Timer blinker(1000);
 Timer update(1000);
+Timer timer2(10);
+
 
 Audio audio;
 
+bool ledEnable = false;
 
 const int PAGE_SIZE = 256;
 uint8_t page[PAGE_SIZE];
@@ -83,6 +87,9 @@ public:
         case 'W':
             writeAllAudio(audio_data, sizeof(audio_data));
             break;
+        case 'Z':
+            ledEnable = true;
+            break;
         }
 
     }
@@ -102,13 +109,16 @@ void setup()
     motor.setup();
     yellow.begin();
     blue.begin();
+    led.begin();
     powerMeter.setup();
     timer.start(100);
+    timer2.start(100);
     blinker.start();
     
     audio.begin();
     loco.debugLevel = 10;
     loco.setup();
+
 }
 
 void loop()
@@ -130,5 +140,14 @@ void loop()
             // digitalWrite(LED_BUILTIN, LOW);
         }
     }
+
+    if (ledEnable && timer2.hasFired()) {
+        static bool flip;
+        Serial.print(">>");
+        Serial.println(flip);
+        led.apply(flip);
+        flip = !flip;
+    }
+
 }
 

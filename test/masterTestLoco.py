@@ -9,7 +9,7 @@ from test_nrf_local import tests_nrf
 tests = []
 tests += tests_mq
 # tests += tests_local
-tests += tests_nrf
+# tests += tests_nrf
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(message)s',

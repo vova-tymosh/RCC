@@ -1,6 +1,7 @@
 import re
 import serial
 import time
+import queue
 import subprocess
 import select
 import sys
@@ -75,26 +76,22 @@ class TransportMqtt:
     def __init__(self):
         self.mqttClient = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, MQTT_NODE_NAME)
         self.mqttClient.on_message = self.onReceive
-        self.message = ""
+        self.messageQueue = queue.Queue()
 
     def start(self):
         self.mqttClient.connect(MQTT_BROKER)
         options = SubscribeOptions(qos = 1, noLocal = True)
         self.mqttClient.subscribe(f'{MQ_PREFIX}/#', options=options)
 
-    def loop(self, message = None):
+    def waitForMessage(self, message = None):
         for i in range(5):
             self.mqttClient.loop(timeout=1.0)
-            if message and self.message.startswith(message):
-                self.message = ""
-                return True
-        return False
-
-    def waitForHearbeat(self, message):
-        for i in range(10):
-            self.mqttClient.loop(timeout=1.0)
-            if self.message.startswith(message):
-                return self.message.split('+', 1)[1]
+            if message:
+                while not self.messageQueue.empty():
+                    m = self.messageQueue.get()
+                    if m.startswith(message):
+                        return m.split('+', 1)[1]
+        return None
 
     def write(self, message, retain = False):
         logging.info(f"[MQ] >: {message}")
@@ -108,4 +105,4 @@ class TransportMqtt:
         message = str(msg.payload, 'UTF-8')
 
         logging.info(f"[MQ] <: {msg.topic}+{message}")
-        self.message = msg.topic + '+' + message
+        self.messageQueue.put(msg.topic + '+' + message)
