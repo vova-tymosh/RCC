@@ -52,31 +52,9 @@ protected:
 
     static const uint16_t STATION_NODE = 0;
     uint16_t node;
-    int total;
-    int lost;
-    int last_sent;
 
 public:
     Wireless() : RADIO_CTOR, network(radio) {};
-
-    uint16_t getLostRate()
-    {
-        uint16_t lost_rate = 0;
-        if (total) {
-            lost_rate = 100 * lost / total;
-            if (lost_rate > 100)
-                lost_rate = 100;
-        }
-        return lost_rate;
-    }
-
-    bool isTransmitting()
-    {
-        int sent = total - lost;
-        bool alive = last_sent != sent;
-        last_sent = sent;
-        return alive;
-    }
 
     uint16_t read(void *payload, uint16_t size, int *from = NULL)
     {
@@ -96,9 +74,6 @@ public:
             if (report)
                 break;
         }
-        total++;
-        if (!report)
-            lost++;
         return report;
     }
 

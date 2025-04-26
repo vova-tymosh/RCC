@@ -14,14 +14,53 @@
 #define NAME_SIZE 5
 
 
+//TODO: add local mode tests
+//TODO: in the mq test make heartbeat fast to speed up the test
+
+struct Qos
+{
+    int sendExp = 0;
+    int sendAct = 0;
+    int hearbeatAct = 0;
+    int hearbeatExp = 0;
+    int hearbeatPeriod = 0;
+    int rate = 0;
+    int span = 0;
+    Timer timer;
+
+    void begin()
+    {
+        hearbeatPeriod = 1000;
+        timer.start(hearbeatPeriod);
+    }
+
+    void loop()
+    {
+        if (timer.hasFiredOnce()) {
+            hearbeatExp++;
+            int exp = sendExp + hearbeatExp;
+            float _rate = (exp) ? (float)(sendAct + hearbeatAct) / (exp) : 0;
+            rate = constrain(_rate * 100, 0, 100);
+
+            if (span++ > 10) {
+                hearbeatAct = hearbeatExp = 0;
+                sendAct = sendExp = 0;
+                span = 0;
+            }
+            timer.start(hearbeatPeriod);
+        }
+    }
+};
+
+
 class KeypadTransport
 {
 private:
+    const char *HEARTBEAT = "heartbeat";
+    uint8_t payload[MAX_PACKET];
     Wireless wireless;
     RCCNode *node;
-
-    Timer timer;
-    bool localMode;
+    Qos qos;
 
     struct Node {
         uint8_t addr;
@@ -34,17 +73,10 @@ private:
         int len;
     } known;
 
-    // int lost;
-    // int total;
-    // int received;
-    // bool alive;
-
-    uint8_t payload[MAX_PACKET];
-
 public:
     bool isLocal;
 
-    KeypadTransport(RCCNode *node) : node(node), timer(100) {};
+    KeypadTransport(RCCNode *node) : node(node) {};
 
     void log(String msg)
     {
@@ -52,11 +84,18 @@ public:
             Serial.println(msg);
     }
 
+    int getConnSuccessRate()
+    {
+        return qos.rate;
+    }
+
     void send(uint8_t *payload, uint8_t size, int to = -1)
     {
         if (to < 0)
             to = (isLocal) ? known.nodes[known.selected].addr : 0;
-        wireless.write(payload, size, to);
+        qos.sendExp++;
+        if (wireless.write(payload, size, to))
+            qos.sendAct++;
         Serial.print("[NR] >");
         Serial.print(to);
         Serial.print(">");
@@ -68,21 +107,6 @@ public:
     {
         send((uint8_t *)cmd, sizeof(*cmd), to);
     }
-
-    // uint16_t getLostRate()
-    // {
-    //     uint16_t lostRate = 0;
-    //     if (total) {
-    //         lostRate = 100 * lost / total;
-    //         if (lostRate > 100)
-    //             lostRate = 100;
-    //     }
-    //     return lostRate;
-    // }
-    // bool isAlive()
-    // {
-    //     return alive;
-    // }
 
     char *getSelectedName()
     {
@@ -155,6 +179,12 @@ public:
         send(&cmd);
     }
 
+    void askHearbteat()
+    {
+        String packet = String(NRF_GET_VALUE) + HEARTBEAT;
+        send((uint8_t *)packet.c_str(), packet.length());
+    }
+
     void processListCabs(char *packet, uint16_t size)
     {
         packet[size] = 0;
@@ -181,13 +211,24 @@ public:
         Serial.println("Subscribe to " + String(addr));
     }
 
-    bool processHeartbeat(uint8_t *payload, uint16_t size, int from)
+    void processHeartbeat(uint8_t *payload, uint16_t size, int from)
     {
-        bool mine = true;
-        if (mine) {
-            memcpy(&node->state, payload, size);
+        memcpy(&node->state, payload, size);
+        qos.hearbeatAct++;
+    }
+
+    void processSetValue(char* payload)
+    {
+        char *buffer[2];
+        int tokens = split((char*)payload + CODE_SIZE, (char**)&buffer, sizeofarray(buffer));
+        if (tokens >= 2) {
+            char *key = buffer[0];
+            char *value = buffer[1];
+            if (strcmp(key, HEARTBEAT) == 0) {
+                qos.hearbeatPeriod = atoi(value);
+            }
+            Serial.println(String("NRF_SET_VALUE: ") + key + " " + value);
         }
-        return mine;
     }
 
     void received(uint8_t *payload, uint16_t size, int from)
@@ -205,6 +246,7 @@ public:
                 introduce();
                 askListCabs();
             }
+            askHearbteat();
         } else if (isLocal && !isKnown(from)){
             askToIntro(from);
         } else if (command->code == NRF_LIST_CAB) {
@@ -230,13 +272,7 @@ public:
         } else if (command->code == NRF_SET_VALUE) {
             if ((isMine(from)) && (size >= CODE_SIZE + 1)) {
                 payload[size] = 0;
-                char *buffer[2];
-                int tokens = split((char*)payload + CODE_SIZE, (char**)&buffer, sizeofarray(buffer));
-                if (tokens >= 2) {
-                    char *key = buffer[0];
-                    char *value = buffer[1];
-                    Serial.println(String("NRF_SET_VALUE: ") + key + " " + value);
-                }
+                processSetValue((char *)payload);
             }
         } else if (command->code == NRF_LIST_VALUE_RES) {
             if (isMine(from)) {
@@ -253,22 +289,20 @@ public:
         wireless.setup(addr);
         isLocal = (addr == 0);
         known.selected = 0;
+        qos.begin();
     }
 
     bool loop()
     {
         bool update = false;
         if (wireless.available()) {
+            update = true;
             int from;
             uint16_t size = wireless.read(payload, sizeof(payload), &from);
             received(payload, size, from);
         }
 
-        // if (alive_period.hasFired()) {
-        //     static int lastPackets;
-        //     alive = received > lastPackets;
-        //     lastPackets = received;
-        // }
+        qos.loop();
         return update;
     }
 };

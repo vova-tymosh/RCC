@@ -20,6 +20,7 @@ public:
         if (debugLevel > 0)
             Serial.println(msg);
     }
+
     virtual int getHeartbeat()
     {
         return 1000;

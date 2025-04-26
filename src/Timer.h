@@ -17,7 +17,7 @@ public:
 
     Timer(unsigned int duration)
     {
-        start(duration);
+        this->duration = duration;
     }
 
     void start()
