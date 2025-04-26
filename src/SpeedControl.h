@@ -64,7 +64,7 @@ public:
         return map(value, 0, upper, 0, 100);
     }
 
-    void setup(float _p, float _i, float _d, float _m)
+    void begin(float _p, float _i, float _d, float _m)
     {
         p = _p;
         i = _i;

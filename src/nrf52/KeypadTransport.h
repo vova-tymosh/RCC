@@ -275,11 +275,11 @@ public:
         }
     }
 
-    void setup()
+    void begin()
     {
         memset(&known, 0, sizeof(known));
         int addr = node->locoAddr.toInt();
-        wireless.setup(addr);
+        wireless.begin(addr);
         isLocal = (addr == 0);
         known.selected = 0;
         qos.begin();

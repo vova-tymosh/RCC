@@ -32,7 +32,7 @@ class ServoBase {
   public:
     ServoBase(int pin): pin(pin) {}
 
-    void setup() {
+    void begin() {
       pinMode(pin, OUTPUT);
       servo.attach(pin);
     }
@@ -75,7 +75,7 @@ public:
     {
     }
 
-    virtual void setup()
+    virtual void begin()
     {
         pinMode(pin_back, OUTPUT);
         pinMode(pin_fowd, OUTPUT);
@@ -118,7 +118,7 @@ public:
     {
     }
 
-    virtual void setup()
+    virtual void begin()
     {
         pinMode(pin_back, OUTPUT);
         pinMode(pin_fowd, OUTPUT);
@@ -184,7 +184,7 @@ private:
 public:
     ThermoSensor(const int pin) : pin(pin) {}
 
-    void setup()
+    void begin()
     {
         pinMode(pin, INPUT);
     }
@@ -219,9 +219,9 @@ public:
     {
     }
 
-    void setup()
+    void begin()
     {
-        ThermoSensor::setup();
+        ThermoSensor::begin();
         pinMode(vcc, OUTPUT);
         digitalWrite(vcc, HIGH);
         pinMode(gnd, OUTPUT);
@@ -237,7 +237,7 @@ private:
 
 public:
     PreassureSensor(int pin, int psiMax = 100) : pin(pin), psiMax(psiMax) {}
-    void setup()
+    void begin()
     {
         pinMode(pin, INPUT);
     }

@@ -61,7 +61,7 @@ void setup()
 
 
     keypad.debugLevel = 10;
-    keypad.setup();
+    keypad.begin();
 }
 
 void loop()

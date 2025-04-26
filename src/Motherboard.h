@@ -76,7 +76,7 @@ public:
 
     PowerMeter() : ina219() {}
 
-    void setup()
+    void begin()
     {
         if (ina219.begin()) {
             ina219.setCalibration_32V_2A();

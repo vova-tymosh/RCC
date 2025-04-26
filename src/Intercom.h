@@ -21,7 +21,7 @@ public:
     int onReceive();
     void onSend();
 
-    void setup(bool master);
+    void begin(bool master);
     void send(void *data, uint8_t size);
     void recv(void *data, uint8_t size);
 };

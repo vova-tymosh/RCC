@@ -11,7 +11,7 @@
 // TODO: add nrf52 support
 // TODO: simplify bit stream management
 
-void dccPhy::setup()
+void dccPhy::begin()
 {
     pinMode(9, OUTPUT);
 #ifdef ARDUINO_AVR_LEONARDO

@@ -111,10 +111,10 @@ public:
         return "";
     }
 
-    void setup()
+    void begin()
     {
         locoAddr = settings.get("locoaddr");
-        transport->setup();
+        transport->begin();
     }
 
     void loop()

@@ -9,6 +9,6 @@ private:
     static void writeLow();
 
 public:
-    static void setup();
+    static void begin();
     static void handleInterrupt();
 };

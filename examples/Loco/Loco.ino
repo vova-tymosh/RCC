@@ -128,7 +128,7 @@ void setup()
     // settings.checkDefaults(defaultSettings, defaultSettingsSize);
 
     // loco.debugLevel = 2;
-    // loco.setup();
+    // loco.begin();
 
     testRun.start(2000);
 }

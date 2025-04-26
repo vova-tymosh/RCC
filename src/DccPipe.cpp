@@ -97,9 +97,9 @@ dccPipe::dccPipe()
     this->function_bits = 0;
 }
 
-void dccPipe::setup()
+void dccPipe::begin()
 {
-    dccPhy::setup();
+    dccPhy::begin();
     Serial.println("DCC_begin");
     if (control_state == Idle) {
 #ifndef ARDUINO_ARCH_NRF52

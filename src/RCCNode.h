@@ -38,6 +38,6 @@ public:
     virtual void setValue(char *key, char *value) = 0;
     virtual String getValue(char *key) = 0;
     virtual String listValues() = 0;
-    virtual void setup() = 0;
+    virtual void begin() = 0;
     virtual void loop() = 0;
 };

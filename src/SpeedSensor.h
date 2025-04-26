@@ -27,7 +27,7 @@ public:
     {
     }
 
-    void setup()
+    void begin()
     {
         pinMode(pin, INPUT);
         attachInterrupt(digitalPinToInterrupt(pin), speedHandler, RISING);

@@ -180,7 +180,7 @@ public:
         }
     }
 
-    void setup()
+    void begin()
     {
         locoName = settings.get("loconame");
         locoAddr = settings.get("locoaddr");

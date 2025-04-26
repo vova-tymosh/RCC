@@ -38,7 +38,7 @@ void Intercom::onSend()
     Wire.write((const uint8_t *)packet_out, size);
 }
 
-void Intercom::setup(bool master)
+void Intercom::begin(bool master)
 {
     this->master = master;
     if (master) {

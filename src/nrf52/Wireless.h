@@ -83,7 +83,7 @@ public:
         return network.available();
     }
 
-    void setup(int node)
+    void begin(int node)
     {
         this->node = node;
         if (!radio.begin()) {

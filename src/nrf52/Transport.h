@@ -139,7 +139,7 @@ public:
     void begin()
     {
         int addr = loco->locoAddr.toInt();
-        wireless.setup(addr);
+        wireless.begin(addr);
         introduce();
         heartbeatTimer.start();
     }

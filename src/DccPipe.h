@@ -17,7 +17,7 @@ private:
 
 public:
     dccPipe();
-    void setup();
+    void begin();
     bool processCommand(char msg[]);
     bool processSpeed(char msg[]);
     bool processFunction(char msg[]);
