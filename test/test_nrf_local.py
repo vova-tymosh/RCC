@@ -35,8 +35,8 @@ def test_direction_0():
     testResult = mq.waitForMessage(setValueMsg)
     return (testResult, test_name)
 
-def test_function():
-    test_name = 'Test NRF Function'
+def test_function_set():
+    test_name = 'Test NRF Function Set'
     writeSerial(s, 'F12')
     setValueMsg = f'cab/{ADDR}/function/2+ON'
     testResult = mq.waitForMessage(setValueMsg)
@@ -59,5 +59,5 @@ def test_nrf_end():
     s.close()
     return (True, 'Test NRF End')
 
-tests_nrf = [test_nrf_start, test_throttle, test_direction_3, test_direction_0, test_nrf_end]
-
+tests_nrf = [test_nrf_start, test_throttle, test_direction_3, test_direction_0, 
+             test_function_set, test_function_get, test_nrf_end]
