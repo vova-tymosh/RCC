@@ -54,10 +54,32 @@ def test_function_get():
     testResult = mq.waitForMessage(setValueMsg)
     return (testResult, test_name)
 
+def test_value():
+    test_name = 'Test NRF Velue'
+    writeSerial(s, 'Sacceleration:72')
+    setValueMsg = f'cab/{ADDR}/value/acceleration+72'
+    mq.waitForMessage(setValueMsg)
+    writeSerial(s, 'Gacceleration')
+    getValueRes = f'cab/{ADDR}/value/acceleration+72'
+    testResult = mq.waitForMessage(getValueRes)
+    writeSerial(s, 'Sacceleration:0')
+    setValueMsg = f'cab/{ADDR}/value/acceleration+0'
+    mq.waitForMessage(setValueMsg)
+    return (testResult, test_name)
+
+def test_list():
+    test_name = 'Test NRF List'
+    writeSerial(s, 'L')
+    getValueRes = f'cab/{ADDR}/{MQ_LIST_VALUE_RES}'
+    testResult = mq.waitForMessage(getValueRes)
+    logging.error(f"Test List: {testResult}")
+    return (testResult, test_name)
+
+
 def test_nrf_end():
     global s
     s.close()
     return (True, 'Test NRF End')
 
 tests_nrf = [test_nrf_start, test_throttle, test_direction_3, test_direction_0, 
-             test_function_set, test_function_get, test_nrf_end]
+             test_function_set, test_function_get, test_value, test_list, test_nrf_end]

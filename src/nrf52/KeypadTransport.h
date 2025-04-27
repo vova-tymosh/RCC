@@ -200,7 +200,7 @@ public:
             addr = known.nodes[known.selected].addr;
         Command cmd = {.code = NRF_SUB, .value = addr};
         send(&cmd);
-        log("Subscribe to " + addr);
+        log("Subscribed to: " + addr);
     }
 
     void processHeartbeat(uint8_t *payload, uint16_t size, int from)
