@@ -53,7 +53,6 @@ public:
         String packet = String(NRF_INTRO) + NRF_TYPE_LOCO + NRF_SEPARATOR +
                         node->locoAddr + NRF_SEPARATOR + node->locoName +
                         NRF_SEPARATOR + VERSION + NRF_SEPARATOR + LOCO_FORMAT;
-
         for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             packet += NRF_SEPARATOR;
             packet += Keys[i];

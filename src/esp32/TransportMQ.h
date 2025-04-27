@@ -39,9 +39,16 @@ public:
         node = _loco;
     }
 
+    void write(String topic, String message, bool retain = false)
+    {
+        log(String(">") + topic + "+" + message);
+        mqtt.publish(topic.c_str(), message.c_str(), retain = retain);
+    }
+
     void heartbeat()
     {
         LocoState *s = &node->state;
+        s->tick = (float)millis() / 100;
         String heartbeatPayload;
         heartbeatPayload.reserve(64);
         heartbeatPayload =
@@ -52,18 +59,20 @@ public:
             MQ_SEPARATOR + String(s->battery) + MQ_SEPARATOR +
             String(s->temperature) + MQ_SEPARATOR + String(s->psi) +
             MQ_SEPARATOR + String(s->current);
-        mqtt.publish(heartbeatTopic.c_str(), heartbeatPayload.c_str());
+        write(heartbeatTopic, heartbeatPayload);
     }
 
     void introduce()
     {
         String topic = topicPrefix + String(MQ_INTRO);
-        String value = Keys[0];
-        for (int i = 1; i < sizeof(Keys) / sizeof(char *); i++) {
+        String value = String(NRF_TYPE_LOCO) + NRF_SEPARATOR +
+                        node->locoAddr + NRF_SEPARATOR + node->locoName +
+                        NRF_SEPARATOR + VERSION + MQ_SEPARATOR + LOCO_FORMAT;
+        for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             value += MQ_SEPARATOR;
             value += Keys[i];
         }
-        mqtt.publish(topic.c_str(), value.c_str(), true);
+        write(topic, value, true);
     }
 
     void reconnect()
@@ -90,6 +99,7 @@ public:
         topicPrefix = String(MQ_PREFIX) + "/" + node->locoAddr + "/";
         heartbeatTopic = topicPrefix + String(MQ_HEARTBEAT_VALUES);
         nextReconnectTime = millis();
+        heartbeatTimer.start();
     }
 
     void loop()
@@ -97,8 +107,9 @@ public:
         if (!mqtt.connected()) {
             reconnect();
         } else {
-            if (heartbeatTimer.hasFired()) {
+            if (heartbeatTimer.hasFiredOnce()) {
                 heartbeat();
+                heartbeatTimer.start(node->getHeartbeat());
             }
         }
         mqtt.loop();
@@ -145,12 +156,14 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
         String key(payload, length);
         String value = mqttClient.node->getValue((char *)key.c_str());
         String topic = mqttClient.topicPrefix + MQ_SET_VALUE + key;
-        mqttClient.mqtt.publish(topic.c_str(), value.c_str());
+        // mqttClient.mqtt.publish(topic.c_str(), value.c_str());
+        mqttClient.write(topic, value);
     } else if (strcmp(action, MQ_LIST_VALUE_ASK) == 0) {
         // Value, list all Keys (config and runtime)
         String topic = mqttClient.topicPrefix + MQ_LIST_VALUE_RES;
         String value = mqttClient.node->listValues();
-        mqttClient.mqtt.publish(topic.c_str(), value.c_str());
+        // mqttClient.mqtt.publish(topic.c_str(), value.c_str());
+        mqttClient.write(topic, value);
     } else if (strncmp(action, MQ_SET_VALUE, strlen(MQ_SET_VALUE)) == 0) {
         // Value, set state. Hast to be the last one, after "get" and "list"
         char *key = action + strlen(MQ_SET_VALUE);
@@ -163,7 +176,8 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
         String value =
             mqttClient.node->getFunction(functionCode) ? MQ_ON : MQ_OFF;
         String topic = mqttClient.topicPrefix + MQ_SET_FUNCTION + key;
-        mqttClient.mqtt.publish(topic.c_str(), value.c_str());
+        // mqttClient.mqtt.publish(topic.c_str(), value.c_str());
+        mqttClient.write(topic, value);
     } else if (strncmp(action, MQ_SET_FUNCTION, strlen(MQ_SET_FUNCTION)) == 0) {
         // Function, set state. Hast to be the last one, after "get"
         action += strlen(MQ_SET_FUNCTION);
