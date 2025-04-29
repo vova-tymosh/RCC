@@ -88,7 +88,7 @@ public:
                 introduce();
             } else {
                 log("Failed to connect");
-                nextReconnectTime = millis() + 5000;
+                nextReconnectTime = millis() + 2000;
             }
         }
     }

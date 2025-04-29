@@ -5,9 +5,11 @@
 #include "ConfigWeb.h"
 #include "Settings.h"
 
+extern const int locoKeySize;
+extern const char *locoKeys[];
 // TODO: add all settings
 
-const char *htmlRoot = R"(
+const char *htmlPrefix = R"(
 <html>
     <head>
       <style>
@@ -30,26 +32,23 @@ const char *htmlRoot = R"(
       <h1>RCC Configuration</h1>
       <form method="POST" action="/submit">
         <table>
+)";
+
+const char *htmlCheckbox = R"(
           <tr>
             <th>Access point mode:</th>
             <td><input type="checkbox" name="wifiap" $wifiap$></td>
           </tr>
+)";
+
+const char *htmlInput = R"(
           <tr>
-            <th>Wifi SSID:</th>
-            <td><input type="text" name="wifissid" value="$wifissid$"></td>
+            <th>$user_readable$:</th>
+            <td><input type="text" name="$key$" value="$value$"></td>
           </tr>
-          <tr>
-            <th>Wifi Password:</th>
-            <td><input type="text" name="wifipwd" value="$wifipwd$"></td>
-          </tr>
-          <tr>
-            <th>Loco Name:</th>
-            <td><input type="text" name="loconame" value="$loconame$"></td>
-          </tr>
-          <tr>
-            <th>Loco Address:</th>
-            <td><input type="text" name="locoaddr" value="$locoaddr$"></td>
-          </tr>
+)";
+
+const char *htmlSuffix = R"(
           <tr>
             <td colspan="2" style="text-align: center;">
               <input type="submit" value="Submit">
@@ -75,41 +74,44 @@ const char *htmlSubmitted = R"(
   </html>
 )";
 
+const char *userReadable[] = 
+    {"wifiap", "Wifi SSID", "WiFi Password", "Loco Name", "Loco Address", 
+     "MQTT Broker IP", "MQTT Broker port", "Acceleration", "managespeed", 
+     "heartbeat"};
+
+
 WebServer ConfigWeb::server(80);
 
 void ConfigWeb::handleRoot()
 {
     String wifiap = settings.get("wifiap");
-    String wifissid = settings.get("wifissid");
-    String wifipwd = settings.get("wifipwd");
-    String loconame = settings.get("loconame");
-    String locoaddr = settings.get("locoaddr");
 
-    String form = String(htmlRoot);
-    form.replace("$wifiap$", (wifiap == "on") ? "checked" : "");
-    form.replace("$wifissid$", wifissid);
-    form.replace("$wifipwd$", wifipwd);
-    form.replace("$loconame$", loconame);
-    form.replace("$locoaddr$", locoaddr);
+    String form = String(htmlPrefix);
+    String checkbox = String(htmlCheckbox);
+    checkbox.replace("$wifiap$", (wifiap == "on") ? "checked" : "");
+    form += checkbox;
+    for (int i = 1; i < locoKeySize; i++) {
+        String inputbox = String(htmlInput);
+        inputbox.replace("$user_readable$", userReadable[i]);
+        inputbox.replace("$key$", locoKeys[i]);
+        inputbox.replace("$value$", settings.get(locoKeys[i]));
+        form += inputbox;
+    }
+    form += htmlSuffix;
     server.send(200, "text/html", form);
 }
 
 void ConfigWeb::handleSubmit()
 {
     String wifiap = server.arg("wifiap");
-    String wifissid = server.arg("wifissid");
-    String wifipwd = server.arg("wifipwd");
-    String loconame = server.arg("loconame");
-    String locoaddr = server.arg("locoaddr");
-
     if (wifiap != "on")
         wifiap = "of";
     settings.put("wifiap", wifiap);
-    settings.put("wifissid", wifissid);
-    settings.put("wifipwd", wifipwd);
-    settings.put("loconame", loconame);
-    settings.put("locoaddr", locoaddr);
 
+    for (int i = 1; i < locoKeySize; i++) {
+        String value = server.arg(locoKeys[i]);
+        settings.put(locoKeys[i], value);
+    }
     server.send(200, "text/html", htmlSubmitted);
 }
 
