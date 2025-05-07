@@ -22,6 +22,8 @@ protected:
     RccCli rccCli;
 
 public:
+    bool update;
+
     RCCKeypad() : rccCli(this)
     {
         transport = new KeypadTransport(this);
@@ -111,6 +113,27 @@ public:
         return "";
     }
 
+    void askHeartbeat()
+    {
+        Command cmd = {.code = NRF_HEARTBEAT, .value = 0};
+        transport->send(&cmd);
+    }
+
+    char *getSelectedName()
+    {
+        return transport->getSelectedName();
+    }
+
+    void cycleSelected()
+    {
+        transport->cycleSelected();
+    }
+
+    int getConnSuccessRate()
+    {
+        return transport->getConnSuccessRate();
+    }
+
     void begin()
     {
         locoAddr = settings.get("locoaddr");
@@ -119,7 +142,7 @@ public:
 
     void loop()
     {
-        transport->loop();
         rccCli.loop();
+        update = transport->loop();
     }
 };

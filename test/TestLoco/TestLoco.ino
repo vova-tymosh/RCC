@@ -195,6 +195,7 @@ void setup()
     timer.start(100);
     timer2.start(100);
     blinker.start();
+    update.start();
     
     audio.begin();
     loco.debugLevel = 10;
@@ -209,6 +210,10 @@ void loop()
     if (update.hasFired()) {
         loco.state.battery = powerMeter.readBattery();
         loco.state.current = powerMeter.readCurrent();
+        loco.state.distance = 101;
+        loco.state.speed = 20;
+        loco.state.temperature = 110;
+        loco.state.psi = 35;
     }
 
     if (blinker.hasFired()) {

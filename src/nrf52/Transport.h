@@ -3,20 +3,14 @@
  *
  *
  */
+#pragma once
 #include "nrf52/Wireless.h"
-#include "RCCNode.h"
+#include "nrf52/TransportUtils.h"
 #include "Protocol.h"
+#include "RCCNode.h"
 #include "Timer.h"
 
-void printHex(uint8_t *payload, int size);
-int split(char *input, char **output, uint8_t size,
-          char delimiter = NRF_SEPARATOR);
 
-const int MAX_PACKET = 256;
-
-#define COMMAND_SIZE sizeof(struct Command)
-#define CODE_SIZE 1
-#define sizeofarray(x) (sizeof(x) / sizeof(x[0]))
 
 #define log(msg)                                                               \
     {                                                                          \
@@ -24,17 +18,6 @@ const int MAX_PACKET = 256;
             Serial.println(String("[Nrf] ") + (msg));                          \
     };
 
-
-struct __attribute__((packed)) Command {
-    uint8_t code;
-    union {
-        uint8_t value;
-        struct {
-            uint8_t functionId : 7;
-            uint8_t activate   : 1;
-        };
-    };
-};
 
 class Transport
 {
@@ -106,7 +89,7 @@ public:
                 payload[size] = 0;
                 char *buffer[2];
                 int tokens = split((char *)payload + CODE_SIZE,
-                                   (char **)&buffer, sizeofarray(buffer));
+                                   (char **)&buffer, sizeofarray(buffer), NRF_SEPARATOR);
                 if (tokens >= 2) {
                     char *key = buffer[0];
                     char *value = buffer[1];
@@ -131,6 +114,8 @@ public:
             }
         } else if (command->code == NRF_LIST_VALUE_ASK) {
             processList();
+        } else if (command->code == NRF_HEARTBEAT) {
+            heartbeat();
         } else {
             node->onCommand(command->code, (char *)payload + CODE_SIZE, size);
         }

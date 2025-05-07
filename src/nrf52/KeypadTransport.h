@@ -5,9 +5,9 @@
  */
 #pragma once
 #include "nrf52/Wireless.h"
-#include "nrf52/Transport.h"
-#include "RCCNode.h"
+#include "nrf52/TransportUtils.h"
 #include "Protocol.h"
+#include "RCCNode.h"
 #include "Timer.h"
 
 #define MAX_LOCO 5
@@ -17,40 +17,40 @@
 
 #define log(msg)                                                               \
     {                                                                          \
-        if (node->debugLevel > 2)                                              \
+        if (node->debugLevel > 3)                                              \
             Serial.println(String("[Nrf] ") + (msg));                          \
     };
 
 struct Qos {
     int sendExp = 0;
     int sendAct = 0;
-    int hearbeatAct = 0;
-    int hearbeatExp = 0;
-    int hearbeatPeriod = 0;
+    int heartbeatAct = 0;
+    int heartbeatExp = 0;
+    int heartbeatPeriod = 0;
     int rate = 0;
     int span = 0;
     Timer timer;
 
     void begin()
     {
-        hearbeatPeriod = 1000;
-        timer.start(hearbeatPeriod);
+        heartbeatPeriod = 1000;
+        timer.start(heartbeatPeriod);
     }
 
     void loop()
     {
         if (timer.hasFiredOnce()) {
-            hearbeatExp++;
-            int exp = sendExp + hearbeatExp;
-            float _rate = (exp) ? (float)(sendAct + hearbeatAct) / (exp) : 0;
+            heartbeatExp++;
+            int exp = sendExp + heartbeatExp;
+            float _rate = (exp) ? (float)(sendAct + heartbeatAct) / (exp) : 0;
             rate = constrain(_rate * 100, 0, 100);
 
             if (span++ > 10) {
-                hearbeatAct = hearbeatExp = 0;
+                heartbeatAct = heartbeatExp = 0;
                 sendAct = sendExp = 0;
                 span = 0;
             }
-            timer.start(hearbeatPeriod);
+            timer.start(heartbeatPeriod);
         }
     }
 };
@@ -85,25 +85,6 @@ public:
         return qos.rate;
     }
 
-    void send(uint8_t *payload, uint8_t size, int to = -1)
-    {
-        if (to < 0)
-            to = (isLocal) ? known.nodes[known.selected].addr : 0;
-        qos.sendExp++;
-        if (wireless.write(payload, size, to))
-            qos.sendAct++;
-        if (size == 2) {
-            log(String(to) + ">" + String((char)payload[0]) + payload[1]);
-        } else {
-            log(String(to) + ">" + String((char)payload[0]) + " size:" + size);
-        }
-    }
-
-    void send(Command *cmd, int to = -1)
-    {
-        send((uint8_t *)cmd, sizeof(*cmd), to);
-    }
-
     char *getSelectedName()
     {
         return known.nodes[known.selected].name;
@@ -115,6 +96,7 @@ public:
             known.selected++;
         else
             known.selected = 0;
+        subsribe();
     }
 
     bool isKnown(int addr)
@@ -138,7 +120,7 @@ public:
     {
         payload[size] = 0;
         char *buffer[5];
-        int tokens = split(payload + 1, (char **)&buffer, sizeofarray(buffer));
+        int tokens = split(payload + 1, (char **)&buffer, sizeofarray(buffer), NRF_SEPARATOR);
 
         if (tokens > 3) {
             known.nodes[known.len].addr = atoi(buffer[1]);
@@ -182,7 +164,7 @@ public:
         packet[size] = 0;
         int index = 0;
         char *buffer[10 * 3];
-        int tokens = split(packet + 1, (char **)&buffer, sizeofarray(buffer));
+        int tokens = split(packet + 1, (char **)&buffer, sizeofarray(buffer), NRF_SEPARATOR);
         for (int i = 0; i < tokens / 3; i++) {
             if (buffer[i * 3][0] == NRF_TYPE_LOCO) {
                 known.nodes[index].addr = atoi(buffer[i * 3 + 1]);
@@ -200,28 +182,47 @@ public:
             addr = known.nodes[known.selected].addr;
         Command cmd = {.code = NRF_SUB, .value = addr};
         send(&cmd);
-        log("Subscribed to: " + addr);
+        log("Subscribed to: " + String(addr));
     }
 
     void processHeartbeat(uint8_t *payload, uint16_t size, int from)
     {
         memcpy(&node->state, payload, size);
-        qos.hearbeatAct++;
+        qos.heartbeatAct++;
     }
 
     void processSetValue(char *payload)
     {
         char *buffer[2];
         int tokens = split((char *)payload + CODE_SIZE, (char **)&buffer,
-                           sizeofarray(buffer));
+                           sizeofarray(buffer), NRF_SEPARATOR);
         if (tokens >= 2) {
             char *key = buffer[0];
             char *value = buffer[1];
             if (strcmp(key, HEARTBEAT) == 0) {
-                qos.hearbeatPeriod = atoi(value);
+                qos.heartbeatPeriod = atoi(value);
             }
             log("Set value: " + String(key) + " " + String(value));
         }
+    }
+
+    void send(uint8_t *payload, uint8_t size, int to = -1)
+    {
+        if (to < 0)
+            to = (isLocal) ? known.nodes[known.selected].addr : 0;
+        qos.sendExp++;
+        if (wireless.write(payload, size, to))
+            qos.sendAct++;
+        if (size == 2) {
+            log(String(to) + ">" + String((char)payload[0]) + payload[1]);
+        } else {
+            log(String(to) + ">" + String((char)payload[0]) + " size:" + size);
+        }
+    }
+
+    void send(Command *cmd, int to = -1)
+    {
+        send((uint8_t *)cmd, sizeof(*cmd), to);
     }
 
     void received(uint8_t *payload, uint16_t size, int from)
@@ -238,12 +239,12 @@ public:
                 introduce();
                 askListCabs();
             }
-            askHearbteat();
         } else if (isLocal && !isKnown(from)) {
             askToIntro(from);
         } else if (command->code == NRF_LIST_CAB) {
             processListCabs((char *)payload, size);
             subsribe();
+            askHearbteat();
         } else if (command->code == NRF_HEARTBEAT) {
             if (isMine(from))
                 processHeartbeat(payload, size, from);
@@ -282,11 +283,12 @@ public:
         isLocal = (addr == 0);
         known.selected = 0;
         qos.begin();
-        if (!isLocal) {
+        if (isLocal) {
+            askHearbteat();
+        } else {
             introduce();
             askListCabs();
         }
-        askHearbteat();
     }
 
     bool loop()

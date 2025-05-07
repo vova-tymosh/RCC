@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PROTOCOL_H
+#define PROTOCOL_H
 
 const char SEPARATOR = ' ';
 
@@ -54,3 +55,5 @@ const char CMD_LIST_VALUE = 'L';
 const char CMD_CMD = 'C';
 const char CMD_ERASE = 'E';
 const char CMD_REBOOT = '!';
+
+#endif // PROTOCOL_H
