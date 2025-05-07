@@ -12,6 +12,8 @@
 #include "Timer.h"
 #include "Cli.h"
 
+//TODO : push realtimeXXX to Settings
+
 extern const char *locoKeys[];
 extern const char *locoValues[];
 extern const int locoKeySize;

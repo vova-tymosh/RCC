@@ -7,7 +7,7 @@
 
 extern const int locoKeySize;
 extern const char *locoKeys[];
-// TODO: add all settings
+
 
 const char *htmlPrefix = R"(
 <html>
