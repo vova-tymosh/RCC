@@ -1,132 +1,156 @@
-#if defined(ARDUINO_ARCH_NRF52) || defined(ARDUINO_AVR_LEONARDO)
+#if defined(ARDUINO_ARCH_NRF52) 
 
 /*
 SPI flash storage for nRF52
-Important:
-    The flash writes with 4 bytes alignment, so the size of the file will be
-rounded up to the next multiple of 4 Also FileRecords has to be aligned to 4
-bytes
-
-
 */
 
-#include <stdint.h>
 #include <Arduino.h>
 #include "Storage.h"
-#include "StoragePhy.h"
+#include "Adafruit_LittleFS.h"
+#include "Adafruit_SPIFlash.h"
 
-struct FileRecord {
-    char filename[16];
-    uint32_t offset;
-    uint32_t size;
-};
+#define LFS_BLOCK_SIZE        4096
 
-struct MasterRecord {
-    uint32_t validation;
-    uint32_t count;
-    uint32_t end;
-};
 
-MasterRecord mr;
+const SPIFlash_Device_t XIAO_NRF_FLASH = P25Q16H;
+Adafruit_FlashTransport_QSPI flashTransport;
+Adafruit_SPIFlash flash(&flashTransport);
 
-uint32_t createFile(const char *filename, size_t size)
+static inline uint32_t lba2addr(uint32_t block)
 {
-    if (mr.end + size > phySize) {
-        Serial.println("[FS] Storage full");
-        return 0;
-    }
-    size = (size + 3) & ~3;
-    FileRecord f;
-    strncpy(f.filename, filename, sizeof(f.filename));
-    f.offset = mr.end;
-    f.size = size;
-    uint32_t recordAt = mr.count * sizeof(FileRecord) + sizeof(MasterRecord);
-    phyWrite(recordAt, (const uint8_t *)&f, sizeof(f));
-    mr.count++;
-    mr.end += size;
-    phyWrite(0, (const uint8_t *)&mr, sizeof(mr));
-    return f.offset;
+  return block * LFS_BLOCK_SIZE;
 }
 
-bool getFile(const char *filename, FileRecord *record)
+static int _internal_flash_read (const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size)
 {
-    FileRecord f;
-    uint32_t offset = sizeof(mr);
-    for (int i = 0; i < mr.count; i++) {
-        phyRead(offset + i * sizeof(f), (uint8_t *)&f, sizeof(f));
-        if (strcmp(f.filename, filename) == 0) {
-            memcpy(record, &f, sizeof(f));
-            return true;
-        }
-    }
-    return false;
+  uint32_t addr = lba2addr(block) + off;
+  if (flash.readBuffer(addr, (uint8_t*)buffer, size))
+    return 0;
+  return -1;
 }
+
+static int _internal_flash_prog (const struct lfs_config *c, lfs_block_t block, lfs_off_t off, const void *buffer, lfs_size_t size)
+{
+  uint32_t addr = lba2addr(block) + off;
+  if (flash.writeBuffer(addr, (const uint8_t*)buffer, size))
+    return 0;
+  return -1;
+}
+
+static int _internal_flash_erase (const struct lfs_config *c, lfs_block_t block)
+{
+  if (flash.eraseSector(block))
+    return 0;
+  return -1;
+}
+
+static int _internal_flash_sync (const struct lfs_config *c)
+{
+  flash.syncBlocks();
+  return 0;
+}
+
+static struct lfs_config extCfg =
+{
+  .context = NULL,
+
+  .read = _internal_flash_read,
+  .prog = _internal_flash_prog,
+  .erase = _internal_flash_erase,
+  .sync = _internal_flash_sync,
+
+  .read_size = 256,
+  .prog_size = 256,
+  .block_size = LFS_BLOCK_SIZE,
+  .block_count = (1<<21) / 4096,   //XIAO_NRF_FLASH.total_size / LFS_BLOCK_SIZE,
+  .lookahead = 128,
+
+  .read_buffer = NULL,
+  .prog_buffer = NULL,
+  .lookahead_buffer = NULL,
+  .file_buffer = NULL
+};
+
+Adafruit_LittleFS littefs(&extCfg);
+Adafruit_LittleFS_Namespace::File file(littefs);
+
 
 void Storage::beginInternal()
 {
-    phyBegin();
+    flash.begin(&XIAO_NRF_FLASH, 1);
+    if (!littefs.begin()) {
+        Serial.println("[FS] Mount failed, erase and format");
+        flash.eraseChip();
+        flash.waitUntilReady();  
+        bool r = littefs.format();
+        r = r && littefs.begin();
+        if (!r)
+            Serial.println("[FS] Format/reinit failed");
+      } else {
+        Serial.println("[FS] Mount successful");
+      }
 }
 
 uint32_t Storage::getValidation()
 {
-    mr.validation = 0;
-    phyRead(0, (uint8_t *)&mr, sizeof(mr));
-    return mr.validation;
+    uint32_t validation = 0;
+    read("validation", &validation, sizeof(validation));
+    return validation;
 }
 
 void Storage::setValidation(uint32_t validation)
 {
-    mr = {validation, 0, maxFiles * sizeof(FileRecord)};
-    phyWrite(0, (const uint8_t *)&mr, sizeof(mr));
+    write("validation", &validation, sizeof(validation));
 }
 
 void Storage::clearInternal()
 {
-    phyErase();
+    // littefs.rmdir_r("/");
 }
 
 int Storage::read(const char *filename, void *buffer, size_t size,
                   size_t offset)
 {
-    FileRecord f;
-    if (getFile(filename, &f)) {
-        if (offset >= f.size)
+    int r = 0;
+    String path = String("/") + filename;
+    file.open(path.c_str(), Adafruit_LittleFS_Namespace::FILE_O_READ);
+    if (file) {
+        if (offset >= file.size())
             return 0;
-        if (offset + size > f.size)
-            size -= offset + size - f.size;
-        return phyRead(f.offset + offset, (uint8_t *)buffer, size);
+        if (offset + size > file.size())
+            size -= offset + size - file.size();
+        file.seek(offset);
+        r = file.read((uint8_t *)buffer, size);
+        file.close();
     }
-    return 0;
+    return r;
 }
 
 int Storage::write(const char *filename, void *buffer, size_t size,
                    size_t offset)
 {
-    FileRecord f;
-    if (getFile(filename, &f)) {
-        if (offset >= f.size)
-            return 0;
-        if (offset + size > f.size)
-            size -= offset + size - f.size;
-        return phyWrite(f.offset + offset, (const uint8_t *)buffer, size);
+    int r = 0;
+    String path = String("/") + filename;
+    file.open(path.c_str(), Adafruit_LittleFS_Namespace::FILE_O_WRITE);
+    if (file) {
+        file.seek(offset);
+        r = file.write((const uint8_t *)buffer, size);
+        file.close();
     } else {
-        uint32_t fileOffset = createFile(filename, size);
-        if (fileOffset)
-            return phyWrite(fileOffset, (const uint8_t *)buffer, size);
+        Serial.print("[FS] Failed to write file: ");
+        Serial.println(filename);
     }
-    Serial.print("[FS] Failed to write file: ");
-    Serial.println(filename);
-    return 0;
+    return r;
 }
 
 bool Storage::exists(const char *filename)
 {
-    FileRecord f;
-    return getFile(filename, &f);
+    String path = String("/") + filename;
+    return littefs.exists(path.c_str());
 }
 
 bool Storage::allocate(const char *filename, size_t size)
 {
-    return (createFile(filename, size) > 0);
+    return true;
 }
 #endif

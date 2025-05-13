@@ -1,11 +1,7 @@
 #pragma once
 
 #if defined(ARDUINO_ARCH_NRF52)
-#include "Adafruit_SPIFlash.h"
 
-const SPIFlash_Device_t XIAO_NRF_FLASH = P25Q16H;
-Adafruit_FlashTransport_QSPI flashTransport;
-Adafruit_SPIFlash flash(&flashTransport);
 const uint16_t maxFiles = 64;
 
 #define phyBegin() flash.begin(&XIAO_NRF_FLASH, 1);

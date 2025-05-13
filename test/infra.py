@@ -40,7 +40,7 @@ def writeSerial(s, data):
     logging.info("Write to serial: %s"%d)
     s.write(d)
 
-def printSerial(s, printLog=False):
+def printSerial(s):
     for i in range(1000):
         if s.in_waiting > 0:
             data = s.readline().decode('utf-8')
@@ -48,7 +48,7 @@ def printSerial(s, printLog=False):
 
 def readSerial(s):
     buffer = ''
-    for i in range(10000):
+    for i in range(20000):
         if s.in_waiting > 0:
             data = s.readline().decode('utf-8')
             logging.info("Read from serial22: %s"%data)

@@ -8,6 +8,7 @@
 #include "RCCLoco.h"
 #include "Audio.h"
 #include "audio_data2.h"
+#include "TestStorage.h"
 
 
 
@@ -49,85 +50,7 @@ void writeAllAudio(const uint8_t *data, const size_t size) {
     }
 }
 
-char testStr[] = "0123456789abcd";
-char buffer[64];
 
-void test01()
-{
-    storage.write("test01", testStr, sizeof(testStr));
-
-    int s = storage.read("test01", buffer, 12);
-    buffer[s + 1] = '\0';
-    Serial.println(buffer);
-    if (strncmp(testStr, buffer, s) == 0)
-        Serial.println("test01 ... ok");
-}
-
-void test011()
-{
-    int s = storage.read("test01", buffer, 12);
-    buffer[s + 1] = '\0';
-    Serial.println(String("test011.") + String(s) + "=" + buffer);
-    if (strcmp(testStr, buffer) == 0)
-        Serial.println("test011 ... ok");
-}
-
-
-void test02()
-{
-    storage.write("test02", testStr, sizeof(testStr));
-
-    int s = storage.read("test02", buffer, 12, 2);
-    buffer[s + 1] = '\0';
-    Serial.println(buffer);
-    if (strcmp(testStr + 2, buffer) == 0)
-        Serial.println("test02 ... ok");
-}
-
-void test03()
-{
-    storage.write("test03", testStr, sizeof(testStr));
-
-    int s = storage.read("test02", buffer, 12, 10);
-    buffer[s + 1] = '\0';
-    Serial.println(buffer);
-    if (strcmp(testStr + 10, buffer) == 0)
-        Serial.println("test03 ... ok");
-}
-
-void test05()
-{
-    settings.put("test05", testStr);
-    String r = settings.get("test05");
-    Serial.println(r);
-    if (strcmp(testStr, r.c_str()) == 0)
-        Serial.println("test05 ... ok");
-}
-
-void test051()
-{
-    String r = settings.get("test05");
-    Serial.println(r);
-    if (strcmp(testStr, r.c_str()) == 0)
-        Serial.println("test051 ... ok");
-}
-
-void test06()
-{
-    settings.put("name", "1204");
-    String r = settings.get("name");
-    Serial.println(r);
-    if (strcmp("1204", r.c_str()) == 0)
-        Serial.println("test06 ... ok");
-}
-
-void test061()
-{
-    String r = settings.get("name");
-    Serial.println(r);
-    if (strcmp("1204", r.c_str()) == 0)
-        Serial.println("test061 ... ok");
-}
 
 
 class TestLoco : public RCCLoco
@@ -171,6 +94,13 @@ public:
         case 'Z':
             ledEnable = true;
             break;
+        case 'T':
+            if (size > 0) {
+                int idx = atoi(value);
+                if (idx < (sizeof(tests) / sizeof(tests[0])))
+                    tests[idx]();
+            }
+            break;
         }
 
     }
@@ -183,10 +113,17 @@ void setup()
 {
     Serial.begin(115200);
     delay(250);
+    // while ( !Serial ) delay(10);
+    // Serial.println("Enter to any keys to continue:");
+    // while ( !Serial.available() )
+    // {
+    //     delay(1);
+    // }
+    // Serial.println("Start");
 
+  
     storage.begin();
     settings.defaults(locoKeys, locoValues, locoKeySize);
-
     motor.begin();
     yellow.begin();
     blue.begin();
@@ -205,7 +142,7 @@ void setup()
 void loop()
 {
     loco.loop();
-    audio.loop();
+    // audio.loop();
 
     if (update.hasFired()) {
         loco.state.battery = powerMeter.readBattery();
@@ -216,23 +153,23 @@ void loop()
         loco.state.psi = 35;
     }
 
-    if (blinker.hasFired()) {
-        static bool flip = false;
-        flip = !flip;
-        if (flip) {
-            // digitalWrite(LED_BUILTIN, HIGH);
-        } else {
-            // digitalWrite(LED_BUILTIN, LOW);
-        }
-    }
+    // if (blinker.hasFired()) {
+    //     static bool flip = false;
+    //     flip = !flip;
+    //     if (flip) {
+    //         // digitalWrite(LED_BUILTIN, HIGH);
+    //     } else {
+    //         // digitalWrite(LED_BUILTIN, LOW);
+    //     }
+    // }
 
-    if (ledEnable && timer2.hasFired()) {
-        static bool flip;
-        Serial.print(">>");
-        Serial.println(flip);
-        led.apply(flip);
-        flip = !flip;
-    }
+    // if (ledEnable && timer2.hasFired()) {
+    //     static bool flip;
+    //     Serial.print(">>");
+    //     Serial.println(flip);
+    //     led.apply(flip);
+    //     flip = !flip;
+    // }
 
 }
 
