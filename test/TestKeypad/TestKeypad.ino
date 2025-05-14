@@ -57,7 +57,7 @@ void setup()
     Serial.begin(115200);
     Serial.println("Started");
     storage.begin();
-    // settings.defaults(keypadKeys, keypadValues, keypadKeySize);
+    settings.begin(keypadKeys, keypadValues, keypadKeySize);
 
 
     keypad.debugLevel = 10;

@@ -22,7 +22,7 @@ def test_storage00():
     return _test_storage(0, 'Test Storage, write/read with extra size')
 
 def test_storage01():
-    return _test_storage(1, 'Test Storage, wead only')
+    return _test_storage(1, 'Test Storage, read only')
 
 def test_storage02():
     return _test_storage(2, 'Test Storage, read multiple')

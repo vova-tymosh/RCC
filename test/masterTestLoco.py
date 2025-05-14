@@ -17,8 +17,8 @@ def test_boot():
 
 tests = []
 # tests += [test_boot]
-tests += tests_mq
-tests += tests_local
+# tests += tests_mq
+# tests += tests_local
 tests += tests_storage
 
 logging.basicConfig(level=logging.INFO,

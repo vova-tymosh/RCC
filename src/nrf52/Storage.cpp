@@ -5,9 +5,9 @@ SPI flash storage for nRF52
 */
 
 #include <Arduino.h>
+#include <Adafruit_LittleFS.h>
+#include <Adafruit_SPIFlash.h>
 #include "Storage.h"
-#include "Adafruit_LittleFS.h"
-#include "Adafruit_SPIFlash.h"
 
 #define LFS_BLOCK_SIZE        4096
 
@@ -68,19 +68,21 @@ static struct lfs_config extCfg =
     .file_buffer = NULL
 };
 
-Adafruit_LittleFS littefs(&extCfg);
-Adafruit_LittleFS_Namespace::File file(littefs);
+#define File Adafruit_LittleFS_Namespace::File 
+#define F_WRITE_MODE Adafruit_LittleFS_Namespace::FILE_O_WRITE
+#define getPath(x) (String("/") + x.name())
 
+Adafruit_LittleFS fs(&extCfg);
 
 void Storage::beginInternal()
 {
     flash.begin(&XIAO_NRF_FLASH, 1);
-    if (!littefs.begin()) {
+    if (!fs.begin()) {
         Serial.println("[FS] Mount failed, erase and format");
         flash.eraseChip();
         flash.waitUntilReady();  
-        bool r = littefs.format();
-        r = r && littefs.begin();
+        bool r = fs.format();
+        r = r && fs.begin();
         if (!r)
             Serial.println("[FS] Format/reinit failed");
     } else {
@@ -88,70 +90,5 @@ void Storage::beginInternal()
     }
 }
 
-uint32_t Storage::getValidation()
-{
-    uint32_t validation = 0;
-    read("validation", &validation, sizeof(validation));
-    return validation;
-}
-
-void Storage::setValidation(uint32_t validation)
-{
-    write("validation", &validation, sizeof(validation));
-}
-
-void Storage::clearInternal()
-{
-    Adafruit_LittleFS_Namespace::File root = littefs.open("/");
-    Adafruit_LittleFS_Namespace::File f = root.openNextFile();
-    while (f) {
-        String path = String("/") + f.name();
-        Serial.println("[FS] Delete: " + path);
-        littefs.remove(path.c_str());
-        f = root.openNextFile();
-    }
-
-}
-
-int Storage::read(const char *filename, void *buffer, size_t size,
-                  size_t offset)
-{
-    int r = 0;
-    String path = String("/") + filename;
-    file.open(path.c_str(), Adafruit_LittleFS_Namespace::FILE_O_READ);
-    if (file) {
-        file.seek(offset);
-        r = file.read((uint8_t *)buffer, size);
-        file.close();
-    }
-    return r;
-}
-
-int Storage::write(const char *filename, void *buffer, size_t size,
-                   size_t offset)
-{
-    int r = 0;
-    String path = String("/") + filename;
-    file.open(path.c_str(), Adafruit_LittleFS_Namespace::FILE_O_WRITE);
-    if (file) {
-        file.seek(offset);
-        r = file.write((const uint8_t *)buffer, size);
-        file.close();
-    } else {
-        Serial.print("[FS] Failed to write file: ");
-        Serial.println(filename);
-    }
-    return r;
-}
-
-bool Storage::exists(const char *filename)
-{
-    String path = String("/") + filename;
-    return littefs.exists(path.c_str());
-}
-
-bool Storage::allocate(const char *filename, size_t size)
-{
-    return true;
-}
+#include "StorageImpl.h"
 #endif
