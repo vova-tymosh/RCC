@@ -8,39 +8,6 @@ def test_local_start():
     s = openSerial()
     return (True, 'Test Local Start')
 
-def _test_storage(idx, test_name):
-    writeSerial(s, f'CT{idx}')
-    r = readSerial(s).strip()
-    if r != 'ok':
-        print(f'\t{r}')
-        return (False, test_name)
-    return (True, test_name)
-
-def test_storage00():
-    return _test_storage(0, 'Test Storage. Simple write/read')
-
-def test_storage01():
-    return _test_storage(1, 'Test Storage. Limited size')
-
-def test_storage02():
-    return _test_storage(2, 'Test Storage. Size and offset')
-
-def test_storage03():
-    return _test_storage(3, 'Test Storage. Different files')
-
-def test_storage04():
-    return _test_storage(4, 'Test Settings. Create')
-
-def test_storage05():
-    return _test_storage(5, 'Test Settings. Only read')
-
-def test_storage06():
-   return  _test_storage(6, 'Test Settings. Update')
-
-def test_storage07():
-   return  _test_storage(7, 'Test Settings. Default value')
-
-
 def test_f0_on():
     test_name = 'Test Function 0 ON'
     writeSerial(s, 'F100')
@@ -165,12 +132,9 @@ def test_local_end():
     s.close()
     return (True, 'Test Local End')
 
-# tests_local = [test_local_start, test_voltage,
-#     test_current, test_current_with_load, test_motor_bemf,
-#     test_f0_on, test_f0_blinking, test_f1_blinking,
-#     test_motor_forward, test_motor_backward, test_local_end]
+tests_local = [test_local_start, test_voltage,
+    test_current, test_current_with_load, test_motor_bemf,
+    test_f0_on, test_f0_blinking, test_f1_blinking,
+    test_motor_forward, test_motor_backward, test_local_end]
 
-tests_local_storage = [test_storage00, test_storage01, test_storage02, 
-                       test_storage03, test_storage04, test_storage05, test_storage06, test_storage07]
 
-tests_local = [test_local_start] + tests_local_storage + [test_local_end]

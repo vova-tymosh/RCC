@@ -18,14 +18,16 @@ void printResult(const char *expected, char* actual)
 
 void test00()
 {
+    //Test write/read with extra size
     storage.write("test01", testStr, sizeof(testStr));
-    int s = storage.read("test01", buffer, sizeof(testStr));
-    buffer[s] = '\0';
+    int s = storage.read("test01", buffer, sizeof(buffer));
+    // buffer[s] = '\0';
     printResult(testStr, buffer);
 }
 
 void test01()
 {
+    //Test read only
     int s = storage.read("test01", buffer, 12);
     buffer[s] = '\0';
     String t = String(testStr);
@@ -35,48 +37,97 @@ void test01()
 
 void test02()
 {
-    storage.write("test02", testStr, sizeof(testStr));
-    int s = storage.read("test02", buffer, 11, 2);
+    //Test read multiple
+    const int c = 100;
+    int s = 0;
+    long start = millis();
+    for (int i = 0; i < c; i++)
+        s = storage.read("test01", buffer, 12);
+    long duration = millis() - start;
     buffer[s] = '\0';
+    // Serial.println(String("Duration of ") + c + " runs = " + duration);
     String t = String(testStr);
-    t = t.substring(2, 13);
+    t = t.substring(0, 12);
     printResult(t.c_str(), buffer);
 }
 
 void test03()
 {
+    //Test size and offset
+    storage.write("test02", testStr, sizeof(testStr));
+    int s = storage.read("test02", buffer, 11, 7);
+    buffer[s] = '\0';
+    String t = String(testStr);
+    t = t.substring(7, t.length());
+    printResult(t.c_str(), buffer);
+}
+
+void test04()
+{
+    //Test offset bigger than size
+    storage.write("test02", testStr, sizeof(testStr));
+    int s = storage.read("test02", buffer, 11, 20);
+    if (s == 0)
+        Serial.println("ok");
+    else
+        Serial.println("FAIL");
+}
+
+void test05()
+{
+    //Test re-write
     storage.write("test01", testStr2, sizeof(testStr2));
     int s = storage.read("test01", buffer, sizeof(testStr2));
     buffer[s] = '\0';
     printResult(testStr2, buffer);
 }
 
-void test04()
+void test06()
 {
+    //Test setting create
     settings.create("test05", testStr);
     String r = settings.get("test05");
     printResult(testStr, (char*)r.c_str());
 }
 
-void test05()
+void test07()
 {
+    //Test setting read
     String r = settings.get("test05");
     printResult(testStr, (char*)r.c_str());
 }
 
-void test06()
+void test08()
 {
+    //Test settings re-write
     settings.put("test05", testStr2);
     String r = settings.get("test05");
     printResult(testStr2, (char*)r.c_str());
 }
 
-void test07()
+void test09()
 {
+    //Test reading defaults
     String r = settings.get("loconame");
     printResult("RCC", (char*)r.c_str());
 }
 
+void test10()
+{
+    //Test cache
+    settings.put("testvalue", "101.1");
+    const int c = 10000;
+    long start = millis();
+    float r = 0;
+    for (int i = 0; i < c; i++)
+        r = settings.getCachedFloat("testvalue");
+    long duration = millis() - start;
+    // Serial.println(String("Duration of ") + c + " runs = " + duration + ", value = " + r);
+    if ((int)(r*10) == 1011 && duration < 100)
+        Serial.println("ok");
+    else
+        Serial.println("FAIL");
+}
 
 
 void (*tests[])() = {
@@ -88,4 +139,7 @@ void (*tests[])() = {
     test05,
     test06,
     test07,
+    test08,
+    test09,
+    test10,
 };

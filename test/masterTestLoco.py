@@ -4,6 +4,7 @@ import time
 import logging
 from infra import *
 from test_local import tests_local
+from test_storage import tests_storage
 from test_mqtt import tests_mq
 from test_nrf_local import tests_nrf
 
@@ -18,7 +19,8 @@ tests = []
 # tests += [test_boot]
 # tests += tests_mq
 # tests += tests_nrf
-tests += tests_local
+# tests += tests_local
+tests += tests_storage
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(message)s',

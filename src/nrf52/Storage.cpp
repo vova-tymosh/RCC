@@ -23,52 +23,49 @@ static inline uint32_t lba2addr(uint32_t block)
 
 static int _internal_flash_read (const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size)
 {
-  uint32_t addr = lba2addr(block) + off;
-  if (flash.readBuffer(addr, (uint8_t*)buffer, size))
-    return 0;
-  return -1;
+    uint32_t addr = lba2addr(block) + off;
+    if (flash.readBuffer(addr, (uint8_t*)buffer, size))
+        return 0;
+    return -1;
 }
 
 static int _internal_flash_prog (const struct lfs_config *c, lfs_block_t block, lfs_off_t off, const void *buffer, lfs_size_t size)
 {
-  uint32_t addr = lba2addr(block) + off;
-  if (flash.writeBuffer(addr, (const uint8_t*)buffer, size))
-    return 0;
-  return -1;
+    uint32_t addr = lba2addr(block) + off;
+    if (flash.writeBuffer(addr, (const uint8_t*)buffer, size))
+        return 0;
+    return -1;
 }
 
 static int _internal_flash_erase (const struct lfs_config *c, lfs_block_t block)
 {
-  if (flash.eraseSector(block))
-    return 0;
-  return -1;
+    if (flash.eraseSector(block))
+        return 0;
+    return -1;
 }
 
 static int _internal_flash_sync (const struct lfs_config *c)
 {
-  flash.syncBlocks();
-  return 0;
+    flash.syncBlocks();
+    return 0;
 }
 
 static struct lfs_config extCfg =
 {
-  .context = NULL,
-
-  .read = _internal_flash_read,
-  .prog = _internal_flash_prog,
-  .erase = _internal_flash_erase,
-  .sync = _internal_flash_sync,
-
-  .read_size = 256,
-  .prog_size = 256,
-  .block_size = LFS_BLOCK_SIZE,
-  .block_count = (1<<21) / 4096,   //XIAO_NRF_FLASH.total_size / LFS_BLOCK_SIZE,
-  .lookahead = 128,
-
-  .read_buffer = NULL,
-  .prog_buffer = NULL,
-  .lookahead_buffer = NULL,
-  .file_buffer = NULL
+    .context = NULL,
+    .read = _internal_flash_read,
+    .prog = _internal_flash_prog,
+    .erase = _internal_flash_erase,
+    .sync = _internal_flash_sync,
+    .read_size = 256,
+    .prog_size = 256,
+    .block_size = LFS_BLOCK_SIZE,
+    .block_count = (1<<21) / 4096,   //XIAO_NRF_FLASH.total_size / LFS_BLOCK_SIZE,
+    .lookahead = 128,
+    .read_buffer = NULL,
+    .prog_buffer = NULL,
+    .lookahead_buffer = NULL,
+    .file_buffer = NULL
 };
 
 Adafruit_LittleFS littefs(&extCfg);
@@ -86,9 +83,9 @@ void Storage::beginInternal()
         r = r && littefs.begin();
         if (!r)
             Serial.println("[FS] Format/reinit failed");
-      } else {
+    } else {
         Serial.println("[FS] Mount successful");
-      }
+    }
 }
 
 uint32_t Storage::getValidation()

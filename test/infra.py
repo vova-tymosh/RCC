@@ -33,12 +33,13 @@ def openSerial(idx = 0):
         print('No serial port found')
         exit(1)
     if idx < len(ser_names):
-        return serial.Serial(ser_names[idx], 115200)
+        return serial.Serial(ser_names[idx], 115200, timeout=1)
 
 def writeSerial(s, data):
     d = data.encode('utf-8')
     logging.info("Write to serial: %s"%d)
     s.write(d)
+    s.flush()
 
 def printSerial(s):
     for i in range(1000):
@@ -47,13 +48,7 @@ def printSerial(s):
             logging.info("Read from serial: %s"%data.strip())
 
 def readSerial(s):
-    buffer = ''
-    for i in range(20000):
-        if s.in_waiting > 0:
-            data = s.readline().decode('utf-8')
-            logging.info("Read from serial22: %s"%data)
-            if data:
-                buffer += data
+    buffer = s.readline().decode('utf-8')
     logging.info("Read from serial: %s"%buffer)
     return buffer
 
