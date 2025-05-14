@@ -102,7 +102,15 @@ void Storage::setValidation(uint32_t validation)
 
 void Storage::clearInternal()
 {
-    // littefs.rmdir_r("/");
+    Adafruit_LittleFS_Namespace::File root = littefs.open("/");
+    Adafruit_LittleFS_Namespace::File f = root.openNextFile();
+    while (f) {
+        String path = String("/") + f.name();
+        Serial.println("[FS] Delete: " + path);
+        littefs.remove(path.c_str());
+        f = root.openNextFile();
+    }
+
 }
 
 int Storage::read(const char *filename, void *buffer, size_t size,
@@ -112,10 +120,6 @@ int Storage::read(const char *filename, void *buffer, size_t size,
     String path = String("/") + filename;
     file.open(path.c_str(), Adafruit_LittleFS_Namespace::FILE_O_READ);
     if (file) {
-        if (offset >= file.size())
-            return 0;
-        if (offset + size > file.size())
-            size -= offset + size - file.size();
         file.seek(offset);
         r = file.read((uint8_t *)buffer, size);
         file.close();
