@@ -78,13 +78,13 @@ def motor_blinker(direction):
 def test_motor_forward():
     test_name = 'Test Motor forward'
     print('\tIs White light fading in/out? (Y/n)')
-    yn = motor_blinker(s, 1)
+    yn = motor_blinker(1)
     return (yn.strip().lower() != 'n', test_name)
 
 def test_motor_backward():
     test_name = 'Test Motor backward'
     print('\tIs Green light fading in/out? (Y/n)')
-    yn = motor_blinker(s, 2)
+    yn = motor_blinker(2)
     return (yn.strip().lower() != 'n', test_name)
 
 def test_motor_bemf():
@@ -132,9 +132,8 @@ def test_local_end():
     s.close()
     return (True, 'Test Local End')
 
-tests_local = [test_local_start, test_voltage,
-    test_current, test_current_with_load, test_motor_bemf,
-    test_f0_on, test_f0_blinking, test_f1_blinking,
-    test_motor_forward, test_motor_backward, test_local_end]
-
-
+tests_local = [test_local_start, 
+               test_voltage, test_current, test_current_with_load, test_motor_bemf,
+               test_f0_on, test_f0_blinking, test_f1_blinking, test_motor_forward, 
+               test_motor_backward, 
+               test_local_end]

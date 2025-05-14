@@ -17,9 +17,8 @@ def test_boot():
 
 tests = []
 # tests += [test_boot]
-# tests += tests_mq
-# tests += tests_nrf
-# tests += tests_local
+tests += tests_mq
+tests += tests_local
 tests += tests_storage
 
 logging.basicConfig(level=logging.INFO,
@@ -30,6 +29,13 @@ logging.error('*** Test Start ***')
 
 
 if __name__ == '__main__':
+    s = openSerial(1)
+    if s != None:
+        tests += tests_nrf
+        s.close()
+    else:
+        print('*** No second serial port found, skipping NRF tests')
+
     w = 80
     for test in tests:
         result, name = test()

@@ -57,8 +57,8 @@ def test_storage_end():
 
 
 tests_storage = [test_storage_start, 
-                test_storage00, test_storage01, test_storage02, test_storage03, 
-                test_storage04, test_storage05, test_storage06, test_storage07, 
-                test_storage08, test_storage09, test_storage10,
-                test_storage_end]
+                 test_storage00, test_storage01, test_storage02, test_storage03, 
+                 test_storage04, test_storage05, test_storage06, test_storage07, 
+                 test_storage08, test_storage09, test_storage10,
+                 test_storage_end]
 
