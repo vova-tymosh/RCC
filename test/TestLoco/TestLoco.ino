@@ -123,7 +123,7 @@ void setup()
 
   
     storage.begin();
-    settings.defaults(locoKeys, locoValues, locoKeySize);
+    settings.begin(locoKeys, locoValues, locoKeySize);
     motor.begin();
     yellow.begin();
     blue.begin();

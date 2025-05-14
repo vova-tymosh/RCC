@@ -12,8 +12,6 @@
 #include "Timer.h"
 #include "Cli.h"
 
-//TODO : push realtimeXXX to Settings
-
 extern const char *locoKeys[];
 extern const char *locoValues[];
 extern const int locoKeySize;
@@ -26,20 +24,6 @@ protected:
 
     Timer speedTimer;
     SpeedControl pid;
-
-    enum {
-        ACCELERATION = 0,
-        MANAGESPEED,
-        HEARTBEAT,
-        MAX_REALTIME,
-    };
-    const char *realtimeKey[MAX_REALTIME] = {"acceleration", "managespeed",
-                                             "heartbeat"};
-    float realtimeValue[MAX_REALTIME] = {
-        0,
-        0,
-        0,
-    };
 
 public:
     enum { DIR_REVERSE = 0, DIR_FORWARD = 1, DIR_STOP = 2, DIR_NEUTRAL = 3 };
@@ -56,7 +40,7 @@ public:
 
     virtual int getHeartbeat()
     {
-        return realtimeValue[HEARTBEAT];
+        return settings.getCachedInt("heartbeat");
     }
 
     int getThrottle()
@@ -102,13 +86,13 @@ public:
         for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             if (strcmp(key, Keys[i]) == 0) {
                 int value = *((uint8_t *)&state + ValueOffsets[i]);
-                Serial.println("getValue r: " + String(key) + "/" +
+                Serial.println("getValue: " + String(key) + "/" +
                                String(value));
                 return String(value);
             }
         }
         String value(settings.get(key));
-        Serial.println("getValue s: " + String(key) + "/" + String(value));
+        Serial.println("getValue: " + String(key) + "/" + String(value));
         return value;
     }
 
@@ -116,13 +100,6 @@ public:
     {
         Serial.println("setValue: " + String(key) + "/" + String(value));
         settings.put(key, value);
-        for (int i = 0; i < sizeof(realtimeValue) / sizeof(realtimeValue[0]);
-             i++) {
-            if (strcmp(key, realtimeKey[i]) == 0) {
-                realtimeValue[i] = atof(value);
-                return;
-            }
-        }
     }
 
     String listValues()
@@ -144,7 +121,7 @@ public:
         if (state.direction == DIR_STOP) {
             state.throttle = 0;
             state.throttle_out = 0;
-        } else if (realtimeValue[ACCELERATION] == 0) {
+        } else if (settings.getCachedInt("acceleration") == 0) {
             state.throttle_out = state.throttle;
         }
         onThrottle(state.direction, state.throttle_out);
@@ -154,17 +131,17 @@ public:
     {
         if (state.direction == DIR_STOP)
             return;
-        if (realtimeValue[ACCELERATION]) {
+        if (settings.getCachedInt("acceleration")) {
             if (state.throttle_out < state.throttle) {
-                state.throttle_out += realtimeValue[ACCELERATION];
+                state.throttle_out += settings.getCachedInt("acceleration");
                 if (state.throttle_out > state.throttle)
                     state.throttle_out = state.throttle;
             } else if (state.throttle_out > state.throttle) {
-                state.throttle_out -= realtimeValue[ACCELERATION];
+                state.throttle_out -= settings.getCachedInt("acceleration");
                 if (state.throttle_out < state.throttle)
                     state.throttle_out = state.throttle;
             }
-        } else if (realtimeValue[MANAGESPEED]) {
+        } else if (settings.getCachedInt("managespeed")) {
             float speed = state.speed;
             float scaled = pid.scale(speed);
             pid.setDesired(state.throttle);
@@ -173,7 +150,7 @@ public:
             Serial.println("[PD] Update: " + String(speed) + " " +
                            String(scaled) + " " + String(state.throttle_out));
         }
-        if (realtimeValue[ACCELERATION] || realtimeValue[MANAGESPEED]) {
+        if (settings.getCachedInt("acceleration") || settings.getCachedInt("managespeed")) {
             static uint8_t lastThrottle = 0;
             if (state.throttle_out != lastThrottle) {
                 lastThrottle = state.throttle_out;
@@ -186,11 +163,8 @@ public:
     {
         locoName = settings.get("loconame");
         locoAddr = settings.get("locoaddr");
-        for (int i = 0; i < sizeof(realtimeValue) / sizeof(realtimeValue[0]);
-             i++) {
-            realtimeValue[i] = settings.get(realtimeKey[i]).toFloat();
-        }
         transport->begin();
+        speedTimer.start();
     }
 
     void loop()

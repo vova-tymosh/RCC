@@ -3,18 +3,13 @@
 
 class Settings
 {
-#if defined(HIGH_CAPACITY_STORAGE)
     static const int MAX_LENGTH = 256;
-#else
-    static const int MAX_LENGTH = 16;
-#endif
 
     struct {
         char **keys;
         float *values;
         int size;
     } cache;
-
 
 public:
     String get(const char *key)
@@ -34,25 +29,32 @@ public:
         return 0;
     }
 
+    int getCachedInt(const char *key)
+    {
+        return (int)getCachedFloat(key);
+    }
+
     void put(const char *key, String value)
     {
-        if (storage.exists(key))
+        if (storage.exists(key)) {
             storage.write(key, (void *)value.c_str(), value.length() + 1);
+            for (int i = 0; i < cache.size; i++) {
+                if (strcmp(cache.keys[i], key) == 0) {
+                    cache.values[i] = value.toFloat();
+                    break;
+                }
+            }
+        }
     }
 
     //Doesn't update cache
     void create(const char *key, const char *value)
     {
-        // char buffer[MAX_LENGTH];
         size_t size = strlen(value) + 1;
-        // if (size > sizeof(buffer) - 1)
-        //     size = sizeof(buffer) - 1;
-        // memset(buffer, 0, sizeof(buffer));
-        // memcpy(buffer, value, size);
         storage.write((char *)key, (void *)value, size);
     }
     
-    void defaults(const char *keys[], const char *values[], const int size)
+    void begin(const char *keys[], const char *values[], const int size)
     {
         cache.size = size;
         cache.keys = (char **)keys;
