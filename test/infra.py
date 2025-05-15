@@ -47,9 +47,15 @@ def printSerial(s):
             data = s.readline().decode('utf-8')
             logging.info("Read from serial: %s"%data.strip())
 
-def readSerial(s):
-    buffer = s.readline().decode('utf-8')
-    logging.info("Read from serial: %s"%buffer)
+def readSerial(s, msg = None):
+    buffer = ''
+    for i in range(5):
+        b = s.readline().decode('utf-8').strip()
+        logging.info(f"Read from serial: {msg}/{b}")
+        if msg and msg == b:
+            return b
+        elif b:
+            buffer += b
     return buffer
 
 def readSerialFloat(s):

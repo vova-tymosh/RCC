@@ -1,9 +1,7 @@
 #pragma once
 #include <stdint.h>
+#include <Arduino.h>
 
-#if defined(ARDUINO_ARCH_NRF52) || defined(ARDUINO_ARCH_ESP32)
-#define HIGH_CAPACITY_STORAGE
-#endif
 
 class Storage
 {
@@ -22,7 +20,7 @@ public:
         uint32_t validation = 0;
         read("validation", &validation, sizeof(validation));
         if (validation >> 16 != code || (validation & 0xFFFF) != version) {
-            Serial.println("[FS] No FS or old version, reformat");
+            Serial.println("[FS] No FS or old version, drop to defaults");
             clear();
         }
     }

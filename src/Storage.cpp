@@ -2,13 +2,32 @@
  * Include only inside Storage.cpp inside platfomr specific folders
  * 
 */
+#include "Storage.h"
+#if defined(ARDUINO_ARCH_NRF52) 
+#include "nrf52/Storage.h"
+#elif defined(ARDUINO_ARCH_ESP32)
+#include "esp32/Storage.h"
+#endif
+
+void Storage::beginInternal()
+{
+    beginPhy();
+    if (!fs.begin()) {
+        bool r = fs.format();
+        r = r && fs.begin();
+        if (!r)
+            Serial.println("[FS] Format failed");
+    } else {
+        Serial.println("[FS] Mount successful");
+    }
+}
 
 void Storage::clearInternal()
 {
     File root = fs.open("/");
     File file = root.openNextFile();
     while (file) {
-        String path = getPath(file);
+        String path = String("/") + file.name();
         Serial.println("[FS] Delete: " + path);
         fs.remove(path.c_str());
         file = root.openNextFile();

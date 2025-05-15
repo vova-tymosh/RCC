@@ -5,7 +5,7 @@ s = None
 
 def _test_storage(idx, test_name):
     writeSerial(s, f'CT{idx}')
-    r = readSerial(s).strip()
+    r = readSerial(s, 'ok')
     if r != 'ok':
         print(f'\t{r}')
         return (False, test_name)

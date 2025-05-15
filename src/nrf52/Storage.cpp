@@ -7,7 +7,8 @@ SPI flash storage for nRF52
 #include <Arduino.h>
 #include <Adafruit_LittleFS.h>
 #include <Adafruit_SPIFlash.h>
-#include "Storage.h"
+#include "nrf52/Storage.h"
+
 
 #define LFS_BLOCK_SIZE        4096
 
@@ -74,21 +75,10 @@ static struct lfs_config extCfg =
 
 Adafruit_LittleFS fs(&extCfg);
 
-void Storage::beginInternal()
+void beginPhy()
 {
     flash.begin(&XIAO_NRF_FLASH, 1);
-    if (!fs.begin()) {
-        Serial.println("[FS] Mount failed, erase and format");
-        flash.eraseChip();
-        flash.waitUntilReady();  
-        bool r = fs.format();
-        r = r && fs.begin();
-        if (!r)
-            Serial.println("[FS] Format/reinit failed");
-    } else {
-        Serial.println("[FS] Mount successful");
-    }
 }
 
-#include "StorageImpl.h"
+
 #endif
