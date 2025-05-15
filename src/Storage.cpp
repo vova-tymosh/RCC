@@ -7,6 +7,8 @@
 #include "nrf52/Storage.h"
 #elif defined(ARDUINO_ARCH_ESP32)
 #include "esp32/Storage.h"
+#elif defined(ARDUINO_AVR_LEONARDO)
+#include "avr/Storage.h"
 #endif
 
 void Storage::beginInternal()

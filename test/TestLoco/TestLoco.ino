@@ -3,11 +3,15 @@
  *
  *
  */
+#define NRF_CE 19
+#define NRF_CSN 18
+
 // #define RCC_NO_STATION
-#include "Motherboard.h"
+// #include "Motherboard.h"
+#include "Peripheral.h"
 #include "RCCLoco.h"
-#include "Audio.h"
-#include "audio_data2.h"
+// #include "Audio.h"
+// #include "audio_data2.h"
 #include "TestStorage.h"
 
 
@@ -17,18 +21,18 @@
 
 Storage storage;
 Settings settings;
-PinExt yellow(2);
-PinExt led(5);
-Pin blue(D0);
-PowerMeter powerMeter;
-Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD);
+// PinExt yellow(2);
+// PinExt led(5);
+Pin blue(0);
+// PowerMeter powerMeter;
+// Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD);
 Timer timer;
 Timer blinker(1000);
 Timer update(1000);
 Timer timer2(10);
 
 
-Audio audio;
+// Audio audio;
 
 bool ledEnable = false;
 
@@ -61,35 +65,35 @@ public:
     void onFunction(uint8_t code, bool value)
     {
         Serial.println("onFunction: " + String(code) + "/" + String(value));
-        if (code == 0)
-            yellow.apply(value);
-        if (code == 1)
-            blue.apply(value);
+        // if (code == 0)
+        //     yellow.apply(value);
+        // if (code == 1)
+        //     blue.apply(value);
     }
 
     void onThrottle(uint8_t direction, uint8_t throttle)
     {
         Serial.println("onThrottle: " + String(direction) + "/" + String(throttle));
-        motor.apply(direction, throttle);
+        // motor.apply(direction, throttle);
     }
 
     void onCommand(uint8_t code, char* value, uint8_t size)
     {
         switch (code) {
         case 'B':
-            Serial.println(motor.readBemf());
+            // Serial.println(motor.readBemf());
             break;
         case 'P':
-            audio.play(audio_data, sizeof(audio_data), 2);
+            // audio.play(audio_data, sizeof(audio_data), 2);
             break;
         case 'Q':
-            audio.play("sound", 2);
+            // audio.play("sound", 2);
             break;
         case 'L':
-            audio.cycle = true;
+            // audio.cycle = true;
             break;
         case 'W':
-            writeAllAudio(audio_data, sizeof(audio_data));
+            // writeAllAudio(audio_data, sizeof(audio_data));
             break;
         case 'Z':
             ledEnable = true;
@@ -113,28 +117,28 @@ void setup()
 {
     Serial.begin(115200);
     delay(250);
-    // while ( !Serial ) delay(10);
-    // Serial.println("Enter to any keys to continue:");
-    // while ( !Serial.available() )
-    // {
-    //     delay(1);
-    // }
-    // Serial.println("Start");
+    while ( !Serial ) delay(10);
+    Serial.println("Enter to any keys to continue:");
+    while ( !Serial.available() )
+    {
+        delay(1);
+    }
+    Serial.println("Start");
 
   
     storage.begin();
     settings.begin(locoKeys, locoValues, locoKeySize);
-    motor.begin();
-    yellow.begin();
-    blue.begin();
-    led.begin();
-    powerMeter.begin();
+    // motor.begin();
+    // yellow.begin();
+    // blue.begin();
+    // led.begin();
+    // powerMeter.begin();
     timer.start(100);
     timer2.start(100);
     blinker.start();
     update.start();
     
-    audio.begin();
+    // audio.begin();
     loco.debugLevel = 10;
     loco.begin();
 }
@@ -145,8 +149,8 @@ void loop()
     // audio.loop();
 
     if (update.hasFired()) {
-        loco.state.battery = powerMeter.readBattery();
-        loco.state.current = powerMeter.readCurrent();
+        // loco.state.battery = powerMeter.readBattery();
+        // loco.state.current = powerMeter.readCurrent();
         loco.state.distance = 101;
         loco.state.speed = 20;
         loco.state.temperature = 110;
