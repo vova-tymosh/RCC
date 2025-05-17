@@ -2,18 +2,17 @@
 #include "Settings.h"
 #include "Storage.h"
 
-char testStr[]  = "1234567890abcd";
-char testStr2[] = "ABCDEFGHIJKLMNO";
-char buffer[64];
+const char testStr[]  = "1234567890abcd";
+const char testStr2[] = "ABCDEFGHIJKLMNO";
 
 void printResult(const char *expected, char* actual)
 {
     if (strcmp(expected, actual) == 0) {
         Serial.println("ok");
     } else {
-        Serial.print("FAIL. Expected: ");
+        Serial.print(F("FAIL. Expected: "));
         Serial.print(expected);
-        Serial.print(" Actual: ");
+        Serial.print(F(" Actual: "));
         Serial.println(actual);
     }
 }
@@ -21,6 +20,7 @@ void printResult(const char *expected, char* actual)
 void test00()
 {
     //Test write/read with extra size
+    char buffer[20];
     storage.write("test01", testStr, sizeof(testStr));
     int s = storage.read("test01", buffer, sizeof(buffer));
     // buffer[s] = '\0';
@@ -30,6 +30,7 @@ void test00()
 void test01()
 {
     //Test read only
+    char buffer[20];
     int s = storage.read("test01", buffer, 12);
     buffer[s] = '\0';
     String t = String(testStr);
@@ -40,6 +41,7 @@ void test01()
 void test02()
 {
     //Test read multiple
+    char buffer[20];
     const int c = 100;
     int s = 0;
     long start = millis();
@@ -56,6 +58,7 @@ void test02()
 void test03()
 {
     //Test size and offset
+    char buffer[20];
     storage.write("test02", testStr, sizeof(testStr));
     int s = storage.read("test02", buffer, 11, 7);
     buffer[s] = '\0';
@@ -67,6 +70,7 @@ void test03()
 void test04()
 {
     //Test offset bigger than size
+    char buffer[20];
     storage.write("test02", testStr, sizeof(testStr));
     int s = storage.read("test02", buffer, 11, 20);
     if (s == 0)
@@ -78,6 +82,7 @@ void test04()
 void test05()
 {
     //Test re-write
+    char buffer[20];
     storage.write("test01", testStr2, sizeof(testStr2));
     int s = storage.read("test01", buffer, sizeof(testStr2));
     buffer[s] = '\0';
@@ -89,9 +94,6 @@ void test06()
     //Test setting create
     settings.create("test05", testStr);
     String r = settings.get("test05");
-    Serial.print("  ZZ ZZ");
-    Serial.println(r);
-
     printResult(testStr, (char*)r.c_str());
 }
 
@@ -121,7 +123,7 @@ void test10()
 {
     //Test cache
     settings.put("testvalue", "101.1");
-    const int c = 10000;
+    const int c = 100;
     long start = millis();
     float r = 0;
     for (int i = 0; i < c; i++)
@@ -146,7 +148,7 @@ void test11()
 }
 
 
-void (*tests[])() = {
+const void (*tests[])() = {
     test00,
     test01,
     test02,

@@ -78,7 +78,10 @@ private:
             return false;
         uint8_t function = (uint8_t)atoi(cmd);
         bool activate = loco->getFunction(function);
-        Serial.println(String("F") + cmd + ": " + (activate ? "ON" : "OFF"));
+        Serial.print("F");
+        Serial.print(cmd);
+        Serial.print(": ");
+        Serial.println(activate ? "ON" : "OFF");
         return true;
     }
 
@@ -101,7 +104,9 @@ private:
         char *key = cmd;
         char *value = ++separator;
         loco->setValue(key, value);
-        Serial.println(String(key) + ":" + value);
+        Serial.println(key);
+        Serial.print(":");
+        Serial.println(value);
         return true;
     }
 
@@ -111,7 +116,9 @@ private:
             return false;
         char *key = cmd;
         String value = loco->getValue(key);
-        Serial.println(String(key) + ":" + value);
+        Serial.println(key);
+        Serial.print(":");
+        Serial.println(value);
         return true;
     }
 

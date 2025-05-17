@@ -11,6 +11,11 @@
 #include "avr/Storage.h"
 #endif
 
+#define MAKE_PATH(name) \
+    char path[256]; \
+    path[0] = '/'; \
+    strcpy(path + 1, name); \
+
 void Storage::beginInternal()
 {
     beginPhy();
@@ -40,8 +45,8 @@ int Storage::read(const char *filename, void *buffer, size_t size,
                   size_t offset)
 {
     int r = 0;
-    String path = String("/") + filename;
-    File file = fs.open(path.c_str());
+    MAKE_PATH(filename);
+    File file = fs.open(path);
     if (file) {
         file.seek(offset);
         r = file.read((uint8_t *)buffer, size);
@@ -54,8 +59,8 @@ int Storage::write(const char *filename, void *buffer, size_t size,
                    size_t offset)
 {
     int r = 0;
-    String path = String("/") + filename;
-    File file = fs.open(path.c_str(), F_WRITE_MODE);
+    MAKE_PATH(filename); 
+    File file = fs.open(path, F_WRITE_MODE);
     if (file) {
         file.seek(offset);
         r = file.write((const uint8_t *)buffer, size);
@@ -69,8 +74,8 @@ int Storage::write(const char *filename, void *buffer, size_t size,
 
 bool Storage::exists(const char *filename)
 {
-    String path = String("/") + filename;
-    return fs.exists(path.c_str());
+    MAKE_PATH(filename);
+    return fs.exists(path);
 }
 
 bool Storage::allocate(const char *filename, size_t size)

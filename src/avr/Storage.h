@@ -6,31 +6,57 @@ void beginPhy();
 
 class File
 {
+public:
+    static const int NAME_LEN = 12;
     struct FileRecord {
-        char filename[16];
-        uint32_t offset;
-        uint32_t size;
-    } f;
+        char filename[NAME_LEN];
+        uint16_t addr;
+        uint8_t size;
+    };
 
-    uint32_t createFile(const char *filename, size_t size);
+private:
+    struct FileRecord f;
 
-    bool getFile(const char *filename, FileRecord *record);
+    bool isOpen;
+    uint16_t offset;
+    bool openNextFileFlag;
+
+    bool createRecord(const char *filename, size_t size, FileRecord *record);
+    bool getRecord(const char *filename, FileRecord *record);
 
 public:
 
-    File() {}
+    File() : openNextFileFlag(false), 
+        isOpen(false), offset(0)
+    {}
 
-    File(char const *filename, uint8_t mode = 0);
-
-    bool begin()
+    File(const File& file) : openNextFileFlag(file.openNextFileFlag), 
+        isOpen(file.isOpen), offset(file.offset)
     {
-        return true;
+        memcpy(&f, &file.f, sizeof(f));
     }
 
     bool format()
     {
         return true;
     }
+
+    char *name()
+    {
+        return f.filename;
+    }
+
+    void close(void)
+    {
+        isOpen = false;
+    }
+
+    operator bool (void)
+    {
+        return isOpen;
+    }
+
+    bool begin();
 
     File openNextFile();
 
@@ -40,21 +66,11 @@ public:
 
     File open(char const *filename, uint8_t mode = 0);
 
-    char *name()
-    {
-        return f.filename;
-    }
+    size_t write(uint8_t const *buffer, size_t size);
 
-    size_t write(uint8_t const *buf, size_t size);
-
-    int read(uint8_t *buf, size_t size);
+    size_t read(uint8_t *buffer, size_t size);
 
     bool seek(uint32_t pos);
-
-    void close(void) {}
-
-    operator bool (void);
-
 };
 
 extern File fs;

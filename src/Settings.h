@@ -10,6 +10,7 @@ class Settings
         float *values;
         int size;
     } cache;
+    bool isCacheEnabled = false;
 
 public:
     String get(const char *key)
@@ -22,11 +23,15 @@ public:
 
     float getCachedFloat(const char *key)
     {
-        for (int i = 0; i < cache.size; i++) {
-            if (strcmp(cache.keys[i], key) == 0)
-                return cache.values[i];
+        if (isCacheEnabled) {
+            for (int i = 0; i < cache.size; i++) {
+                if (strcmp(cache.keys[i], key) == 0)
+                    return cache.values[i];
+            }
+            return 0;
+        } else {
+            return get(key).toFloat();
         }
-        return 0;
     }
 
     int getCachedInt(const char *key)
@@ -54,18 +59,23 @@ public:
         storage.write((char *)key, (void *)value, size);
     }
     
-    void begin(const char *keys[], const char *values[], const int size)
+    void begin(const char *keys[], const char *values[], const int size, bool _isCacheEnabled = true)
     {
-        cache.size = size;
-        cache.keys = (char **)keys;
-        cache.values = (float*)malloc(size * sizeof(float));
+        isCacheEnabled = _isCacheEnabled;
         for (int i = 0; i < size; i++) {
-            if (storage.exists(keys[i])) {
-                String v = get(keys[i]);
-                cache.values[i] = v.toFloat();
-            } else {
-                cache.values[i] = atof(values[i]);
+            if (!storage.exists(keys[i])) {
                 create(keys[i], values[i]);
+            }
+        }
+        if (isCacheEnabled) {
+            cache.size = size;
+            cache.keys = (char **)keys;
+            cache.values = (float*)malloc(size * sizeof(float));
+            for (int i = 0; i < size; i++) {
+                if (storage.exists(keys[i])) {
+                    String v = get(keys[i]);
+                    cache.values[i] = v.toFloat();
+                }
             }
         }
     }

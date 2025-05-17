@@ -88,8 +88,7 @@ public:
         this->node = node;
         if (!radio.begin()) {
             Serial.println("ERROR: Radio is dead");
-            while (1) {
-            }
+            return;
         }
         radio.setPALevel(RADIO_LEVEL);
         radio.setDataRate(RADIO_BW);
