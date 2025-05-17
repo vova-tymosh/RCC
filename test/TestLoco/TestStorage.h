@@ -89,7 +89,6 @@ void test06()
     //Test setting create
     settings.create("test05", testStr);
     String r = settings.get("test05");
-    Serial.print("  ZZ ZZ");
     Serial.println(r);
 
     printResult(testStr, (char*)r.c_str());
