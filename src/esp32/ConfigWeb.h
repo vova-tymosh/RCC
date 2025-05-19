@@ -16,10 +16,7 @@ public:
 
     void loop()
     {
-        // if (WiFi.status() != WL_CONNECTED)
-        //     return;
         server.handleClient();
     }
 };
 
-// extern ConfigWeb configWeb;

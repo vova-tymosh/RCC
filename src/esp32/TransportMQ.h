@@ -5,6 +5,8 @@
 #include "Timer.h"
 #include "Settings.h"
 #include "Protocol.h"
+#include "esp32/TransportClient.h"
+
 
 //
 // https://www.jmri.org/help/en/html/hardware/mqtt/index.shtml
@@ -18,7 +20,7 @@
 
 void onMqttMessage(char *topic, byte *payload, unsigned int length);
 
-class MqttClient
+class MqttClient : public TransportClient
 {
 private:
     WiFiClient conn;
@@ -29,15 +31,9 @@ private:
 
 public:
     PubSubClient mqtt;
-    RCCNode *node;
     String topicPrefix;
 
     MqttClient() : mqtt(conn), heartbeatTimer(1000) {};
-
-    void setLoco(RCCNode *_loco)
-    {
-        node = _loco;
-    }
 
     void write(String topic, String message, bool retain = false)
     {

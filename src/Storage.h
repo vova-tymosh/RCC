@@ -9,6 +9,7 @@ private:
     const uint16_t code = 0xC0DE;
     const uint16_t version = 11;
 
+
     void beginInternal();
 
     void clearInternal();
@@ -52,6 +53,10 @@ public:
     bool exists(const char *filename);
 
     bool allocate(const char *filename, size_t size);
+
+    String openFirst();
+
+    String openNext();
 };
 
 extern Storage storage;

@@ -3,26 +3,18 @@
 #include "Timer.h"
 #include "ConfigWeb.h"
 #include "Settings.h"
-
-#if defined(RCC_NO_STATION)
 #include "esp32/TransportWT.h"
-#define TransportClient WiThrottleClient
-#else
 #include "esp32/TransportMQ.h"
-#define TransportClient MqttClient
-#endif
 
 class Transport
 {
 private:
     ConfigWeb configWeb;
-    TransportClient &transportClient = mqttClient;
+    TransportClient *transportClient;
+    RCCNode *loco;
 
 public:
-    Transport(RCCNode *loco)
-    {
-        transportClient.setLoco(loco);
-    }
+    Transport(RCCNode *loco) : loco(loco) {}
 
     void wifiAP(String wifissid, String wifipwd)
     {
@@ -48,19 +40,27 @@ public:
         String wifiap = settings.get("wifiap");
         String wifissid = settings.get("wifissid");
         String wifipwd = settings.get("wifipwd");
+        String mqtt = settings.get("mqtt");
 
-        if (wifiap == "on")
+        if (wifiap == "ON")
             wifiAP(wifissid, wifipwd);
         else
             wifiConnect(wifissid, wifipwd);
 
+        if (mqtt == "ON") {
+            transportClient = new MqttClient();
+        } else {
+            transportClient = new WiThrottleClient();
+        }
+        transportClient->setLoco(loco);
+
         configWeb.begin();
-        transportClient.begin();
+        transportClient->begin();
     }
 
     void loop()
     {
         configWeb.loop();
-        transportClient.loop();
+        transportClient->loop();
     }
 };

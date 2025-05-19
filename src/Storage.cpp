@@ -82,3 +82,28 @@ bool Storage::allocate(const char *filename, size_t size)
 {
     return true;
 }
+
+File fileListRoot;
+
+String Storage::openFirst()
+{
+    fileListRoot = fs.open("/");
+    File file = fileListRoot.openNextFile();
+    if (file) {
+        return String(file.name());
+    }
+    return String();
+}
+
+String Storage::openNext()
+{
+    if (fileListRoot) {
+        File file = fileListRoot.openNextFile();
+        if (file) {
+            return String(file.name());
+        } else {
+            fileListRoot.close();
+            return String();
+        }
+    }
+}

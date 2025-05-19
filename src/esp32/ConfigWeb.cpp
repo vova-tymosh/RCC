@@ -5,9 +5,6 @@
 #include "ConfigWeb.h"
 #include "Settings.h"
 
-extern const int locoKeySize;
-extern const char *locoKeys[];
-
 
 const char *htmlPrefix = R"(
 <html>
@@ -74,28 +71,32 @@ const char *htmlSubmitted = R"(
   </html>
 )";
 
-const char *userReadable[] = 
-    {"wifiap", "Wifi SSID", "WiFi Password", "Loco Name", "Loco Address", 
-     "MQTT Broker IP", "MQTT Broker port", "Acceleration", "managespeed", 
-     "heartbeat"};
+// const char *userReadable[] = 
+//     {"wifiap", "Wifi SSID", "WiFi Password", "Loco Name", "Loco Address", 
+//      "MQTT Broker IP", "MQTT Broker port", "Acceleration", "managespeed", 
+//      "heartbeat"};
 
 
 WebServer ConfigWeb::server(80);
 
 void ConfigWeb::handleRoot()
 {
-    String wifiap = settings.get("wifiap");
-
     String form = String(htmlPrefix);
-    String checkbox = String(htmlCheckbox);
-    checkbox.replace("$wifiap$", (wifiap == "on") ? "checked" : "");
-    form += checkbox;
-    for (int i = 1; i < locoKeySize; i++) {
-        String inputbox = String(htmlInput);
-        inputbox.replace("$user_readable$", userReadable[i]);
-        inputbox.replace("$key$", locoKeys[i]);
-        inputbox.replace("$value$", settings.get(locoKeys[i]));
-        form += inputbox;
+    String name = storage.openFirst();
+    while (!name.isEmpty()){
+        if (name == "wifiap") {
+            String checkbox = String(htmlCheckbox);
+            String value = settings.get(name.c_str());
+            checkbox.replace("$wifiap$", (value == "ON") ? "checked" : "");
+            form += checkbox;
+        } else {
+            String inputbox = String(htmlInput);
+            inputbox.replace("$user_readable$", name);
+            inputbox.replace("$key$", name);
+            inputbox.replace("$value$", settings.get(name.c_str()));
+            form += inputbox;
+        }
+        name = storage.openNext();
     }
     form += htmlSuffix;
     server.send(200, "text/html", form);
@@ -103,14 +104,12 @@ void ConfigWeb::handleRoot()
 
 void ConfigWeb::handleSubmit()
 {
-    String wifiap = server.arg("wifiap");
-    if (wifiap != "on")
-        wifiap = "of";
-    settings.put("wifiap", wifiap);
-
-    for (int i = 1; i < locoKeySize; i++) {
-        String value = server.arg(locoKeys[i]);
-        settings.put(locoKeys[i], value);
+    for (int i = 0; i < server.args(); i++) {
+        String name = server.argName(i);
+        if (name == "wifiap")
+            settings.put(server.argName(i).c_str(), server.arg(i) == "on" ? "ON" : "OFF");
+        else
+            settings.put(server.argName(i).c_str(), server.arg(i));
     }
     server.send(200, "text/html", htmlSubmitted);
 }

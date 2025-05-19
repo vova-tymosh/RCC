@@ -109,9 +109,11 @@ public:
             s += SEPARATOR;
             s += Keys[i];
         }
-        for (int i = 0; i < locoKeySize; i++) {
+        String name = storage.openFirst();
+        while (!name.isEmpty()){
             s += SEPARATOR;
-            s += locoKeys[i];
+            s += name;
+            name = storage.openNext();
         }
         return s;
     }

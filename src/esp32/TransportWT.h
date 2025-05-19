@@ -4,6 +4,7 @@
 #include <ESPmDNS.h>
 #include "Timer.h"
 #include "Settings.h"
+#include "esp32/TransportClient.h"
 
 //
 // https://www.jmri.org/help/en/package/jmri/jmrit/withrottle/Protocol.shtml
@@ -43,7 +44,7 @@ public:
     }
 };
 
-class WiThrottleClient
+class WiThrottleClient : public TransportClient
 {
 protected:
     const char *propertySeparator = "<;>";
@@ -54,10 +55,10 @@ protected:
     WiFiServer server;
     WiFiClient conn;
     LineReceiver lr;
-    RCCNode *node;
+    String locoAddr;
 
 public:
-    WiThrottleClient(RCCNode *node) : server(port), node(node) {}
+    WiThrottleClient() : server(port) {}
 
     void reply(String msg)
     {
@@ -196,7 +197,7 @@ public:
 
     void connect()
     {
-        log("[WT] Connected");
+        log("Connected");
         conn.flush();
         conn.setTimeout(500);
 
@@ -214,10 +215,10 @@ public:
 
     void begin()
     {
-        MDNS.begin(locoName);
+        MDNS.begin(node->locoName);
         server.begin();
         MDNS.addService(mdnsName, "tcp", port);
-        log("[WT] Srted");
+        log("Started");
     }
 
     void loop()

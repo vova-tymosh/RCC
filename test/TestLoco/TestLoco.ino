@@ -3,7 +3,6 @@
  *
  *
  */
-// #define RCC_NO_STATION
 #include "Motherboard.h"
 #include "Peripheral.h"
 #include "RCCLoco.h"
