@@ -152,13 +152,11 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
         String key(payload, length);
         String value = mqttClient.node->getValue((char *)key.c_str());
         String topic = mqttClient.topicPrefix + MQ_SET_VALUE + key;
-        // mqttClient.mqtt.publish(topic.c_str(), value.c_str());
         mqttClient.write(topic, value);
     } else if (strcmp(action, MQ_LIST_VALUE_ASK) == 0) {
         // Value, list all Keys (config and runtime)
         String topic = mqttClient.topicPrefix + MQ_LIST_VALUE_RES;
         String value = mqttClient.node->listValues();
-        // mqttClient.mqtt.publish(topic.c_str(), value.c_str());
         mqttClient.write(topic, value);
     } else if (strncmp(action, MQ_SET_VALUE, strlen(MQ_SET_VALUE)) == 0) {
         // Value, set state. Hast to be the last one, after "get" and "list"
@@ -172,7 +170,6 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
         String value =
             mqttClient.node->getFunction(functionCode) ? MQ_ON : MQ_OFF;
         String topic = mqttClient.topicPrefix + MQ_SET_FUNCTION + key;
-        // mqttClient.mqtt.publish(topic.c_str(), value.c_str());
         mqttClient.write(topic, value);
     } else if (strncmp(action, MQ_SET_FUNCTION, strlen(MQ_SET_FUNCTION)) == 0) {
         // Function, set state. Hast to be the last one, after "get"

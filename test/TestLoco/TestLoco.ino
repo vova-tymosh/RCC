@@ -52,7 +52,11 @@ public:
 
     void onFunction(uint8_t code, bool value)
     {
-        Serial.print("onFunction: "); Serial.print(code); Serial.print("/"); Serial.println(value);
+        Serial.print("Function: "); Serial.print(code); 
+        if (value)
+            Serial.println(" ON");
+        else
+            Serial.println(" OFF");
         if (code == 0)
             yellow.apply(value);
         if (code == 1)
@@ -61,7 +65,7 @@ public:
 
     void onThrottle(uint8_t direction, uint8_t throttle)
     {
-        Serial.print("onThrottle: "); Serial.print(direction); Serial.print("/"); Serial.println(throttle);
+        Serial.print("Throttle: "); Serial.print(throttle); Serial.print(" D:"); Serial.println(direction); 
         motor.apply(direction, throttle);
     }
 
@@ -119,7 +123,7 @@ void setup()
     update.start();
     
     audio.begin();
-    loco.debugLevel = 10;
+    // loco.debugLevel = 10;
     loco.begin();
 }
 
