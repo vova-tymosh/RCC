@@ -83,27 +83,28 @@ bool Storage::allocate(const char *filename, size_t size)
     return true;
 }
 
-File fileListRoot;
+File fileListRoot = BUILD_FILE();
 
 String Storage::openFirst()
 {
     fileListRoot = fs.open("/");
-    File file = fileListRoot.openNextFile();
-    if (file) {
-        return String(file.name());
-    }
-    return String();
+    return openNext();
 }
 
 String Storage::openNext()
 {
     if (fileListRoot) {
         File file = fileListRoot.openNextFile();
-        if (file) {
-            return String(file.name());
-        } else {
-            fileListRoot.close();
-            return String();
+        while (file) {
+            String s = String(file.name());
+            if (s == "validation") {
+                file = fileListRoot.openNextFile();
+                continue;
+            } else {
+                return s;
+            }
         }
+        fileListRoot.close();
     }
+    return String();   
 }

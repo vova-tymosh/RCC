@@ -58,6 +58,7 @@ protected:
     String locoAddr;
 
 public:
+
     WiThrottleClient() : server(port) {}
 
     void reply(String msg)

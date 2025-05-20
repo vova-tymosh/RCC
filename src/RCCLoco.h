@@ -110,7 +110,7 @@ public:
             s += Keys[i];
         }
         String name = storage.openFirst();
-        while (!name.isEmpty()){
+        while (name.length() != 0) {
             s += SEPARATOR;
             s += name;
             name = storage.openNext();

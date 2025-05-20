@@ -26,12 +26,13 @@ public:
     void wifiConnect(String wifissid, String wifipwd)
     {
         WiFi.begin(wifissid, wifipwd);
-        Serial.println("Connecting to wifi.");
+        Serial.print("Connecting to wifi.");
         while (WiFi.status() != WL_CONNECTED) {
             delay(100);
             Serial.print(".");
         }
-        Serial.print("Connected, IP: ");
+        Serial.println("Connected");
+        Serial.print("WiFi IP: ");
         Serial.println(WiFi.localIP());
     }
 
@@ -48,7 +49,7 @@ public:
             wifiConnect(wifissid, wifipwd);
 
         if (mqtt == "ON") {
-            transportClient = new MqttClient();
+            transportClient = &mqttClient;
         } else {
             transportClient = new WiThrottleClient();
         }
