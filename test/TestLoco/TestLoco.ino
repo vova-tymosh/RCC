@@ -22,9 +22,17 @@ Pin blue(0);
 PowerMeter powerMeter;
 Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD);
 Timer update(1000);
-
-
 Audio audio;
+
+const int settingsSize = 13;
+const char *settingsKeys[settingsSize] = {
+    "wifiap", "wifissid",   "wifipwd",      "loconame",    "locoaddr",
+    "broker", "brokerport", "acceleration", "managespeed", "heartbeat", 
+    "testvalue", "mqtt", "pump"};
+const char *settingsValues[settingsSize] = {"ON", "RCC_Loco",      "RCC_Loco", "RCC",
+                            "3",  "192.168.20.61", "1883",     "0",
+                            "0",  "1000", "1.1", "ON", "0"};
+
 
 
 const int PAGE_SIZE = 256;
@@ -115,7 +123,7 @@ void setup()
 
   
     storage.begin();
-    settings.begin(locoKeys, locoValues, locoKeySize);
+    settings.begin(settingsKeys, settingsValues, settingsSize);
     motor.begin();
     yellow.begin();
     blue.begin();

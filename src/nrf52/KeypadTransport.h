@@ -15,11 +15,15 @@
 
 // TODO: add local mode tests
 
+#ifndef NO_DEBUG
 #define log(msg)                                                               \
     {                                                                          \
         if (node->debugLevel > 3)                                              \
             Serial.println(String("[Nrf] ") + (msg));                          \
     };
+#else
+#define log(msg)
+#endif
 
 struct Qos {
     int sendExp = 0;
@@ -124,7 +128,8 @@ public:
 
         if (tokens > 3) {
             known.nodes[known.len].addr = atoi(buffer[1]);
-            strncpy(known.nodes[known.len].name, buffer[2], NAME_SIZE);
+            memset(known.nodes[known.len].name, 0, NAME_SIZE);
+            strncpy(known.nodes[known.len].name, buffer[2], NAME_SIZE - 1);
             log("Local Intro: " + String(known.nodes[known.len].addr));
             known.len++;
         }
@@ -153,7 +158,7 @@ public:
         send(&cmd);
     }
 
-    void askHearbteat()
+    void askHeartbeatPeriod()
     {
         String packet = String(NRF_GET_VALUE) + HEARTBEAT;
         send((uint8_t *)packet.c_str(), packet.length());
@@ -203,6 +208,7 @@ public:
                 qos.heartbeatPeriod = atoi(value);
             }
             log("Set value: " + String(key) + " " + String(value));
+            node->onSetValue(key, value);
         }
     }
 
@@ -235,6 +241,7 @@ public:
         if (command->code == NRF_INTRO) {
             if (isLocal) {
                 processLocalIntro((char *)payload, size, from);
+                // askHeartbeatPeriod();
             } else {
                 introduce();
                 askListCabs();
@@ -244,7 +251,7 @@ public:
         } else if (command->code == NRF_LIST_CAB) {
             processListCabs((char *)payload, size);
             subsribe();
-            askHearbteat();
+            askHeartbeatPeriod();
         } else if (command->code == NRF_HEARTBEAT) {
             if (isMine(from))
                 processHeartbeat(payload, size, from);
@@ -284,7 +291,7 @@ public:
         known.selected = 0;
         qos.begin();
         if (isLocal) {
-            askHearbteat();
+            askHeartbeatPeriod();
         } else {
             introduce();
             askListCabs();

@@ -32,6 +32,7 @@ public:
     virtual void onFunction(uint8_t code, bool activate) {}
     virtual void onThrottle(uint8_t direction, uint8_t throttle) {}
     virtual void onCommand(uint8_t code, char *value, uint8_t size) {}
+    virtual void onSetValue(const char *key, const char *value) {}
 
     int getThrottle()
     {
@@ -71,7 +72,7 @@ public:
         transport->send(&cmd);
     }
 
-    String getValue(char *key)
+    String getValue(const char *key)
     {
         String packet = String(NRF_GET_VALUE) + key;
         int size = packet.length();
@@ -79,21 +80,21 @@ public:
         return "";
     }
 
-    void setValue(char *key, char *value)
+    void setValue(const char *key, const char *value)
     {
         String packet = String(NRF_SET_VALUE) + key + NRF_SEPARATOR + value;
         int size = packet.length();
         transport->send((uint8_t *)packet.c_str(), size);
     }
 
-    String getValueLocal(char *key)
+    String getValueLocal(const char *key)
     {
         String value(settings.get(key));
         Serial.println("getValueLoc: " + String(key) + "/" + String(value));
         return value;
     }
 
-    void setValueLocal(char *key, char *value)
+    void setValueLocal(const char *key, const char *value)
     {
         Serial.println("setValueLoc: " + String(key) + "/" + String(value));
         settings.put(key, value);

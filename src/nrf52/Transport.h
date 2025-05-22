@@ -11,13 +11,15 @@
 #include "Timer.h"
 
 
-
+#ifndef NO_DEBUG
 #define log(msg)                                                               \
     {                                                                          \
         if (node->debugLevel > 2)                                              \
             Serial.println(String("[Nrf] ") + (msg));                          \
     };
-
+#else
+#define log(msg)
+#endif
 
 class Transport
 {

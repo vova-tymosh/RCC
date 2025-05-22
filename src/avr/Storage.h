@@ -1,6 +1,7 @@
 #pragma once
 
 #define F_WRITE_MODE (1)
+#define BUILD_FILE() File()
 
 void beginPhy();
 

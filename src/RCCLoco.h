@@ -37,6 +37,7 @@ public:
     virtual void onFunction(uint8_t code, bool activate) {}
     virtual void onThrottle(uint8_t direction, uint8_t throttle) {}
     virtual void onCommand(uint8_t code, char *value, uint8_t size) {}
+    virtual void onSetValue(const char *key, const char *value) {}
 
     virtual int getHeartbeat()
     {
@@ -81,24 +82,24 @@ public:
         onFunction(code, activate);
     }
 
-    String getValue(char *key)
+    String getValue(const char *key)
     {
         for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             if (strcmp(key, Keys[i]) == 0) {
                 int value = *((uint8_t *)&state + ValueOffsets[i]);
-                Serial.println("getValue: " + String(key) + "/" +
+                Serial.println("getValue " + String(key) + ":" +
                                String(value));
                 return String(value);
             }
         }
         String value(settings.get(key));
-        Serial.println("getValue: " + String(key) + "/" + String(value));
+        Serial.println("getValue " + String(key) + ":" + String(value));
         return value;
     }
 
-    void setValue(char *key, char *value)
+    void setValue(const char *key, const char *value)
     {
-        Serial.println("setValue: " + String(key) + "/" + String(value));
+        Serial.println("setValue " + String(key) + ":" + String(value));
         settings.put(key, value);
     }
 

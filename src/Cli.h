@@ -104,7 +104,7 @@ private:
         char *key = cmd;
         char *value = ++separator;
         loco->setValue(key, value);
-        Serial.println(key);
+        Serial.print(key);
         Serial.print(":");
         Serial.println(value);
         return true;
@@ -116,7 +116,7 @@ private:
             return false;
         char *key = cmd;
         String value = loco->getValue(key);
-        Serial.println(key);
+        Serial.print(key);
         Serial.print(":");
         Serial.println(value);
         return true;

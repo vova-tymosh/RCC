@@ -29,7 +29,8 @@ public:
     void clear()
     {
         clearInternal();
-        uint32_t validation = (uint32_t)code << 16 | version;
+        uint16_t validation[2] = {code, version};
+        // (uint32_t)code << 16 | version;
         write("validation", &validation, sizeof(validation));
     }
 

@@ -5,17 +5,23 @@
  */
 #define NRF_CE 19
 #define NRF_CSN 18
+#define NO_DEBUG
 
 #include "Peripheral.h"
 #include "RCCLoco.h"
 #include "TestStorage.h"
 
-
-
 Storage storage;
 Settings settings;
 Pin blue(0);
 Timer update(1000);
+
+const int settingsSize = 13;
+const char *settingsKeys[settingsSize] = {
+    "loconame", "locoaddr", "acceleration", "managespeed",  "heartbeat"};
+const char *settingsValues[settingsSize] = {
+    "Mini",     "3",        "0",            "0",            "1000"};
+
 
 class TestLocoMin : public RCCLoco
 {
@@ -63,7 +69,7 @@ void setup()
 
   
     storage.begin();
-    settings.begin(locoKeys, locoValues, locoKeySize, false);
+    settings.begin(settingsKeys, settingsValues, settingsSize, false);
     
     loco.debugLevel = 10;
     loco.begin();

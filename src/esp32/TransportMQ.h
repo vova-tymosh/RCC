@@ -150,7 +150,7 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
     } else if (strcmp(action, MQ_GET_VALUE) == 0) {
         // Value, get state
         String key(payload, length);
-        String value = mqttClient.node->getValue((char *)key.c_str());
+        String value = mqttClient.node->getValue(key.c_str());
         String topic = mqttClient.topicPrefix + MQ_SET_VALUE + key;
         mqttClient.write(topic, value);
     } else if (strcmp(action, MQ_LIST_VALUE_ASK) == 0) {
@@ -162,7 +162,7 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
         // Value, set state. Hast to be the last one, after "get" and "list"
         char *key = action + strlen(MQ_SET_VALUE);
         String value(payload, length);
-        mqttClient.node->setValue(key, (char *)value.c_str());
+        mqttClient.node->setValue(key, value.c_str());
     } else if (strcmp(action, MQ_GET_FUNCTION) == 0) {
         // Function, get state.
         String key(payload, length);
