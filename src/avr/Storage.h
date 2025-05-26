@@ -4,6 +4,7 @@
 #define BUILD_FILE() File()
 
 void beginPhy();
+bool cleanPhy();
 
 class File
 {
@@ -17,22 +18,17 @@ public:
 
 private:
     struct FileRecord f;
-
-    bool isOpen;
     uint16_t offset;
-    bool openNextFileFlag;
+    bool isOpen;
 
     bool createRecord(const char *filename, size_t size, FileRecord *record);
     bool getRecord(const char *filename, FileRecord *record);
 
 public:
 
-    File() : openNextFileFlag(false), 
-        isOpen(false), offset(0)
-    {}
+    File() : isOpen(false), offset(0) {}
 
-    File(const File& file) : openNextFileFlag(file.openNextFileFlag), 
-        isOpen(file.isOpen), offset(file.offset)
+    File(const File& file) : isOpen(file.isOpen), offset(file.offset)
     {
         memcpy(&f, &file.f, sizeof(f));
     }

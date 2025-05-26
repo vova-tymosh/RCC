@@ -8,3 +8,4 @@
 #define BUILD_FILE() File()
 
 void beginPhy();
+bool cleanPhy();

@@ -31,6 +31,10 @@ void Storage::beginInternal()
 
 void Storage::clearInternal()
 {
+    if (cleanPhy()) {
+        Serial.println("[FS] Cleaned by phy");
+        return;
+    }
     File root = fs.open("/");
     File file = root.openNextFile();
     while (file) {

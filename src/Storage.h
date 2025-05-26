@@ -18,9 +18,9 @@ public:
     void begin()
     {
         beginInternal();
-        uint32_t validation = 0;
+        uint16_t validation[2];
         read("validation", &validation, sizeof(validation));
-        if (validation >> 16 != code || (validation & 0xFFFF) != version) {
+        if ((validation[0] != code) || (validation[1] != version)) {
             Serial.println("[FS] No FS or old version, drop to defaults");
             clear();
         }
@@ -29,8 +29,7 @@ public:
     void clear()
     {
         clearInternal();
-        uint16_t validation[2] = {code, version};
-        // (uint32_t)code << 16 | version;
+        const uint16_t validation[2] = {code, version};
         write("validation", &validation, sizeof(validation));
     }
 

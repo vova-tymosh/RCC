@@ -9,3 +9,4 @@
 extern Adafruit_LittleFS fs;
 
 void beginPhy();
+bool cleanPhy();

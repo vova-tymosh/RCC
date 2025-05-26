@@ -25,6 +25,14 @@ File fs;
 const int MIN_FILE_SIZE = 16;
 const int MAX_FILES = 32;
 
+void beginPhy() {}
+
+bool cleanPhy()
+{
+    mr = {0, MAX_FILES * sizeof(File::FileRecord)};
+    EEPROM.put(0, mr);
+    return true;
+}
 
 bool File::createRecord(const char *filename, size_t size, FileRecord *record)
 {
@@ -57,10 +65,6 @@ bool File::getRecord(const char *filename, FileRecord *record)
     return false;
 }
 
-void beginPhy()
-{
-
-}
 
 bool File::begin()
 {
@@ -74,16 +78,12 @@ bool File::begin()
 
 File File::openNextFile()
 {
-    if (openNextFileFlag)
-        isOpen = true;
-    openNextFileFlag = true;
     return File(*this);
 }
 
 bool File::remove(char const *filepath)
 {
-    begin();
-    return true;
+    return false;
 }
 
 bool File::exists(char const *filename)
@@ -94,13 +94,11 @@ bool File::exists(char const *filename)
 
 File File::open(char const *filename, uint8_t mode = 0)
 {
-    if (strcmp(filename, "/") != 0) {
-        bool exists = getRecord(filename, &f);
-        if (exists)
-            isOpen = true;
-        else if (mode == 1 && !exists)
-            isOpen = createRecord(filename, MIN_FILE_SIZE, &f);
-    }
+    bool exists = getRecord(filename, &f);
+    if (exists)
+        isOpen = true;
+    else if (mode == 1 && !exists)
+        isOpen = createRecord(filename, MIN_FILE_SIZE, &f);
     return File(*this);
 }
 

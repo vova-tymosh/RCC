@@ -80,5 +80,9 @@ void beginPhy()
     flash.begin(&XIAO_NRF_FLASH, 1);
 }
 
+bool cleanPhy()
+{
+    return false;
+}
 
 #endif
