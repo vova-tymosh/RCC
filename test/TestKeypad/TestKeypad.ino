@@ -51,13 +51,16 @@ public:
 TestKeypad keypad;
 
 
+const char *padKeys[] = {"loconame", "locoaddr"};
+const char *padValues[] = {"RCC_Keypad", "0"};
+
 
 void setup()
 {
     Serial.begin(115200);
     Serial.println("Started");
     storage.begin();
-    settings.begin(keypadKeys, keypadValues, keypadKeySize);
+    settings.begin(padKeys, padValues, sizeof(padKeys) / sizeof(padKeys[0]));
 
 
     keypad.debugLevel = 10;

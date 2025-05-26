@@ -2,9 +2,8 @@
 #include "Settings.h"
 #include "Storage.h"
 
-char testStr[]  = "1234567890abcd";
-char testStr2[] = "ABCDEFGHIJKLMNO";
-char buffer[64];
+const char testStr[]  = "1234567890abcd";
+const char testStr2[] = "ABCDEFGHIJKLMNO";
 
 void printResult(const char *expected, char* actual)
 {
@@ -21,6 +20,7 @@ void printResult(const char *expected, char* actual)
 void test00()
 {
     //Test write/read with extra size
+    char buffer[64];
     storage.write("test01", testStr, sizeof(testStr));
     int s = storage.read("test01", buffer, sizeof(buffer));
     // buffer[s] = '\0';
@@ -30,6 +30,7 @@ void test00()
 void test01()
 {
     //Test read only
+    char buffer[64];
     int s = storage.read("test01", buffer, 12);
     buffer[s] = '\0';
     String t = String(testStr);
@@ -40,6 +41,7 @@ void test01()
 void test02()
 {
     //Test read multiple
+    char buffer[64];    
     const int c = 100;
     int s = 0;
     long start = millis();
@@ -56,6 +58,7 @@ void test02()
 void test03()
 {
     //Test size and offset
+    char buffer[64];    
     storage.write("test02", testStr, sizeof(testStr));
     int s = storage.read("test02", buffer, 11, 7);
     buffer[s] = '\0';
@@ -67,6 +70,7 @@ void test03()
 void test04()
 {
     //Test offset bigger than size
+    char buffer[64];    
     storage.write("test02", testStr, sizeof(testStr));
     int s = storage.read("test02", buffer, 11, 20);
     if (s == 0)
@@ -78,6 +82,7 @@ void test04()
 void test05()
 {
     //Test re-write
+    char buffer[64];    
     storage.write("test01", testStr2, sizeof(testStr2));
     int s = storage.read("test01", buffer, sizeof(testStr2));
     buffer[s] = '\0';
@@ -144,8 +149,16 @@ void test11()
         Serial.println("FAIL");
 }
 
+void test12()
+{
+    //Test clean & valid
+    settings.put("loconame", "something");
+    storage.clear();
+    String r = settings.get("loconame");
+    printResult("RCC", (char*)r.c_str());
+}
 
-void (*tests[])() = {
+const void (*tests[])() = {
     test00,
     test01,
     test02,
@@ -158,4 +171,5 @@ void (*tests[])() = {
     test09,
     test10,
     test11,
+    test12,
 };

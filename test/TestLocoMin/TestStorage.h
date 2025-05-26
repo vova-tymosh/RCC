@@ -147,6 +147,15 @@ void test11()
         Serial.println("FAIL");
 }
 
+void test12()
+{
+    //Test clean & valid
+    settings.put("loconame", "something");
+    storage.clear();
+    String r = settings.get("loconame");
+    printResult("RCC", (char*)r.c_str());
+}
+
 
 const void (*tests[])() = {
     test00,
@@ -161,4 +170,5 @@ const void (*tests[])() = {
     test09,
     test10,
     test11,
+    test12,
 };

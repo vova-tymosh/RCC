@@ -16,12 +16,6 @@ Settings settings;
 Pin blue(0);
 Timer update(1000);
 
-const int settingsSize = 13;
-const char *settingsKeys[settingsSize] = {
-    "loconame", "locoaddr", "acceleration", "managespeed",  "heartbeat"};
-const char *settingsValues[settingsSize] = {
-    "Mini",     "3",        "0",            "0",            "1000"};
-
 
 class TestLocoMin : public RCCLoco
 {
@@ -30,12 +24,12 @@ public:
 
     void onFunction(uint8_t code, bool value)
     {
-        Serial.print(F("onFunction: ")); Serial.print(code); Serial.print(F("/")); Serial.println(value);
+        Serial.print(F("F ")); Serial.print(code); Serial.print(F("/")); Serial.println(value);
     }
 
     void onThrottle(uint8_t direction, uint8_t throttle)
     {
-        Serial.print(F("onThrottle: ")); Serial.print(direction); Serial.print(F("/")); Serial.println(throttle);
+        Serial.print(F("T ")); Serial.print(direction); Serial.print(F("/")); Serial.println(throttle);
     }
 
     void onCommand(uint8_t code, char* value, uint8_t size)
@@ -55,6 +49,11 @@ public:
 TestLocoMin loco;
 
 
+const int settingsSize = 13;
+const char *settingsKeys[settingsSize] = {
+    "loconame", "locoaddr", "acceleration", "managespeed",  "heartbeat"};
+const char *settingsValues[settingsSize] = {
+    "Mini",     "3",        "0",            "0",            "1000"};
 
 void setup()
 {
@@ -62,7 +61,7 @@ void setup()
     delay(250);
 
     // while ( !Serial ) delay(10);
-    // Serial.println("Enter to any keys to continue:");
+    // Serial.println(F("hit entre"));
     // while ( !Serial.available() )
     //     delay(1);
     // Serial.println("Start");
@@ -85,6 +84,7 @@ void loop()
         loco.state.speed = 20;
         loco.state.temperature = 110;
         loco.state.psi = 35;
+        Serial.println(settings.get("loconame"));
     }
 }
 

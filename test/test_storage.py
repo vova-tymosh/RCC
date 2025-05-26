@@ -54,6 +54,9 @@ def test_storage10():
 def test_storage11():
    return  _test_storage(11, 'Test Storage 11, exists')
 
+def test_storage12():
+   return  _test_storage(12, 'Test Storage 12, clean and validation')
+
 def test_storage_end():
     s.close()
     return (True, 'Test Storage End')
@@ -63,5 +66,6 @@ tests_storage = [test_storage_start,
                  test_storage00, test_storage01, test_storage02, test_storage03, 
                  test_storage04, test_storage05, test_storage06, test_storage07, 
                  test_storage08, test_storage09, test_storage10, test_storage11,
+                 test_storage12,
                  test_storage_end]
 
