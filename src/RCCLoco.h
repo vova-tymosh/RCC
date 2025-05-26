@@ -87,19 +87,19 @@ public:
         for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             if (strcmp(key, Keys[i]) == 0) {
                 int value = *((uint8_t *)&state + ValueOffsets[i]);
-                Serial.println("getValue " + String(key) + ":" +
-                               String(value));
+                // Serial.println("getValue " + String(key) + ":" +
+                //                String(value));
                 return String(value);
             }
         }
         String value(settings.get(key));
-        Serial.println("getValue " + String(key) + ":" + String(value));
+        // Serial.println("getValue " + String(key) + ":" + String(value));
         return value;
     }
 
     void setValue(const char *key, const char *value)
     {
-        Serial.println("setValue " + String(key) + ":" + String(value));
+        // Serial.println("setValue " + String(key) + ":" + String(value));
         settings.put(key, value);
     }
 
