@@ -11,46 +11,39 @@
 #include "avr/Storage.h"
 #endif
 
-#define MAKE_PATH(name) \
-    char path[256]; \
-    path[0] = '/'; \
-    strcpy(path + 1, name); \
 
-void Storage::beginInternal()
-{
-    beginPhy();
-    if (!fs.begin()) {
-        bool r = fs.format();
-        r = r && fs.begin();
-        if (!r)
-            Serial.println("[FS] Format failed");
-    } else {
-        Serial.println("[FS] Mount successful");
-    }
-}
+const char* const validationFile = "/validation";
 
-void Storage::clearInternal()
+void Storage::begin(uint16_t _version)
 {
-    if (cleanPhy()) {
-        Serial.println("[FS] Cleaned by phy");
+    if (!LittleFS.begin(true)) {
+        Serial.println("[FS] Can't mount");
         return;
     }
-    File root = fs.open("/");
-    File file = root.openNextFile();
-    while (file) {
-        String path = String("/") + file.name();
-        Serial.println("[FS] Delete: " + path);
-        fs.remove(path.c_str());
-        file = root.openNextFile();
+    uint16_t validation[2];
+    read(validationFile, &validation, sizeof(validation));
+    if ((validation[0] != code) || (validation[1] != _version)) {
+        Serial.println("[FS] Outdated");
+        clear();
     }
+    char filepath[MAX_LENGTH];
+    makeSettingsPath("", filepath, sizeof(filepath));
+    if (!LittleFS.mkdir(filepath))
+        Serial.println("[FS] Can't create folder");    
+}
+
+void Storage::clear()
+{
+    deleteFiles();
+    const uint16_t validation[2] = {code, version};
+    write(validationFile, (void*)&validation, sizeof(validation));
 }
 
 int Storage::read(const char *filename, void *buffer, size_t size,
                   size_t offset)
 {
     int r = 0;
-    MAKE_PATH(filename);
-    File file = fs.open(path);
+    File file = LittleFS.open(filename);
     if (file) {
         file.seek(offset);
         r = file.read((uint8_t *)buffer, size);
@@ -59,18 +52,17 @@ int Storage::read(const char *filename, void *buffer, size_t size,
     return r;
 }
 
-int Storage::write(const char *filename, void *buffer, size_t size,
+int Storage::write(const char *filename, const void *buffer, size_t size,
                    size_t offset)
 {
     int r = 0;
-    MAKE_PATH(filename); 
-    File file = fs.open(path, F_WRITE_MODE);
+    File file = LittleFS.open(filename, F_WRITE_MODE);
     if (file) {
         file.seek(offset);
         r = file.write((const uint8_t *)buffer, size);
         file.close();
     } else {
-        Serial.print("[FS] Failed to write file: ");
+        Serial.print("[FS] Can't write: ");
         Serial.println(filename);
     }
     return r;
@@ -78,20 +70,16 @@ int Storage::write(const char *filename, void *buffer, size_t size,
 
 bool Storage::exists(const char *filename)
 {
-    MAKE_PATH(filename);
-    return fs.exists(path);
-}
-
-bool Storage::allocate(const char *filename, size_t size)
-{
-    return true;
+    return LittleFS.exists(filename);
 }
 
 File fileListRoot = BUILD_FILE();
 
 String Storage::openFirst()
 {
-    fileListRoot = fs.open("/");
+    char filepath[MAX_LENGTH];
+    makeSettingsPath("", filepath, sizeof(filepath));
+    fileListRoot = LittleFS.open(filepath);
     return openNext();
 }
 
@@ -99,16 +87,10 @@ String Storage::openNext()
 {
     if (fileListRoot) {
         File file = fileListRoot.openNextFile();
-        while (file) {
-            String s = String(file.name());
-            if (s == "validation") {
-                file = fileListRoot.openNextFile();
-                continue;
-            } else {
-                return s;
-            }
-        }
-        fileListRoot.close();
+        if (file)
+            return String(file.name());
+        else
+            fileListRoot.close();
     }
     return String();   
 }

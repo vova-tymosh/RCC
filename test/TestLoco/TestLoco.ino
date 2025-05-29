@@ -26,12 +26,13 @@ Audio audio;
 
 const int settingsSize = 13;
 const char *settingsKeys[settingsSize] = {
-    "wifiap", "wifissid",   "wifipwd",      "loconame",    "locoaddr",
-    "broker", "brokerport", "acceleration", "managespeed", "heartbeat", 
-    "testvalue", "mqtt", "pump"};
-const char *settingsValues[settingsSize] = {"ON", "RCC_Loco",      "RCC_Loco", "RCC",
-                            "3",  "192.168.20.61", "1883",     "0",
-                            "0",  "1000", "1.1", "ON", "0"};
+    "wifiap",       "wifissid",   "wifipwd",      "loconame",    "locoaddr",
+    "broker",       "brokerport", "acceleration", "managespeed", "heartbeat", 
+    "testvalue",    "mqtt",       "pump"};
+const char *settingsValues[settingsSize] = {
+    "ON",           "RCC_Loco",   "RCC_Loco",     "RCC",         "3",
+    "192.168.20.61","1883",       "0",            "0",           "1000", 
+    "1.1",          "ON",         "0"};
 
 
 
@@ -40,7 +41,7 @@ uint8_t page[PAGE_SIZE];
 char soundFile[] = "sound";
 void writeAllAudio(const uint8_t *data, const size_t size) {
     uint32_t offset = 0;
-    storage.allocate(soundFile, size);
+    // storage.allocate(soundFile, size);
 
     while (offset < size) {
         uint32_t s = size - offset;
@@ -95,6 +96,12 @@ public:
         case 'W':
             writeAllAudio(audio_data, sizeof(audio_data));
             break;
+        case 'D':
+            storage.begin(0);
+            storage.begin();
+            settings.begin(settingsKeys, settingsValues, settingsSize);
+            Serial.println("Clear");
+            break;
         case 'T':
             if (size > 0) {
                 int idx = atoi(value);
@@ -119,7 +126,7 @@ void setup()
     // Serial.println("Enter to any keys to continue:");
     // while ( !Serial.available() )
     //     delay(1);
-    // Serial.println("Start");
+    Serial.println("Start");
 
   
     storage.begin();

@@ -12,6 +12,7 @@ bytes
 
 #include <stdint.h>
 #include <Arduino.h>
+#include "../Storage.h"
 #include "avr/Storage.h"
 #include "EEPROM.h"
 
@@ -25,14 +26,7 @@ File fs;
 const int MIN_FILE_SIZE = 16;
 const int MAX_FILES = 32;
 
-void beginPhy() {}
-
-bool cleanPhy()
-{
-    mr = {0, MAX_FILES * sizeof(File::FileRecord)};
-    EEPROM.put(0, mr);
-    return true;
-}
+File LittleFS;
 
 bool File::createRecord(const char *filename, size_t size, FileRecord *record)
 {
@@ -65,8 +59,7 @@ bool File::getRecord(const char *filename, FileRecord *record)
     return false;
 }
 
-
-bool File::begin()
+bool File::begin(bool format)
 {
     EEPROM.get(0, mr);
     if (mr.count == 0xFFFF) {
@@ -79,11 +72,6 @@ bool File::begin()
 File File::openNextFile()
 {
     return File(*this);
-}
-
-bool File::remove(char const *filepath)
-{
-    return false;
 }
 
 bool File::exists(char const *filename)
@@ -136,5 +124,18 @@ bool File::seek(uint32_t pos)
         offset = pos;
     return isOpen;
 }
+
+void Storage::deleteFiles()
+{
+    mr = {0, MAX_FILES * sizeof(File::FileRecord)};
+    EEPROM.put(0, mr);
+}
+
+char* Storage::makeSettingsPath(const char *filename, char *buffer, size_t size)
+{
+    strcpy(buffer, filename);
+    return buffer;
+}
+
 
 #endif

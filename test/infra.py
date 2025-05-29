@@ -51,12 +51,12 @@ def readSerial(s, msg = None):
     buffer = ''
     for i in range(5):
         b = s.readline().decode('utf-8').strip()
-        logging.info(f"Read from serial: {msg}/{b}")
+        logging.info(f"Read from serial: {b}. Need: {msg}. Accumulated: {buffer}")
         if msg and msg == b:
-            return b
+            return True
         elif b:
             buffer += b
-    return buffer
+    return False
 
 def readSerialFloat(s):
     data = readSerial(s)

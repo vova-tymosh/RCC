@@ -51,9 +51,11 @@ const char CMD_SET_FUNCTION = 'F';
 const char CMD_GET_VALUE = 'G';
 const char CMD_SET_VALUE = 'S';
 const char CMD_LIST_VALUE = 'L';
+const char CMD_READ_FILE = 'R';
+const char CMD_WRITE_FILE = 'W';
+const char CMD_ERASE = 'E';
 
 const char CMD_CMD = 'C';
-const char CMD_ERASE = 'E';
 const char CMD_REBOOT = '!';
 
 #endif // PROTOCOL_H

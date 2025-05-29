@@ -7,8 +7,8 @@ SPI flash storage for nRF52
 #include <Arduino.h>
 #include <Adafruit_LittleFS.h>
 #include <Adafruit_SPIFlash.h>
+#include "../Storage.h"
 #include "nrf52/Storage.h"
-
 
 #define LFS_BLOCK_SIZE        4096
 
@@ -69,20 +69,58 @@ static struct lfs_config extCfg =
     .file_buffer = NULL
 };
 
-#define File Adafruit_LittleFS_Namespace::File 
-#define F_WRITE_MODE Adafruit_LittleFS_Namespace::FILE_O_WRITE
-#define getPath(x) (String("/") + x.name())
+RccFS LittleFS(&extCfg);
 
-Adafruit_LittleFS fs(&extCfg);
-
-void beginPhy()
+bool RccFS::begin(bool format)
 {
+    bool r = true;
     flash.begin(&XIAO_NRF_FLASH, 1);
+    if (!Adafruit_LittleFS::begin() && format) {
+        r = Adafruit_LittleFS::format();
+        r = r && Adafruit_LittleFS::begin();
+        if (!r)
+            Serial.println("[FS] Format failed");
+    }
+    return r;
 }
 
-bool cleanPhy()
+void deleteDirectory(const char *dirname)
 {
-    return false;
+    char path[256];
+    File root = LittleFS.open(dirname);
+    File file = root.openNextFile();
+    while (file) {
+        strcpy(path, dirname);
+        if (path[strlen(path) - 1] != '/') {
+            strcat(path, "/");
+        }
+        strcat(path, file.name());
+        bool isDir = file.isDirectory();
+        file = root.openNextFile();
+        if (isDir) {
+            deleteDirectory(path);
+            LittleFS.rmdir(path);
+        } else {
+            LittleFS.remove(path);
+        }
+        // Serial.print("[FS] Delete: ");
+        // Serial.println(path);
+    }
 }
+
+void Storage::deleteFiles()
+{
+    deleteDirectory("/");
+    Serial.println("[FS] All deleted");
+}
+
+char* Storage::makeSettingsPath(const char *filename, char *buffer, size_t size)
+{
+    const char *const prefix = "/settings/";
+    strcpy(buffer, prefix);
+    strncat(buffer, filename, size - strlen(prefix) - 1);
+    return buffer;
+}
+
 
 #endif

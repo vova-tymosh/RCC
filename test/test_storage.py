@@ -6,66 +6,103 @@ s = None
 def _test_storage(idx, test_name):
     writeSerial(s, f'CT{idx}')
     r = readSerial(s, 'ok')
-    if r != 'ok':
-        print(f'\t{r}')
-        return (False, test_name)
-    return (True, test_name)
+    return (r, test_name)
 
-
+testStr1 = "1234567890abcd"
+testStr2 = "ABCDEFGHIJKLMNO"
 
 def test_storage_start():
     global s
     s = openSerial()
     return (True, 'Test Storage Start')
 
+def test_storage_normal():
+    test_name = 'Test Storage, write/read'
+    writeSerial(s, f'W/test01:{testStr1}')
+    r1 = readSerial(s, 'Write: /test01')
+    writeSerial(s, f'R/test01')
+    r2 = readSerial(s, f'/test01:{testStr1}')
+    return (r1 and r2, test_name)
+
+def test_storage_read_only():
+    test_name = 'Test Storage, read only'
+    writeSerial(s, f'R/test01')
+    r2 = readSerial(s, f'/test01:{testStr1}')
+    return (r2, test_name)
+
+def test_storage_re_write():
+    test_name = 'Test Storage, re-write'
+    writeSerial(s, f'W/test01:{testStr2}')
+    r1 = readSerial(s, 'Write: /test01')
+    writeSerial(s, f'R/test01')
+    r2 = readSerial(s, f'/test01:{testStr2}')
+    return (r1 and r2, test_name)
+
+def test_setting_read_only():
+    test_name = 'Test Settings, read'
+    writeSerial(s, f'Gtest05')
+    r2 = readSerial(s, f'test05:{testStr1}')
+    return (r2, test_name)
+
+def test_setting_re_write():
+    test_name = 'Test Settings, re-write'
+    writeSerial(s, f'Stest05:{testStr2}')
+    r1 = readSerial(s, f'test05:{testStr2}')
+    writeSerial(s, f'Gtest05')
+    r2 = readSerial(s, f'test05:{testStr2}')
+    return (r1 and r2, test_name)
+
+def test_setting_defaults():
+    test_name = 'Test Settings, reading defaults'
+    writeSerial(s, f'Gloconame')
+    r2 = readSerial(s, f'loconame:RCC')
+    return (r2, test_name)
+
+def test_storage_version():
+    test_name = 'Test Storage, version missmatch'
+    writeSerial(s, 'Sloconame:something')
+    r1 = readSerial(s, 'loconame:something')
+    writeSerial(s, 'Gloconame')
+    r2 = readSerial(s, 'loconame:something') 
+    writeSerial(s, 'CD')
+    r3 = readSerial(s, 'Clear')    
+    writeSerial(s, f'Gloconame')
+    r4 = readSerial(s, f'loconame:RCC')
+    r = r1 and r2 and r3 and r4  
+    return (r, test_name)
+
+
 def test_storage00():
-    return _test_storage(0, 'Test Storage 00, write/read with extra size')
+    return _test_storage(0, 'Test Storage 00, read multiple')
 
 def test_storage01():
-    return _test_storage(1, 'Test Storage 01, read only')
+    return _test_storage(1, 'Test Storage 01, size and offset')
 
 def test_storage02():
-    return _test_storage(2, 'Test Storage 02, read multiple')
+    return _test_storage(2, 'Test Storage 02, offset bigger than size')
 
 def test_storage03():
-    return _test_storage(3, 'Test Storage 03, size and offset')
+    return _test_storage(3, 'Test Storage 03, cache')
 
 def test_storage04():
-    return _test_storage(4, 'Test Storage 04, offset bigger than size')
+    return _test_storage(4, 'Test Storage 04, exists')
 
 def test_storage05():
-    return _test_storage(5, 'Test Storage 05, re-write')
+    return _test_storage(5, 'Test Storage 05, settings create')
 
-def test_storage06():
-   return  _test_storage(6, 'Test Settings 06, setting create')
-
-def test_storage07():
-   return  _test_storage(7, 'Test Settings 07, setting read')
-
-def test_storage08():
-   return  _test_storage(8, 'Test Settings 08, settings re-write')
-
-def test_storage09():
-   return  _test_storage(9, 'Test Settings 09, reading defaults')
-
-def test_storage10():
-   return  _test_storage(10, 'Test Settings 10, cache')
-
-def test_storage11():
-   return  _test_storage(11, 'Test Storage 11, exists')
-
-def test_storage12():
-   return  _test_storage(12, 'Test Storage 12, clean and validation')
 
 def test_storage_end():
     s.close()
     return (True, 'Test Storage End')
 
 
-tests_storage = [test_storage_start, 
-                 test_storage00, test_storage01, test_storage02, test_storage03, 
-                 test_storage04, test_storage05, test_storage06, test_storage07, 
-                 test_storage08, test_storage09, test_storage10, test_storage11,
-                 test_storage12,
+tests_storage = [test_storage_start,
+                 test_storage_normal, 
+                 test_storage_read_only, test_storage_re_write,
+                 test_storage05,
+                 test_setting_read_only, 
+                 test_setting_re_write,
+                 test_setting_defaults, test_storage_version,
+                 test_storage00, test_storage01, test_storage02, test_storage03, test_storage04,
                  test_storage_end]
 

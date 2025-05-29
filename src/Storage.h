@@ -1,4 +1,8 @@
-#pragma once
+// #pragma once
+#ifndef STORAGE_H
+#define STORAGE_H
+
+
 #include <stdint.h>
 #include <Arduino.h>
 
@@ -6,53 +10,26 @@
 class Storage
 {
 private:
-    const uint16_t code = 0xC0DE;
-    const uint16_t version = 11;
+    static const uint16_t code = 0xC0DE;
+    static const uint16_t version = 12;
+    static const int MAX_LENGTH = 256;
 
-
-    void beginInternal();
-
-    void clearInternal();
+    void deleteFiles();
 
 public:
-    void begin()
-    {
-        beginInternal();
-        uint16_t validation[2];
-        read("validation", &validation, sizeof(validation));
-        if ((validation[0] != code) || (validation[1] != version)) {
-            Serial.println("[FS] No FS or old version, drop to defaults");
-            clear();
-        }
-    }
+    void begin(uint16_t _version = version);
 
-    void clear()
-    {
-        clearInternal();
-        const uint16_t validation[2] = {code, version};
-        write("validation", &validation, sizeof(validation));
-    }
+    void clear();
 
     int read(const char *filename, void *buffer, size_t size,
              size_t offset = 0);
 
-    int readOrCreate(const char *filename, void *buffer, size_t size)
-    {
-        int r = read(filename, buffer, size);
-        if (size > 0 && r == 0) {
-            Serial.print("[FS] File not found, create: ");
-            Serial.println(filename);
-            write(filename, buffer, size);
-        }
-        return r;
-    }
-
-    int write(const char *filename, void *buffer, size_t size,
+    int write(const char *filename, const void *buffer, size_t size,
               size_t offset = 0);
 
     bool exists(const char *filename);
 
-    bool allocate(const char *filename, size_t size);
+    char* makeSettingsPath(const char *filename, char *buffer, size_t size);
 
     String openFirst();
 
@@ -60,3 +37,5 @@ public:
 };
 
 extern Storage storage;
+
+#endif // STORAGE_H

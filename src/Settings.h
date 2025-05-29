@@ -12,12 +12,21 @@ class Settings
     } cache;
     bool isCacheEnabled = false;
 
+    bool fileExists(const char *key)
+    {
+        char filepath[MAX_LENGTH];
+        storage.makeSettingsPath(key, filepath, sizeof(filepath));
+        return storage.exists(filepath);
+    }
+
 public:
     String get(const char *key)
     {
+        char filepath[MAX_LENGTH];
         char buffer[MAX_LENGTH];
         buffer[0] = 0;
-        storage.read(key, buffer, sizeof(buffer));
+        storage.makeSettingsPath(key, filepath, sizeof(filepath));
+        storage.read(filepath, buffer, sizeof(buffer));
         return String(buffer);
     }
 
@@ -41,8 +50,10 @@ public:
 
     void put(const char *key, String value)
     {
-        if (storage.exists(key)) {
-            storage.write(key, (void *)value.c_str(), value.length() + 1);
+        char filepath[MAX_LENGTH];
+        storage.makeSettingsPath(key, filepath, sizeof(filepath));
+        if (storage.exists(filepath)) {
+            storage.write(filepath, (void *)value.c_str(), value.length() + 1);
             for (int i = 0; i < cache.size; i++) {
                 if (strcmp(cache.keys[i], key) == 0) {
                     cache.values[i] = value.toFloat();
@@ -55,16 +66,21 @@ public:
     //Doesn't update cache
     void create(const char *key, const char *value)
     {
+        char filepath[MAX_LENGTH];
+        storage.makeSettingsPath(key, filepath, sizeof(filepath));
         size_t size = strlen(value) + 1;
-        storage.write((char *)key, (void *)value, size);
+        storage.write(filepath, (void *)value, size);
     }
     
     void begin(const char *keys[], const char *values[], const int size, bool _isCacheEnabled = true)
     {
         isCacheEnabled = _isCacheEnabled;
         for (int i = 0; i < size; i++) {
-            if (!storage.exists(keys[i])) {
-                create(keys[i], values[i]);
+            char filepath[MAX_LENGTH];
+            storage.makeSettingsPath(keys[i], filepath, sizeof(filepath));
+            if (!storage.exists(filepath)) {
+                size_t size = strlen(values[i]) + 1;
+                storage.write(filepath, (void *)values[i], size);
             }
         }
         if (isCacheEnabled) {
@@ -72,10 +88,8 @@ public:
             cache.keys = (char **)keys;
             cache.values = (float*)malloc(size * sizeof(float));
             for (int i = 0; i < size; i++) {
-                if (storage.exists(keys[i])) {
-                    String v = get(keys[i]);
-                    cache.values[i] = v.toFloat();
-                }
+                String v = get(keys[i]);
+                cache.values[i] = v.toFloat();
             }
         }
     }

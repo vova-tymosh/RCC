@@ -33,11 +33,6 @@ public:
         memcpy(&f, &file.f, sizeof(f));
     }
 
-    bool format()
-    {
-        return true;
-    }
-
     char *name()
     {
         return f.filename;
@@ -53,13 +48,13 @@ public:
         return isOpen;
     }
 
-    bool begin();
+    bool begin(bool format = true);
+
+    void clear();
 
     File openNextFile();
 
     bool exists(char const *filepath);
-
-    bool remove(char const *filepath);    
 
     File open(char const *filename, uint8_t mode = 0);
 
@@ -68,8 +63,13 @@ public:
     size_t read(uint8_t *buffer, size_t size);
 
     bool seek(uint32_t pos);
+
+    bool mkdir(const char *path)
+    {
+        return true;
+    }
 };
 
-extern File fs;
+extern File LittleFS;
 
 

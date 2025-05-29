@@ -9,7 +9,7 @@ void (*reboot)(void) = 0;
 class RccCli
 {
 private:
-    static const uint8_t INPUT_LEN_MAX = 32;
+    static const uint8_t INPUT_LEN_MAX = 128;
     static const char END_MARKER = '\n';
 
     RCCNode *loco;
@@ -21,26 +21,32 @@ private:
         char first = toupper(cmd[0]);
         if (strlen(cmd) > 0) {
             cmd++;
-            if (first == CMD_THROTTLE)
+            switch(first) {
+            case CMD_THROTTLE:
                 return processThrottle(cmd);
-            else if (first == CMD_DIRECTION)
+            case CMD_DIRECTION:
                 return processDirection(cmd);
-            else if (first == CMD_SET_FUNCTION)
+            case CMD_SET_FUNCTION:
                 return processFunction(cmd);
-            else if (first == CMD_GET_FUNCTION)
+            case CMD_GET_FUNCTION:
                 return processGetFunction(cmd);
-            else if (first == CMD_CMD)
+            case CMD_CMD:
                 return processCommand(cmd);
-            else if (first == CMD_SET_VALUE)
+            case CMD_SET_VALUE:
                 return processSet(cmd);
-            else if (first == CMD_GET_VALUE)
+            case CMD_GET_VALUE:
                 return processGet(cmd);
-            else if (first == CMD_LIST_VALUE)
+            case CMD_LIST_VALUE:
                 return processList(cmd);
-            else if (first == CMD_ERASE)
-                return processClear(cmd);
-            else if (first == CMD_REBOOT)
+            case CMD_READ_FILE:
+                return processRead(cmd);
+            case CMD_WRITE_FILE:
+                return processWrite(cmd);
+            case CMD_ERASE:
+                return processErase(cmd);
+            case CMD_REBOOT:
                 reboot();
+            }
         }
         return false;
     }
@@ -128,7 +134,36 @@ private:
         return true;
     }
 
-    bool processClear(char cmd[])
+    bool processRead(char cmd[])
+    {
+        if (strlen(cmd) < 1)
+            return false;
+        char *filename = cmd;
+        char value[INPUT_LEN_MAX];
+        storage.read(filename, value, sizeof(value));
+        Serial.print(filename);
+        Serial.print(":");
+        Serial.println(value);
+        return true;
+    }
+
+    bool processWrite(char cmd[])
+    {
+        if (strlen(cmd) < 2)
+            return false;
+        char *separator = strchr(cmd, ':');
+        if (separator == NULL)
+            return false;
+        *separator = '\0';
+        char *filename = cmd;
+        char *value = ++separator;
+        storage.write(filename, value, strlen(value) + 1);
+        Serial.print("Write: ");
+        Serial.println(filename);
+        return true;
+    }
+
+    bool processErase(char cmd[])
     {
         storage.clear();
         Serial.println("Clear");
@@ -138,7 +173,7 @@ private:
     int getLine(char *line)
     {
         int i = 0;
-        memset(line, 0, INPUT_LEN_MAX);
+        // memset(line, 0, INPUT_LEN_MAX);
         while (Serial.available() > 0) {
             char rc = Serial.read();
             if (rc == END_MARKER)
@@ -148,6 +183,7 @@ private:
                 i++;
             }
         }
+        line[i] = '\0';
         return i > 0;
     }
 
