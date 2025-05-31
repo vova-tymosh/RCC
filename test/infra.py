@@ -36,22 +36,26 @@ def openSerial(idx = 0):
         return serial.Serial(ser_names[idx], 115200, timeout=1)
 
 def writeSerial(s, data):
-    d = data.encode('utf-8')
-    logging.info("Write to serial: %s"%d)
-    s.write(d)
+    if type(data) is not bytes:
+        data = data.encode('utf-8')
+    if len(data) <= 40:
+        logging.info(f"Write >: {data}")
+    else:
+        logging.info(f"Write >:[{len(data)}] {data[:40]}...")
+    s.write(data)
     s.flush()
 
-def printSerial(s):
-    for i in range(1000):
-        if s.in_waiting > 0:
-            data = s.readline().decode('utf-8')
-            logging.info("Read from serial: %s"%data.strip())
+# def printSerial(s):
+#     for i in range(1000):
+#         if s.in_waiting > 0:
+#             data = s.readline().decode('utf-8')
+#             logging.info("Read from serial: %s"%data.strip())
 
 def readSerial(s, msg = None):
     buffer = ''
     for i in range(5):
         b = s.readline().decode('utf-8').strip()
-        logging.info(f"Read from serial: {b}. Need: {msg}. Accumulated: {buffer}")
+        logging.info(f"Read <: {b}. Need: {msg}. Accumulated: {buffer}")
         if msg and msg == b:
             return True
         elif b:

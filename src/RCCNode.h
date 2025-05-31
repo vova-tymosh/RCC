@@ -5,13 +5,14 @@
  */
 #pragma once
 #include "RCCState.h"
+#include "Platform.h"
 
 class RCCNode
 {
 public:
     LocoState state;
-    String locoName;
-    String locoAddr;
+    char locoName[VALUE_LEN];
+    int locoAddr;
 
     int debugLevel;
 
@@ -32,6 +33,7 @@ public:
     virtual int getDirection() = 0;
     virtual void setValue(const char *key, const char *value) = 0;
     virtual String getValue(const char *key) = 0;
+    virtual void getValue(const char *key, char *value, size_t size) = 0;
     virtual String listValues() = 0;
     virtual void begin() = 0;
     virtual void loop() = 0;

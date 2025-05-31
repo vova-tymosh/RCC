@@ -38,6 +38,14 @@ def test_storage_re_write():
     r2 = readSerial(s, f'/test01:{testStr2}')
     return (r1 and r2, test_name)
 
+def test_setting_create():
+    test_name = 'Test Settings, create'
+    writeSerial(s, f'CCtest05:{testStr1}')
+    r1 = readSerial(s, f'test05:{testStr1}')
+    writeSerial(s, f'Gtest05')
+    r2 = readSerial(s, f'test05:{testStr1}')
+    return (r1 and r2, test_name)
+
 def test_setting_read_only():
     test_name = 'Test Settings, read'
     writeSerial(s, f'Gtest05')
@@ -71,6 +79,22 @@ def test_storage_version():
     r = r1 and r2 and r3 and r4  
     return (r, test_name)
 
+def test_file_append():
+    test_name = 'Test Stoarge, append 0.5kB'
+    buffer = b'01234567'*32
+    l = len(buffer)
+    t = 0
+    r = True
+    for i in range(2):
+        writeSerial(s, f'A/test10:{l}')
+        time.sleep(0.1)
+        writeSerial(s, buffer)
+        t += l
+        r = r and readSerial(s, f'Append bytes: {l}')
+    writeSerial(s, f'Z/test10')
+    r = r and readSerial(s, f'Size of /test10: {t}')
+    return (r, test_name)
+
 
 def test_storage00():
     return _test_storage(0, 'Test Storage 00, read multiple')
@@ -87,9 +111,6 @@ def test_storage03():
 def test_storage04():
     return _test_storage(4, 'Test Storage 04, exists')
 
-def test_storage05():
-    return _test_storage(5, 'Test Storage 05, settings create')
-
 
 def test_storage_end():
     s.close()
@@ -97,12 +118,19 @@ def test_storage_end():
 
 
 tests_storage = [test_storage_start,
-                 test_storage_normal, 
-                 test_storage_read_only, test_storage_re_write,
-                 test_storage05,
-                 test_setting_read_only, 
-                 test_setting_re_write,
-                 test_setting_defaults, test_storage_version,
-                 test_storage00, test_storage01, test_storage02, test_storage03, test_storage04,
-                 test_storage_end]
+    test_storage_normal,
+    test_storage_read_only,
+    test_storage_re_write,
+    # test_file_append,
+    test_setting_create,
+    test_setting_read_only,
+    test_setting_re_write,
+    test_setting_defaults,
+    test_storage_version,
+    test_storage00,
+    test_storage01,
+    test_storage02,
+    test_storage03,
+    test_storage04,
+    test_storage_end]
 

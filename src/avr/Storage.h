@@ -1,6 +1,9 @@
 #pragma once
+#include "Platform.h"
 
-#define F_WRITE_MODE (1)
+#define RCC_FILE_WRITE 1
+#define RCC_FILE_APPEND 1
+
 #define BUILD_FILE() File()
 
 void beginPhy();
@@ -9,9 +12,8 @@ bool cleanPhy();
 class File
 {
 public:
-    static const int NAME_LEN = 12;
     struct FileRecord {
-        char filename[NAME_LEN];
+        char filename[FILENAME_LEN];
         uint16_t addr;
         uint8_t size;
     };
@@ -26,6 +28,21 @@ private:
 
 public:
 
+//FS level functions
+    bool begin(bool format = true);
+
+    void clear();
+
+    File openNextFile();
+
+    bool exists(char const *filepath);
+
+    bool mkdir(const char *path)
+    {
+        return true;
+    }
+
+//File level functions
     File() : isOpen(false), offset(0) {}
 
     File(const File& file) : isOpen(file.isOpen), offset(file.offset)
@@ -38,6 +55,11 @@ public:
         return f.filename;
     }
 
+    uint8_t size()
+    {
+        return f.size;
+    }
+
     void close(void)
     {
         isOpen = false;
@@ -48,26 +70,15 @@ public:
         return isOpen;
     }
 
-    bool begin(bool format = true);
-
-    void clear();
-
-    File openNextFile();
-
-    bool exists(char const *filepath);
-
     File open(char const *filename, uint8_t mode = 0);
 
     size_t write(uint8_t const *buffer, size_t size);
 
     size_t read(uint8_t *buffer, size_t size);
 
-    bool seek(uint32_t pos);
+    bool seek(uint16_t pos);
 
-    bool mkdir(const char *path)
-    {
-        return true;
-    }
+    bool truncate(uint16_t pos);
 };
 
 extern File LittleFS;

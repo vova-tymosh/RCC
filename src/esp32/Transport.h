@@ -6,6 +6,7 @@
 #include "esp32/TransportWT.h"
 #include "esp32/TransportMQ.h"
 
+
 class Transport
 {
 private:
@@ -19,21 +20,28 @@ public:
     void wifiAP(String wifissid, String wifipwd)
     {
         WiFi.softAP(wifissid, wifipwd);
-        Serial.print("Started wifi as AP, SSID: ");
+        Serial.print("[WiFi] Started as AP, SSID: ");
         Serial.println(wifissid);
     }
 
     void wifiConnect(String wifissid, String wifipwd)
     {
         WiFi.begin(wifissid, wifipwd);
-        Serial.print("Connecting to wifi.");
-        while (WiFi.status() != WL_CONNECTED) {
+        Serial.print("[WiFi] Connecting");
+        for (int i = 0; i < 600; i++) {
+            if (WiFi.status() == WL_CONNECTED)
+                break;
             delay(100);
             Serial.print(".");
         }
-        Serial.println("Connected");
-        Serial.print("WiFi IP: ");
-        Serial.println(WiFi.localIP());
+        if (WiFi.status() == WL_CONNECTED) {
+            Serial.println("Connected");
+            Serial.print("[WiFi] IP: ");
+            Serial.println(WiFi.localIP());
+        } else {
+            Serial.println("Failed to connect, revert to AP");
+            wifiAP(wifissid, wifipwd);
+        }
     }
 
     void begin()

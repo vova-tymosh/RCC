@@ -42,6 +42,10 @@ private:
                 return processRead(cmd);
             case CMD_WRITE_FILE:
                 return processWrite(cmd);
+            case CMD_APPEND_FILE:
+                return processAppend(cmd);
+            case CMD_SIZE_FILE:
+                return processSize(cmd);
             case CMD_ERASE:
                 return processErase(cmd);
             case CMD_REBOOT:
@@ -163,6 +167,46 @@ private:
         return true;
     }
 
+    bool processAppend(char cmd[])
+    {
+        if (strlen(cmd) < 2)
+            return false;
+        char *separator = strchr(cmd, ':');
+        if (separator == NULL)
+            return false;
+        *separator = '\0';
+        char *filename = cmd;
+        char *sizeStr = ++separator;
+        size_t size = atoi(sizeStr);
+        const int bufferSize = 4096;
+        if (size > bufferSize)
+            size = bufferSize;
+        char *buffer = (char*)malloc(size);
+        if (buffer == NULL) {
+            Serial.println("Error: Out of memory");
+            return false;
+        }
+        size_t r = Serial.readBytes(buffer, size);
+        storage.append(filename, buffer, r);
+        Serial.print("Append bytes: ");
+        Serial.println(r);
+        free(buffer);
+        return true;
+    }
+
+    bool processSize(char cmd[])
+    {
+        if (strlen(cmd) < 1)
+            return false;
+        char *filename = cmd;
+        size_t size = storage.size(filename);
+        Serial.print("Size of ");
+        Serial.print(filename);
+        Serial.print(": ");
+        Serial.println(size);
+        return true;
+    }
+
     bool processErase(char cmd[])
     {
         storage.clear();
@@ -173,7 +217,7 @@ private:
     int getLine(char *line)
     {
         int i = 0;
-        // memset(line, 0, INPUT_LEN_MAX);
+        memset(line, 0, INPUT_LEN_MAX);
         while (Serial.available() > 0) {
             char rc = Serial.read();
             if (rc == END_MARKER)
@@ -183,7 +227,7 @@ private:
                 i++;
             }
         }
-        line[i] = '\0';
+        // line[i] = '\0';
         return i > 0;
     }
 

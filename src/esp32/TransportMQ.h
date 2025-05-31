@@ -12,11 +12,15 @@
 // https://www.jmri.org/help/en/html/hardware/mqtt/index.shtml
 //
 
-#define log(msg)                                                               \
-    {                                                                          \
-        if (node->debugLevel > 2)                                              \
-            Serial.println(String("[MQ] ") + (msg));                           \
+#if RCC_DEBUG >= 2
+#define log(msg)                                              \
+    {                                                         \
+        Serial.println(String("[MQ] ") + (msg));             \
     };
+#else
+#define log(msg)
+#endif
+
 
 void onMqttMessage(char *topic, byte *payload, unsigned int length);
 
@@ -75,10 +79,10 @@ public:
     {
         if (millis() >= nextReconnectTime) {
             String brokerIP = settings.get("broker");
-            String brokerPort = settings.get("brokerport");
-            mqtt.setServer(brokerIP.c_str(), brokerPort.toInt());
-            if (mqtt.connect(node->locoName.c_str())) {
-                log("Connected");
+            int brokerPort = settings.getCachedInt("brokerport");
+            mqtt.setServer(brokerIP.c_str(), brokerPort);
+            if (mqtt.connect(node->locoName)) {
+                Serial.println("[MQ] Connected");
                 String topic = topicPrefix + "#";
                 mqtt.subscribe(topic.c_str());
                 introduce();

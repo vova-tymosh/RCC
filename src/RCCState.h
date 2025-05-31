@@ -16,7 +16,7 @@ const char *VERSION = "0.7";
 const char *LOCO_FORMAT = "BIIIHBBBBBBB";
 
 // Key names for the LocoState fields. Has to be in the same order as LocoState
-const char *Keys[] = {"Time", "Disatnce", "Bitstate", "Speed",
+const char *Keys[] = {"Time", "Distance", "Bitstate", "Speed",
                       "Lost", "Throttle", "ThrOut",   "Battery",
                       "Temp", "Psi",      "Current"};
 

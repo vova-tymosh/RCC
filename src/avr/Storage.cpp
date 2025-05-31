@@ -118,7 +118,14 @@ size_t File::read(uint8_t *buffer, size_t size)
     return 0;
 }
 
-bool File::seek(uint32_t pos)
+bool File::seek(uint16_t pos)
+{
+    if (isOpen)
+        offset = pos;
+    return isOpen;
+}
+
+bool File::truncate(uint16_t pos)
 {
     if (isOpen)
         offset = pos;

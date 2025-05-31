@@ -5,7 +5,6 @@
  */
 #define NRF_CE 19
 #define NRF_CSN 18
-#define NO_DEBUG
 
 #include "Peripheral.h"
 #include "RCCLoco.h"
@@ -15,6 +14,12 @@ Storage storage;
 Settings settings;
 Pin blue(0);
 Timer update(1000);
+
+const int settingsSize = 5;
+const char *settingsKeys[settingsSize] = {
+    "loconame", "locoaddr", "acceleration", "managespeed",  "heartbeat"};
+const char *settingsValues[settingsSize] = {
+    "Mini",     "3",        "0",            "0",            "1000"};
 
 
 class TestLocoMin : public RCCLoco
@@ -32,9 +37,34 @@ public:
         Serial.print(F("T ")); Serial.print(direction); Serial.print(F("/")); Serial.println(throttle);
     }
 
+    void processCreate(char cmd[])
+    {
+        if (strlen(cmd) < 2)
+                return;
+        char *separator = strchr(cmd, ':');
+        if (separator == NULL)
+            return;
+        *separator = '\0';
+        char *key = cmd;
+        char *value = ++separator;
+        settings.create(key, value);
+        Serial.print(key);
+        Serial.print(":");
+        Serial.println(value);
+    }
+
     void onCommand(uint8_t code, char* value, uint8_t size)
     {
         switch (code) {
+        case 'C':
+            processCreate(value);
+            break;
+        case 'D':
+            storage.begin(0);
+            storage.begin();
+            settings.begin(settingsKeys, settingsValues, settingsSize);
+            Serial.println("Clear");
+            break;
         case 'T':
             if (size > 0) {
                 int idx = atoi(value);
@@ -49,30 +79,27 @@ public:
 TestLocoMin loco;
 
 
-const int settingsSize = 13;
-const char *settingsKeys[settingsSize] = {
-    "loconame", "locoaddr", "acceleration", "managespeed",  "heartbeat"};
-const char *settingsValues[settingsSize] = {
-    "Mini",     "3",        "0",            "0",            "1000"};
 
 void setup()
 {
     Serial.begin(115200);
     delay(250);
 
-    // while ( !Serial ) delay(10);
-    // Serial.println(F("hit entre"));
-    // while ( !Serial.available() )
-    //     delay(1);
-    // Serial.println("Start");
+    while ( !Serial ) delay(10);
+    Serial.println(F("Hit enter"));
+    while ( !Serial.available() )
+        delay(1);
+    Serial.println("Start");
 
   
     storage.begin();
-    settings.begin(settingsKeys, settingsValues, settingsSize, false);
+    storage.clear();
+    settings.begin(settingsKeys, settingsValues, settingsSize);
     
     loco.debugLevel = 10;
     loco.begin();
     update.start();
+    Serial.println("start");
 }
 
 void loop()
@@ -84,7 +111,8 @@ void loop()
         loco.state.speed = 20;
         loco.state.temperature = 110;
         loco.state.psi = 35;
-        Serial.println(settings.get("loconame"));
+        // Serial.println(settings.get("loconame"));
+        Serial.println("loop");
     }
 }
 

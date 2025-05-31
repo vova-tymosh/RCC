@@ -11,11 +11,10 @@
 #include "Timer.h"
 
 
-#ifndef NO_DEBUG
-#define log(msg)                                                               \
-    {                                                                          \
-        if (node->debugLevel > 2)                                              \
-            Serial.println(String("[Nrf] ") + (msg));                          \
+#if RCC_DEBUG >= 2
+#define log(msg)                                              \
+    {                                                         \
+        Serial.println(String("[Nrf] ") + (msg));             \
     };
 #else
 #define log(msg)
@@ -125,8 +124,7 @@ public:
 
     void begin()
     {
-        int addr = node->locoAddr.toInt();
-        wireless.begin(addr);
+        wireless.begin(node->locoAddr);
         introduce();
         heartbeatTimer.start();
     }

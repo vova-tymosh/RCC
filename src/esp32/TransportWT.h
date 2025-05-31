@@ -12,11 +12,14 @@
 
 // TODO: fix Function names
 
-#define log(msg)                                                               \
-    {                                                                          \
-        if (node->debugLevel > 2)                                              \
-            Serial.println(String("[WT] ") + (msg));                          \
+#if RCC_DEBUG >= 2
+#define log(msg)                                              \
+    {                                                         \
+        Serial.println(String("[WT] ") + (msg));             \
     };
+#else
+#define log(msg)
+#endif
 
 
 class LineReceiver
@@ -202,7 +205,7 @@ public:
         conn.flush();
         conn.setTimeout(500);
 
-        uint addr = node->locoAddr.toInt();
+        uint addr = node->locoAddr;
         char addrType = (addr < 127) ? 'S' : 'L';
         locoAddr = String(addrType) + addr;
 
@@ -219,7 +222,7 @@ public:
         MDNS.begin(node->locoName);
         server.begin();
         MDNS.addService(mdnsName, "tcp", port);
-        log("Started");
+        Serial.println("[WT] Started");
     }
 
     void loop()

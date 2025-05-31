@@ -16,6 +16,7 @@ extern const char *locoKeys[];
 extern const char *locoValues[];
 extern const int locoKeySize;
 
+
 class RCCLoco : public RCCNode
 {
 protected:
@@ -87,19 +88,27 @@ public:
         for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             if (strcmp(key, Keys[i]) == 0) {
                 int value = *((uint8_t *)&state + ValueOffsets[i]);
-                // Serial.println("getValue " + String(key) + ":" +
-                //                String(value));
                 return String(value);
             }
         }
         String value(settings.get(key));
-        // Serial.println("getValue " + String(key) + ":" + String(value));
         return value;
+    }
+
+    void getValue(const char *key, char *value, size_t size)
+    {
+        for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
+            if (strcmp(key, Keys[i]) == 0) {
+                int v = *((uint8_t *)&state + ValueOffsets[i]);
+                snprintf(value, size, "%d", v);
+                return;
+            }
+        }
+        settings.get(key, value, size);
     }
 
     void setValue(const char *key, const char *value)
     {
-        // Serial.println("setValue " + String(key) + ":" + String(value));
         settings.put(key, value);
     }
 
@@ -150,8 +159,8 @@ public:
             pid.setDesired(state.throttle);
             pid.setMeasured(scaled);
             state.throttle_out = pid.read();
-            Serial.println("[PD] Update: " + String(speed) + " " +
-                           String(scaled) + " " + String(state.throttle_out));
+            // Serial.println("[PD] Update: " + String(speed) + " " +
+            //                String(scaled) + " " + String(state.throttle_out));
         }
         if (settings.getCachedInt("acceleration") || settings.getCachedInt("managespeed")) {
             static uint8_t lastThrottle = 0;
@@ -164,8 +173,10 @@ public:
 
     void begin()
     {
-        locoName = settings.get("loconame");
-        locoAddr = settings.get("locoaddr");
+        char buffer[VALUE_LEN];
+        settings.get("locoaddr", buffer, sizeof(buffer));
+        locoAddr = atoi(buffer);
+        settings.get("loconame", locoName, sizeof(locoName));
         transport->begin();
         speedTimer.start();
     }

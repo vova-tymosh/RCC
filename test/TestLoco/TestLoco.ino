@@ -3,6 +3,7 @@
  *
  *
  */
+// #define RCC_DEBUG 2
 #include "Motherboard.h"
 #include "Peripheral.h"
 #include "RCCLoco.h"
@@ -78,6 +79,21 @@ public:
         motor.apply(direction, throttle);
     }
 
+    void processCreate(char cmd[])
+    {
+        if (strlen(cmd) < 2)
+            return;
+        char *separator = strchr(cmd, ':');
+        if (separator == NULL)
+            return;
+        *separator = '\0';
+        char *key = cmd;
+        char *value = ++separator;
+        settings.create(key, value);
+        Serial.print(key);
+        Serial.print(":");
+        Serial.println(value);
+    }
     void onCommand(uint8_t code, char* value, uint8_t size)
     {
         switch (code) {
@@ -95,6 +111,9 @@ public:
             break;
         case 'W':
             writeAllAudio(audio_data, sizeof(audio_data));
+            break;
+        case 'C':
+            processCreate(value);
             break;
         case 'D':
             storage.begin(0);
@@ -126,7 +145,7 @@ void setup()
     // Serial.println("Enter to any keys to continue:");
     // while ( !Serial.available() )
     //     delay(1);
-    Serial.println("Start");
+    // Serial.println("Start");
 
   
     storage.begin();

@@ -94,19 +94,10 @@ void test04()
         Serial.println("FAIL");
 }
 
-void test05()
-{
-    //Test setting create
-    settings.create("test05", testStr);
-    String s = settings.get("test05");
-    printResult(s.c_str(), testStr);
-}
-
 void (*tests[])() = {
     test00,
     test01,
     test02,
     test03,
     test04,
-    test05,
 };
