@@ -8,7 +8,7 @@
 #include "nrf52/Storage.h"
 #elif defined(ARDUINO_ARCH_ESP32)
 #include "esp32/Storage.h"
-#elif defined(ARDUINO_AVR_LEONARDO)
+#elif defined(ARDUINO_ARCH_AVR)
 #include "avr/Storage.h"
 #endif
 

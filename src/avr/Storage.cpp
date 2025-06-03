@@ -1,4 +1,4 @@
-#if defined(ARDUINO_AVR_LEONARDO)
+#if defined(ARDUINO_ARCH_AVR)
 
 /*
 SPI flash storage for nRF52
@@ -35,6 +35,7 @@ bool File::createRecord(const char *filename, size_t size, FileRecord *record)
         return false;
     }
     strncpy(record->filename, filename, sizeof(record->filename));
+    record->filename[sizeof(record->filename) - 1] = 0;
     record->addr = mr.end;
     record->size = size;
     uint32_t recordAt = mr.count * sizeof(FileRecord) + sizeof(MasterRecord);
@@ -83,9 +84,11 @@ bool File::exists(char const *filename)
 File File::open(char const *filename, uint8_t mode = 0)
 {
     bool exists = getRecord(filename, &f);
+    isOpen = false;
+    offset = 0;
     if (exists)
         isOpen = true;
-    else if (mode == 1 && !exists)
+    else if (mode == RCC_FILE_WRITE && !exists)
         isOpen = createRecord(filename, MIN_FILE_SIZE, &f);
     return File(*this);
 }
@@ -125,13 +128,6 @@ bool File::seek(uint16_t pos)
     return isOpen;
 }
 
-bool File::truncate(uint16_t pos)
-{
-    if (isOpen)
-        offset = pos;
-    return isOpen;
-}
-
 void Storage::deleteFiles()
 {
     mr = {0, MAX_FILES * sizeof(File::FileRecord)};
@@ -140,7 +136,8 @@ void Storage::deleteFiles()
 
 char* Storage::makeSettingsPath(const char *filename, char *buffer, size_t size)
 {
-    strcpy(buffer, filename);
+    strncpy(buffer, filename, size);
+    buffer[size - 1] = 0;
     return buffer;
 }
 

@@ -8,17 +8,17 @@ from test_storage import tests_storage
 from test_mqtt import tests_mq
 from test_nrf_local import tests_nrf
 
-def test_boot():
-    s = openSerial()
-    writeSerial(s, '!')
-    s.close()
-    time.sleep(1)
-    return (True, 'Test Boot, bring device to known state')
+# def test_boot():
+#     s = SerialComm.openSerial()
+#     s.write('!')
+#     del s
+#     time.sleep(1)
+#     return (True, 'Test Boot, bring device to known state')
 
 tests = []
 # tests += [test_boot]
-tests += tests_storage
 tests += tests_mq
+tests += tests_storage
 # tests += tests_local
 
 logging.basicConfig(level=logging.INFO,
@@ -29,10 +29,10 @@ logging.error('*** Test Start ***')
 
 
 if __name__ == '__main__':
-    s = openSerial(1)
+    s = SerialComm.openSerial(1)
     if s != None:
         tests += tests_nrf
-        s.close()
+        del s
     else:
         print('*** No second serial port found, skipping NRF tests')
 

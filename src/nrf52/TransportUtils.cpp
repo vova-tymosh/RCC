@@ -3,7 +3,7 @@
  *
  *
  */
-#if defined(ARDUINO_ARCH_NRF52) || defined(ARDUINO_AVR_LEONARDO)
+#if defined(ARDUINO_ARCH_NRF52) || defined(ARDUINO_ARCH_AVR)
 #include <stdint.h>
 #include <Arduino.h>
 #include "nrf52/TransportUtils.h"

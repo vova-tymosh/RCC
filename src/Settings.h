@@ -10,13 +10,6 @@ class Settings
         int size;
     } cache;
 
-    bool fileExists(const char *key)
-    {
-        char filepath[FILENAME_LEN];
-        storage.makeSettingsPath(key, filepath, sizeof(filepath));
-        return storage.exists(filepath);
-    }
-
 public:
     String get(const char *key)
     {
@@ -89,6 +82,7 @@ public:
         cache.size = size;
         cache.keys = (char **)keys;
         cache.values = (float*)malloc(size * sizeof(float));
+
         for (int i = 0; i < size; i++) {
             char value[VALUE_LEN];
             get(keys[i], value, sizeof(value));

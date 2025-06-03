@@ -15,15 +15,15 @@
 
 // TODO: add local mode tests
 
-#ifndef NO_DEBUG
-#define log(msg)                                                               \
-    {                                                                          \
-        if (node->debugLevel > 3)                                              \
-            Serial.println(String("[Nrf] ") + (msg));                          \
+#if RCC_DEBUG >= 2
+#define log(msg)                                              \
+    {                                                         \
+        Serial.println(String("[Nrf] ") + (msg));             \
     };
 #else
 #define log(msg)
 #endif
+
 
 struct Qos {
     int sendExp = 0;
@@ -285,9 +285,8 @@ public:
     void begin()
     {
         memset(&known, 0, sizeof(known));
-        int addr = node->locoAddr.toInt();
-        wireless.begin(addr);
-        isLocal = (addr == 0);
+        wireless.begin(node->locoAddr);
+        isLocal = (node->locoAddr == 0);
         known.selected = 0;
         qos.begin();
         if (isLocal) {

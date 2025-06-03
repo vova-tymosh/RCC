@@ -8,68 +8,70 @@ mq = TransportMqtt()
 
 def test_nrf_start():
     global s
-    s = openSerial(1)
+    s = SerialComm.openSerial(1)
+    if s == None:
+        print('No serial port found')
+        exit(1)
     mq.start()
     mq.waitForMessage(f'cab/{ADDR}/{MQ_HEARTBEAT_VALUES}')
     return (True, 'Test NRF Start')
 
 def test_throttle():
     test_name = 'Test NRF Throttle'
-    writeSerial(s, 'T65')
-    printSerial(s)
+    s.write('T65')
     setValueMsg = f'cab/{ADDR}/throttle+65'
     testResult = mq.waitForMessage(setValueMsg)
     return (testResult, test_name)
 
 def test_direction_3():
     test_name = 'Test NRF Direction 3'
-    writeSerial(s, 'D3')
+    s.write('D3')
     setValueMsg = f'cab/{ADDR}/direction+NEUTRAL'
     testResult = mq.waitForMessage(setValueMsg)
     return (testResult, test_name)
 
 def test_direction_0():
     test_name = 'Test NRF Direction 0'
-    writeSerial(s, 'D0')
+    s.write('D0')
     setValueMsg = f'cab/{ADDR}/direction+REVERSE'
     testResult = mq.waitForMessage(setValueMsg)
     return (testResult, test_name)
 
 def test_function_set():
     test_name = 'Test NRF Function Set'
-    writeSerial(s, 'F12')
+    s.write('F12')
     setValueMsg = f'cab/{ADDR}/function/2+ON'
     testResult = mq.waitForMessage(setValueMsg)
     if not testResult:
         return (testResult, test_name)
-    writeSerial(s, 'F02')
+    s.write('F02')
     setValueMsg = f'cab/{ADDR}/function/2+OFF'
     testResult = mq.waitForMessage(setValueMsg)
     return (testResult, test_name)
     
 def test_function_get():
     test_name = 'Test NRF Function Get'
-    writeSerial(s, 'P2')
+    s.write('P2')
     setValueMsg = f'cab/{ADDR}/function/2+OFF'
     testResult = mq.waitForMessage(setValueMsg)
     return (testResult, test_name)
 
 def test_value():
     test_name = 'Test NRF Velue'
-    writeSerial(s, 'Sacceleration:72')
+    s.write('Sacceleration:72')
     setValueMsg = f'cab/{ADDR}/value/acceleration+72'
     mq.waitForMessage(setValueMsg)
-    writeSerial(s, 'Gacceleration')
+    s.write('Gacceleration')
     getValueRes = f'cab/{ADDR}/value/acceleration+72'
     testResult = mq.waitForMessage(getValueRes)
-    writeSerial(s, 'Sacceleration:0')
+    s.write('Sacceleration:0')
     setValueMsg = f'cab/{ADDR}/value/acceleration+0'
     mq.waitForMessage(setValueMsg)
     return (testResult, test_name)
 
 def test_list():
     test_name = 'Test NRF List'
-    writeSerial(s, 'L')
+    s.write('L')
     getValueRes = f'cab/{ADDR}/{MQ_LIST_VALUE_RES}'
     testResult = mq.waitForMessage(getValueRes)
     logging.error(f"Test List: {testResult}")

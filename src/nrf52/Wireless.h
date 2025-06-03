@@ -31,7 +31,7 @@
 #define RADIO_NETWORK RF52Network
 #define RADIO_CTOR radio()
 
-#elif defined(ARDUINO_AVR_LEONARDO)
+#elif defined(ARDUINO_ARCH_AVR)
 #include <RF24.h>
 #define RADIO_LEVEL RF24_PA_HIGH
 #define RADIO_BW RF24_250KBPS

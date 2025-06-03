@@ -2,99 +2,104 @@ import time
 from infra import *
 
 s = None
-
-def _test_storage(idx, test_name):
-    writeSerial(s, f'CT{idx}')
-    r = readSerial(s, 'ok')
-    return (r, test_name)
-
 testStr1 = "1234567890abcd"
 testStr2 = "ABCDEFGHIJKLMNO"
 
 def test_storage_start():
     global s
-    s = openSerial()
+    s = SerialComm.openSerial()
+    if s == None:
+        print('No serial port found')
+        exit(1)
     return (True, 'Test Storage Start')
 
 def test_storage_normal():
     test_name = 'Test Storage, write/read'
-    writeSerial(s, f'W/test01:{testStr1}')
-    r1 = readSerial(s, 'Write: /test01')
-    writeSerial(s, f'R/test01')
-    r2 = readSerial(s, f'/test01:{testStr1}')
+    s.write(f'W/test01:{testStr1}')
+    r1 = s.read('Write: /test01')
+    s.write(f'R/test01')
+    r2 = s.read(f'/test01:{testStr1}')
     return (r1 and r2, test_name)
 
 def test_storage_read_only():
     test_name = 'Test Storage, read only'
-    writeSerial(s, f'R/test01')
-    r2 = readSerial(s, f'/test01:{testStr1}')
+    s.write(f'R/test01')
+    r2 = s.read(f'/test01:{testStr1}')
     return (r2, test_name)
 
 def test_storage_re_write():
     test_name = 'Test Storage, re-write'
-    writeSerial(s, f'W/test01:{testStr2}')
-    r1 = readSerial(s, 'Write: /test01')
-    writeSerial(s, f'R/test01')
-    r2 = readSerial(s, f'/test01:{testStr2}')
+    s.write(f'W/test01:{testStr2}')
+    r1 = s.read('Write: /test01')
+    s.write(f'R/test01')
+    r2 = s.read(f'/test01:{testStr2}')
     return (r1 and r2, test_name)
 
 def test_setting_create():
     test_name = 'Test Settings, create'
-    writeSerial(s, f'CCtest05:{testStr1}')
-    r1 = readSerial(s, f'test05:{testStr1}')
-    writeSerial(s, f'Gtest05')
-    r2 = readSerial(s, f'test05:{testStr1}')
+    s.write(f'CCtest05:{testStr1}')
+    r1 = s.read(f'test05:{testStr1}')
+    s.write(f'Gtest05')
+    r2 = s.read(f'test05:{testStr1}')
     return (r1 and r2, test_name)
 
 def test_setting_read_only():
     test_name = 'Test Settings, read'
-    writeSerial(s, f'Gtest05')
-    r2 = readSerial(s, f'test05:{testStr1}')
+    s.write(f'Gtest05')
+    r2 = s.read(f'test05:{testStr1}')
     return (r2, test_name)
 
 def test_setting_re_write():
     test_name = 'Test Settings, re-write'
-    writeSerial(s, f'Stest05:{testStr2}')
-    r1 = readSerial(s, f'test05:{testStr2}')
-    writeSerial(s, f'Gtest05')
-    r2 = readSerial(s, f'test05:{testStr2}')
+    s.write(f'Stest05:{testStr2}')
+    r1 = s.read(f'test05:{testStr2}')
+    s.write(f'Gtest05')
+    r2 = s.read(f'test05:{testStr2}')
     return (r1 and r2, test_name)
 
 def test_setting_defaults():
     test_name = 'Test Settings, reading defaults'
-    writeSerial(s, f'Gloconame')
-    r2 = readSerial(s, f'loconame:RCC')
+    s.write(f'Gloconame')
+    r2 = s.read(f'loconame:RCC')
     return (r2, test_name)
 
 def test_storage_version():
     test_name = 'Test Storage, version missmatch'
-    writeSerial(s, 'Sloconame:something')
-    r1 = readSerial(s, 'loconame:something')
-    writeSerial(s, 'Gloconame')
-    r2 = readSerial(s, 'loconame:something') 
-    writeSerial(s, 'CD')
-    r3 = readSerial(s, 'Clear')    
-    writeSerial(s, f'Gloconame')
-    r4 = readSerial(s, f'loconame:RCC')
+    s.write('Sloconame:something')
+    r1 = s.read('loconame:something')
+    s.write('Gloconame')
+    r2 = s.read('loconame:something') 
+    s.write('CD')
+    r3 = s.read('Clear')    
+    s.write(f'Gloconame')
+    r4 = s.read(f'loconame:RCC')
     r = r1 and r2 and r3 and r4  
     return (r, test_name)
 
 def test_file_append():
     test_name = 'Test Stoarge, append 0.5kB'
+    if s.description == 'Arduino Leonardo':
+        print(' Skipping next test for Arduino Leonardo, not supported')
+        return (True, test_name)
     buffer = b'01234567'*32
     l = len(buffer)
     t = 0
     r = True
     for i in range(2):
-        writeSerial(s, f'A/test10:{l}')
+        s.write(f'A/test10:{l}')
         time.sleep(0.1)
-        writeSerial(s, buffer)
+        s.write(buffer)
         t += l
-        r = r and readSerial(s, f'Append bytes: {l}')
-    writeSerial(s, f'Z/test10')
-    r = r and readSerial(s, f'Size of /test10: {t}')
+        r = r and s.read(f'Append bytes: {l}')
+    s.write(f'Z/test10')
+    r = r and s.read(f'Size of /test10: {t}')
     return (r, test_name)
 
+
+def _test_storage(idx, test_name):
+    s.write(f'CT{idx}')
+    r = s.read('ok')
+    return (r, test_name)
 
 def test_storage00():
     return _test_storage(0, 'Test Storage 00, read multiple')
@@ -113,7 +118,8 @@ def test_storage04():
 
 
 def test_storage_end():
-    s.close()
+    global s
+    del s
     return (True, 'Test Storage End')
 
 
@@ -121,7 +127,7 @@ tests_storage = [test_storage_start,
     test_storage_normal,
     test_storage_read_only,
     test_storage_re_write,
-    # test_file_append,
+    test_file_append,
     test_setting_create,
     test_setting_read_only,
     test_setting_re_write,

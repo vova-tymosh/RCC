@@ -24,6 +24,7 @@ private:
     bool isOpen;
 
     bool createRecord(const char *filename, size_t size, FileRecord *record);
+
     bool getRecord(const char *filename, FileRecord *record);
 
 public:
@@ -77,8 +78,6 @@ public:
     size_t read(uint8_t *buffer, size_t size);
 
     bool seek(uint16_t pos);
-
-    bool truncate(uint16_t pos);
 };
 
 extern File LittleFS;

@@ -15,11 +15,11 @@ Settings settings;
 Pin blue(0);
 Timer update(1000);
 
-const int settingsSize = 5;
+const int settingsSize = 6;
 const char *settingsKeys[settingsSize] = {
-    "loconame", "locoaddr", "acceleration", "managespeed",  "heartbeat"};
+    "loconame", "locoaddr", "acceleration", "managespeed",  "heartbeat", "testvalue"};
 const char *settingsValues[settingsSize] = {
-    "Mini",     "3",        "0",            "0",            "1000"};
+    "RCC",      "3",        "0",            "0",            "1000",      "0.0"}; 
 
 
 class TestLocoMin : public RCCLoco
@@ -85,15 +85,15 @@ void setup()
     Serial.begin(115200);
     delay(250);
 
-    while ( !Serial ) delay(10);
-    Serial.println(F("Hit enter"));
-    while ( !Serial.available() )
-        delay(1);
-    Serial.println("Start");
+    // while ( !Serial ) delay(10);
+    // Serial.println(F("Hit enter"));
+    // while ( !Serial.available() )
+    //     delay(1);
+    // Serial.println("Start");
+    // storage.clear();
 
   
     storage.begin();
-    storage.clear();
     settings.begin(settingsKeys, settingsValues, settingsSize);
     
     loco.debugLevel = 10;
@@ -111,8 +111,6 @@ void loop()
         loco.state.speed = 20;
         loco.state.temperature = 110;
         loco.state.psi = 35;
-        // Serial.println(settings.get("loconame"));
-        Serial.println("loop");
     }
 }
 

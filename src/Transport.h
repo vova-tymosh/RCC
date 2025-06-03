@@ -2,7 +2,7 @@
 
 #include "RCCNode.h"
 
-#if defined(ARDUINO_ARCH_NRF52) || defined(ARDUINO_AVR_LEONARDO)
+#if defined(ARDUINO_ARCH_NRF52) || defined(ARDUINO_ARCH_AVR)
 #include "nrf52/Transport.h"
 #elif defined(ARDUINO_ARCH_ESP32)
 #include "esp32/Transport.h"

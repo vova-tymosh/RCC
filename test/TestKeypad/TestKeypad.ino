@@ -12,6 +12,22 @@ class TestKeypad : public RCCKeypad
 {
 public:
 
+    void processCreate(char cmd[])
+    {
+        if (strlen(cmd) < 2)
+                return;
+        char *separator = strchr(cmd, ':');
+        if (separator == NULL)
+            return;
+        *separator = '\0';
+        char *key = cmd;
+        char *value = ++separator;
+        settings.create(key, value);
+        Serial.print(key);
+        Serial.print(":");
+        Serial.println(value);
+    }
+
     void processGet(char cmd[])
     {
         if (strlen(cmd) < 1)
@@ -39,6 +55,9 @@ public:
     {
         value[size] = '\0';
         switch (code) {
+        case 'C':
+            processCreate(value);
+            break;
         case 'G':
             processGet(value);
             break;
@@ -51,8 +70,8 @@ public:
 TestKeypad keypad;
 
 
-const char *padKeys[] = {"loconame", "locoaddr"};
-const char *padValues[] = {"RCC_Keypad", "0"};
+const char *padKeys[] =   {"loconame",   "locoaddr", "testvalue"};
+const char *padValues[] = {"RCC_Keypad", "1",        "0.0"};
 
 
 void setup()

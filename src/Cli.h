@@ -227,7 +227,6 @@ private:
                 i++;
             }
         }
-        // line[i] = '\0';
         return i > 0;
     }
 

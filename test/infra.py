@@ -1,76 +1,13 @@
 import re
 import serial
+import serial.tools.list_ports
 import time
 import queue
-import subprocess
 import select
 import sys
 import logging
 import paho.mqtt.client as mqtt
 from paho.mqtt.subscribeoptions import SubscribeOptions
-
-
-
-def millis():
-    return round(time.time() * 1000)
-
-def get_unblocked_input():
-    output, _, _ = select.select([sys.stdin], [], [], 0)
-    if output:
-        return sys.stdin.readline()
-    return None
-
-def findSerial():
-    output = subprocess.check_output(["ls /dev/cu.usb*"], shell=True)
-    usbmodem = output.decode('utf-8').strip().split('\n')
-    if len(usbmodem) == 0:
-        return None
-    return usbmodem
-
-def openSerial(idx = 0):
-    ser_names = findSerial()
-    if len(ser_names) == 0:
-        print('No serial port found')
-        exit(1)
-    if idx < len(ser_names):
-        return serial.Serial(ser_names[idx], 115200, timeout=1)
-
-def writeSerial(s, data):
-    if type(data) is not bytes:
-        data = data.encode('utf-8')
-    if len(data) <= 40:
-        logging.info(f"Write >: {data}")
-    else:
-        logging.info(f"Write >:[{len(data)}] {data[:40]}...")
-    s.write(data)
-    s.flush()
-
-# def printSerial(s):
-#     for i in range(1000):
-#         if s.in_waiting > 0:
-#             data = s.readline().decode('utf-8')
-#             logging.info("Read from serial: %s"%data.strip())
-
-def readSerial(s, msg = None):
-    buffer = ''
-    for i in range(5):
-        b = s.readline().decode('utf-8').strip()
-        logging.info(f"Read <: {b}. Need: {msg}. Accumulated: {buffer}")
-        if msg and msg == b:
-            return True
-        elif b:
-            buffer += b
-    return False
-
-def readSerialFloat(s):
-    data = readSerial(s)
-    try:
-        if data:
-            data = data.split()[0]
-            return float(data)
-    except:
-        pass
-    return 0.0
 
 MQTT_NODE_NAME = 'RCC_Test'
 MQTT_BROKER = '192.168.20.61'
@@ -95,6 +32,67 @@ MQ_OFF = "OFF"
 MQ_SEPARATOR = ' '
 
 ADDR = 3
+
+
+def millis():
+    return round(time.time() * 1000)
+
+def get_unblocked_input():
+    output, _, _ = select.select([sys.stdin], [], [], 0)
+    if output:
+        return sys.stdin.readline()
+    return None
+
+
+class SerialComm:
+    @staticmethod
+    def openSerial(idx = 0):
+        found = 0
+        for i in serial.tools.list_ports.comports():
+            if i.description != 'n/a':
+                if idx == found:
+                    print(f"Found serial port: {i.device} - {i.description}")
+                    return SerialComm(serial.Serial(i.device, 115200, timeout=1), i.description)
+                found += 1
+        return None
+
+    def __init__(self, s, description):
+        self.s = s
+        self.description = description
+
+    def __del__(self):
+        self.s.close()
+
+    def write(self, data):
+        if type(data) is not bytes:
+            data = data.encode('utf-8')
+        if len(data) <= 40:
+            logging.info(f"Write >: {data}")
+        else:
+            logging.info(f"Write >:[{len(data)}] {data[:40]}...")
+        self.s.write(data)
+        self.s.flush()
+
+    def read(self, msg = None):
+        buffer = ''
+        for i in range(5):
+            b = self.s.readline().decode('utf-8').strip()
+            logging.info(f"Read <: {b}. Need: {msg}. Accumulated: {buffer}")
+            if msg and msg == b:
+                return True
+            elif b:
+                buffer += b
+        return False
+
+# def readSerialFloat(s):
+#     data = readSerial(s)
+#     try:
+#         if data:
+#             data = data.split()[0]
+#             return float(data)
+#     except:
+#         pass
+#     return 0.0
 
 
 class TransportMqtt:

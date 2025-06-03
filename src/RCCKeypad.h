@@ -80,6 +80,11 @@ public:
         return "";
     }
 
+    void getValue(const char *key, char *value, size_t size)
+    {
+        getValue(key);
+    }
+
     void setValue(const char *key, const char *value)
     {
         String packet = String(NRF_SET_VALUE) + key + NRF_SEPARATOR + value;
@@ -90,21 +95,14 @@ public:
     String getValueLocal(const char *key)
     {
         String value(settings.get(key));
-        Serial.println("getValueLoc: " + String(key) + "/" + String(value));
+        // Serial.println("getValueLoc: " + String(key) + "/" + String(value));
         return value;
     }
 
     void setValueLocal(const char *key, const char *value)
     {
-        Serial.println("setValueLoc: " + String(key) + "/" + String(value));
+        // Serial.println("setValueLoc: " + String(key) + "/" + String(value));
         settings.put(key, value);
-        // for (int i = 0; i < sizeof(realtimeValue) / sizeof(realtimeValue[0]);
-        //      i++) {
-        //     if (strcmp(key, realtimeKey[i]) == 0) {
-        //         realtimeValue[i] = atof(value);
-        //         return;
-        //     }
-        // }
     }
 
     String listValues()
@@ -137,7 +135,9 @@ public:
 
     void begin()
     {
-        locoAddr = settings.get("locoaddr");
+        char buffer[VALUE_LEN];
+        settings.get("locoaddr", buffer, sizeof(buffer));
+        locoAddr = atoi(buffer);        
         transport->begin();
     }
 
