@@ -5,7 +5,6 @@
 #include "ConfigWeb.h"
 #include "Settings.h"
 
-
 const char *htmlPrefix = R"(
 <html>
     <head>
@@ -71,19 +70,13 @@ const char *htmlSubmitted = R"(
   </html>
 )";
 
-// const char *userReadable[] = 
-//     {"wifiap", "Wifi SSID", "WiFi Password", "Loco Name", "Loco Address", 
-//      "MQTT Broker IP", "MQTT Broker port", "Acceleration", "managespeed", 
-//      "heartbeat"};
-
-
 WebServer ConfigWeb::server(80);
 
 void ConfigWeb::handleRoot()
 {
     String form = String(htmlPrefix);
     String name = storage.openFirst();
-    while (!name.isEmpty()){
+    while (!name.isEmpty()) {
         if (name == "wifiap") {
             String checkbox = String(htmlCheckbox);
             String value = settings.get(name.c_str());
@@ -107,7 +100,8 @@ void ConfigWeb::handleSubmit()
     for (int i = 0; i < server.args(); i++) {
         String name = server.argName(i);
         if (name == "wifiap")
-            settings.put(server.argName(i).c_str(), server.arg(i) == "on" ? "ON" : "OFF");
+            settings.put(server.argName(i).c_str(),
+                         server.arg(i) == "on" ? "ON" : "OFF");
         else
             settings.put(server.argName(i).c_str(), server.arg(i));
     }

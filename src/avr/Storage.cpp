@@ -16,7 +16,6 @@ bytes
 #include "avr/Storage.h"
 #include "EEPROM.h"
 
-
 struct MasterRecord {
     uint16_t count;
     uint16_t end;
@@ -134,12 +133,11 @@ void Storage::deleteFiles()
     EEPROM.put(0, mr);
 }
 
-char* Storage::makeSettingsPath(const char *filename, char *buffer, size_t size)
+char *Storage::makeSettingsPath(const char *filename, char *buffer, size_t size)
 {
     strncpy(buffer, filename, size);
     buffer[size - 1] = 0;
     return buffer;
 }
-
 
 #endif

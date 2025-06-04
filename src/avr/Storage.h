@@ -28,8 +28,7 @@ private:
     bool getRecord(const char *filename, FileRecord *record);
 
 public:
-
-//FS level functions
+    // FS level functions
     bool begin(bool format = true);
 
     void clear();
@@ -43,10 +42,10 @@ public:
         return true;
     }
 
-//File level functions
+    // File level functions
     File() : isOpen(false), offset(0) {}
 
-    File(const File& file) : isOpen(file.isOpen), offset(file.offset)
+    File(const File &file) : isOpen(file.isOpen), offset(file.offset)
     {
         memcpy(&f, &file.f, sizeof(f));
     }
@@ -66,7 +65,7 @@ public:
         isOpen = false;
     }
 
-    operator bool (void)
+    operator bool(void)
     {
         return isOpen;
     }
@@ -81,5 +80,3 @@ public:
 };
 
 extern File LittleFS;
-
-

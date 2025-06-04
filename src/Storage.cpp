@@ -1,10 +1,10 @@
 /*
  * Include only inside Storage.cpp inside platfomr specific folders
- * 
-*/
+ *
+ */
 #include "Platform.h"
 #include "Storage.h"
-#if defined(ARDUINO_ARCH_NRF52) 
+#if defined(ARDUINO_ARCH_NRF52)
 #include "nrf52/Storage.h"
 #elif defined(ARDUINO_ARCH_ESP32)
 #include "esp32/Storage.h"
@@ -12,8 +12,7 @@
 #include "avr/Storage.h"
 #endif
 
-
-const char* const validationFile = "/validation";
+const char *const validationFile = "/validation";
 
 void Storage::begin(uint16_t _version)
 {
@@ -33,7 +32,7 @@ void Storage::clear()
 {
     deleteFiles();
     const uint16_t validation[2] = {code, version};
-    write(validationFile, (void*)&validation, sizeof(validation));
+    write(validationFile, (void *)&validation, sizeof(validation));
 
     char filepath[FILENAME_LEN];
     makeSettingsPath("", filepath, sizeof(filepath));
@@ -54,10 +53,12 @@ int Storage::read(const char *filename, void *buffer, size_t size,
     return r;
 }
 
-int Storage::write(const char *filename, const void *buffer, size_t size, bool append)
+int Storage::write(const char *filename, const void *buffer, size_t size,
+                   bool append)
 {
     int r = 0;
-    File file = LittleFS.open(filename, (append) ? RCC_FILE_APPEND : RCC_FILE_WRITE);
+    File file =
+        LittleFS.open(filename, (append) ? RCC_FILE_APPEND : RCC_FILE_WRITE);
     if (file) {
         if (!append)
             file.seek(0);
@@ -91,7 +92,6 @@ size_t Storage::size(const char *filename)
     return s;
 }
 
-
 File fileListRoot = BUILD_FILE();
 
 String Storage::openFirst()
@@ -111,5 +111,5 @@ String Storage::openNext()
         else
             fileListRoot.close();
     }
-    return String();   
+    return String();
 }

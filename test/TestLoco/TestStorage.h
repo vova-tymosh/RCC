@@ -6,11 +6,10 @@
 #define F(x) (x)
 #endif
 
-
-const char testStr[]  = "1234567890abcd";
+const char testStr[] = "1234567890abcd";
 const char testStr2[] = "ABCDEFGHIJKLMNO";
 
-void printResult(const char *expected, char* actual)
+void printResult(const char *expected, char *actual)
 {
     if (strcmp(expected, actual) == 0) {
         Serial.println("ok");
@@ -24,8 +23,8 @@ void printResult(const char *expected, char* actual)
 
 void test00()
 {
-    //Test read multiple
-    char buffer[20];    
+    // Test read multiple
+    char buffer[20];
     const int c = 50;
     int s = 0;
     storage.write("/test01", testStr, sizeof(testStr));
@@ -43,8 +42,8 @@ void test00()
 
 void test01()
 {
-    //Test size and offset
-    char buffer[20];    
+    // Test size and offset
+    char buffer[20];
     storage.write("/test02", testStr, sizeof(testStr));
     int s = storage.read("/test02", buffer, 11, 7);
     buffer[s] = '\0';
@@ -55,8 +54,8 @@ void test01()
 
 void test02()
 {
-    //Test offset bigger than size
-    char buffer[20];    
+    // Test offset bigger than size
+    char buffer[20];
     storage.write("/test02", testStr, sizeof(testStr));
     int s = storage.read("/test02", buffer, 11, 20);
     if (s == 0)
@@ -67,7 +66,7 @@ void test02()
 
 void test03()
 {
-    //Test cache
+    // Test cache
     settings.put("testvalue", "101.1");
     const int c = 10000;
     long start = millis();
@@ -75,7 +74,7 @@ void test03()
     for (int i = 0; i < c; i++)
         r = settings.getCachedFloat("testvalue");
     long duration = millis() - start;
-    if ((int)(r*10) == 1011 && duration < 100) {
+    if ((int)(r * 10) == 1011 && duration < 100) {
         Serial.println("ok");
     } else {
         Serial.print(F("FAIL, "));
@@ -85,7 +84,7 @@ void test03()
 
 void test04()
 {
-    //Test exist
+    // Test exist
     storage.write("/test01", testStr, sizeof(testStr));
     bool s = storage.exists("/test01");
     if (s)
@@ -95,9 +94,5 @@ void test04()
 }
 
 void (*tests[])() = {
-    test00,
-    test01,
-    test02,
-    test03,
-    test04,
+    test00, test01, test02, test03, test04,
 };

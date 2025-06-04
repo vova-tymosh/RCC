@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <Arduino.h>
 
-
 class Storage
 {
 private:
@@ -20,7 +19,8 @@ public:
     int read(const char *filename, void *buffer, size_t size,
              size_t offset = 0);
 
-    int write(const char *filename, const void *buffer, size_t size, bool append = false);
+    int write(const char *filename, const void *buffer, size_t size,
+              bool append = false);
 
     int append(const char *filename, const void *buffer, size_t size);
 
@@ -28,7 +28,7 @@ public:
 
     size_t size(const char *filename);
 
-    char* makeSettingsPath(const char *filename, char *buffer, size_t size);
+    char *makeSettingsPath(const char *filename, char *buffer, size_t size);
 
     String openFirst();
 

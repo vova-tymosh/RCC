@@ -21,7 +21,7 @@ private:
         char first = toupper(cmd[0]);
         if (strlen(cmd) > 0) {
             cmd++;
-            switch(first) {
+            switch (first) {
             case CMD_THROTTLE:
                 return processThrottle(cmd);
             case CMD_DIRECTION:
@@ -181,7 +181,7 @@ private:
         const int bufferSize = 4096;
         if (size > bufferSize)
             size = bufferSize;
-        char *buffer = (char*)malloc(size);
+        char *buffer = (char *)malloc(size);
         if (buffer == NULL) {
             Serial.println("Error: Out of memory");
             return false;

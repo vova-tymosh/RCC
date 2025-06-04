@@ -16,7 +16,6 @@ extern const char *locoKeys[];
 extern const char *locoValues[];
 extern const int locoKeySize;
 
-
 class RCCLoco : public RCCNode
 {
 protected:
@@ -159,10 +158,9 @@ public:
             pid.setDesired(state.throttle);
             pid.setMeasured(scaled);
             state.throttle_out = pid.read();
-            // Serial.println("[PD] Update: " + String(speed) + " " +
-            //                String(scaled) + " " + String(state.throttle_out));
         }
-        if (settings.getCachedInt("acceleration") || settings.getCachedInt("managespeed")) {
+        if (settings.getCachedInt("acceleration") ||
+            settings.getCachedInt("managespeed")) {
             static uint8_t lastThrottle = 0;
             if (state.throttle_out != lastThrottle) {
                 lastThrottle = state.throttle_out;

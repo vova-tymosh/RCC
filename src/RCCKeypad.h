@@ -137,7 +137,7 @@ public:
     {
         char buffer[VALUE_LEN];
         settings.get("locoaddr", buffer, sizeof(buffer));
-        locoAddr = atoi(buffer);        
+        locoAddr = atoi(buffer);
         transport->begin();
     }
 

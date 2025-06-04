@@ -7,20 +7,18 @@
 #include "Protocol.h"
 #include "esp32/TransportClient.h"
 
-
 //
 // https://www.jmri.org/help/en/html/hardware/mqtt/index.shtml
 //
 
 #if RCC_DEBUG >= 2
-#define log(msg)                                              \
-    {                                                         \
-        Serial.println(String("[MQ] ") + (msg));             \
+#define log(msg)                                                               \
+    {                                                                          \
+        Serial.println(String("[MQ] ") + (msg));                               \
     };
 #else
 #define log(msg)
 #endif
-
 
 void onMqttMessage(char *topic, byte *payload, unsigned int length);
 
@@ -65,9 +63,9 @@ public:
     void introduce()
     {
         String topic = topicPrefix + String(MQ_INTRO);
-        String value = String(NRF_TYPE_LOCO) + NRF_SEPARATOR +
-                        node->locoAddr + NRF_SEPARATOR + node->locoName +
-                        NRF_SEPARATOR + VERSION + MQ_SEPARATOR + LOCO_FORMAT;
+        String value = String(NRF_TYPE_LOCO) + NRF_SEPARATOR + node->locoAddr +
+                       NRF_SEPARATOR + node->locoName + NRF_SEPARATOR +
+                       VERSION + MQ_SEPARATOR + LOCO_FORMAT;
         for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
             value += MQ_SEPARATOR;
             value += Keys[i];

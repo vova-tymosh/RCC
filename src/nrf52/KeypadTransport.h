@@ -16,14 +16,13 @@
 // TODO: add local mode tests
 
 #if RCC_DEBUG >= 2
-#define log(msg)                                              \
-    {                                                         \
-        Serial.println(String("[Nrf] ") + (msg));             \
+#define log(msg)                                                               \
+    {                                                                          \
+        Serial.println(String("[Nrf] ") + (msg));                              \
     };
 #else
 #define log(msg)
 #endif
-
 
 struct Qos {
     int sendExp = 0;
@@ -124,7 +123,8 @@ public:
     {
         payload[size] = 0;
         char *buffer[5];
-        int tokens = split(payload + 1, (char **)&buffer, sizeofarray(buffer), NRF_SEPARATOR);
+        int tokens = split(payload + 1, (char **)&buffer, sizeofarray(buffer),
+                           NRF_SEPARATOR);
 
         if (tokens > 3) {
             known.nodes[known.len].addr = atoi(buffer[1]);
@@ -169,7 +169,8 @@ public:
         packet[size] = 0;
         int index = 0;
         char *buffer[10 * 3];
-        int tokens = split(packet + 1, (char **)&buffer, sizeofarray(buffer), NRF_SEPARATOR);
+        int tokens = split(packet + 1, (char **)&buffer, sizeofarray(buffer),
+                           NRF_SEPARATOR);
         for (int i = 0; i < tokens / 3; i++) {
             if (buffer[i * 3][0] == NRF_TYPE_LOCO) {
                 known.nodes[index].addr = atoi(buffer[i * 3 + 1]);

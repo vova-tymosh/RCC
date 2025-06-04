@@ -60,7 +60,7 @@ public:
         }
     }
 
-    //Doesn't update cache
+    // Doesn't update cache
     void create(const char *key, const char *value)
     {
         char filepath[FILENAME_LEN];
@@ -68,7 +68,7 @@ public:
         size_t size = strlen(value) + 1;
         storage.write(filepath, (void *)value, size);
     }
-    
+
     void begin(const char *keys[], const char *values[], const int size)
     {
         for (int i = 0; i < size; i++) {
@@ -81,7 +81,7 @@ public:
         }
         cache.size = size;
         cache.keys = (char **)keys;
-        cache.values = (float*)malloc(size * sizeof(float));
+        cache.values = (float *)malloc(size * sizeof(float));
 
         for (int i = 0; i < size; i++) {
             char value[VALUE_LEN];

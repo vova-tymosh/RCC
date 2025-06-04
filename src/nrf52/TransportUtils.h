@@ -6,7 +6,6 @@
 #ifndef NRF52_PROTOCOL_H
 #define NRF52_PROTOCOL_H
 
-
 #define COMMAND_SIZE sizeof(struct Command)
 #define CODE_SIZE 1
 #define sizeofarray(x) (sizeof(x) / sizeof(x[0]))

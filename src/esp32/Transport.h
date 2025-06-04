@@ -6,7 +6,6 @@
 #include "esp32/TransportWT.h"
 #include "esp32/TransportMQ.h"
 
-
 class Transport
 {
 private:

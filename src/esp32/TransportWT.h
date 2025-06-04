@@ -13,14 +13,13 @@
 // TODO: fix Function names
 
 #if RCC_DEBUG >= 2
-#define log(msg)                                              \
-    {                                                         \
-        Serial.println(String("[WT] ") + (msg));             \
+#define log(msg)                                                               \
+    {                                                                          \
+        Serial.println(String("[WT] ") + (msg));                               \
     };
 #else
 #define log(msg)
 #endif
-
 
 class LineReceiver
 {
@@ -61,7 +60,6 @@ protected:
     String locoAddr;
 
 public:
-
     WiThrottleClient() : server(port) {}
 
     void reply(String msg)
