@@ -3,38 +3,47 @@
 import time
 import logging
 from infra import *
-from test_local import tests_local
+from test_mb import tests_mb
 from test_storage import tests_storage
 from test_mqtt import tests_mq
-from test_nrf_local import tests_nrf
+from test_nrf import tests_nrf
 
 # def test_boot():
-#     s = SerialComm.openSerial()
+#     s = SerialComm.openPort()
 #     s.write('!')
-#     del s
 #     time.sleep(1)
+#     del s
 #     return (True, 'Test Boot, bring device to known state')
 
 tests = []
 # tests += [test_boot]
-tests += tests_mq
+# tests += tests_mb
 tests += tests_storage
-# tests += tests_local
+tests += tests_mq
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(message)s',
-                    filename='rcc_test.log',
-                    filemode='a')
-logging.error('*** Test Start ***')
+
+
 
 
 if __name__ == '__main__':
-    s = SerialComm.openSerial(1)
-    if s != None:
-        tests += tests_nrf
-        del s
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(message)s',
+                        filename='rcc_test.log',
+                        filemode='a')
+    logging.error('*** Test Start ***')
+
+    l = SerialComm.listPorts()
+    if len(l) == 0:
+        print('*** No serial ports found')
+        exit(1)
+    elif len(l) == 1:
+        print('*** Got one port, skipping Pad tests')
     else:
-        print('*** No second serial port found, skipping NRF tests')
+        print('*** Got two ports, assigning as following:')
+        print(f'  Loco: {l[0].device} - {l[0].description}')
+        print(f'  Pad:  {l[1].device} - {l[1].description}')
+        tests += tests_nrf
+    print()
 
     w = 80
     for test in tests:

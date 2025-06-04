@@ -5,9 +5,10 @@ s = None
 testStr1 = "1234567890abcd"
 testStr2 = "ABCDEFGHIJKLMNO"
 
+
 def test_storage_start():
     global s
-    s = SerialComm.openSerial()
+    s = SerialComm.openPort()
     if s == None:
         print('No serial port found')
         exit(1)
@@ -116,8 +117,20 @@ def test_storage03():
 def test_storage04():
     return _test_storage(4, 'Test Storage 04, exists')
 
+def updateSettings():
+    data = []
+    try:
+        file = open('default.cfg')
+        data = file.read()
+        data = data.splitlines()
+    except:
+        pass
+    for i in data:
+        s.write(f'S{i}')
+        s.read(i)
 
 def test_storage_end():
+    updateSettings()
     global s
     del s
     return (True, 'Test Storage End')

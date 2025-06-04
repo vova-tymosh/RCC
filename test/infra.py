@@ -45,15 +45,21 @@ def get_unblocked_input():
 
 
 class SerialComm:
+
     @staticmethod
-    def openSerial(idx = 0):
-        found = 0
+    def listPorts():
+        l = []
         for i in serial.tools.list_ports.comports():
             if i.description != 'n/a':
-                if idx == found:
-                    print(f"Found serial port: {i.device} - {i.description}")
-                    return SerialComm(serial.Serial(i.device, 115200, timeout=1), i.description)
-                found += 1
+                l.append(i)
+        l.sort()
+        return l
+
+    @staticmethod
+    def openPort(idx = 0):
+        l = SerialComm.listPorts()
+        if idx < len(l):
+            return SerialComm(serial.Serial(l[idx].device, 115200, timeout=1), l[idx].description)
         return None
 
     def __init__(self, s, description):
@@ -77,22 +83,22 @@ class SerialComm:
         buffer = ''
         for i in range(5):
             b = self.s.readline().decode('utf-8').strip()
-            logging.info(f"Read <: {b}. Need: {msg}. Accumulated: {buffer}")
-            if msg and msg == b:
-                return True
+            logging.info(f"Read <: '{b}' Need: '{msg}'")
+            if msg:
+                if msg == b:
+                    return True
             elif b:
-                buffer += b
+                return b
         return False
 
-# def readSerialFloat(s):
-#     data = readSerial(s)
-#     try:
-#         if data:
-#             data = data.split()[0]
-#             return float(data)
-#     except:
-#         pass
-#     return 0.0
+    def readFloat(self):
+        data = self.read()
+        try:
+            data = data.split()[0]
+            return float(data)
+        except:
+            pass
+        return 0.0
 
 
 class TransportMqtt:

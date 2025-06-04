@@ -12,6 +12,16 @@ SPI flash storage for nRF52
 
 #define LFS_BLOCK_SIZE        4096
 
+#define P25Q16H                                                                \
+  {                                                                            \
+    .total_size = (1 << 21), /* 2 MiB */                                       \
+        .start_up_time_us = 5000, .manufacturer_id = 0x85,                     \
+    .memory_type = 0x60, .capacity = 0x15, .max_clock_speed_mhz = 104,         \
+    .quad_enable_bit_mask = 0x02, .has_sector_protection = false,              \
+    .supports_fast_read = true, .supports_qspi = true,                         \
+    .supports_qspi_writes = true, .write_status_register_split = false,        \
+    .single_status_byte = false, .is_fram = false,                             \
+  }
 
 const SPIFlash_Device_t XIAO_NRF_FLASH = P25Q16H;
 Adafruit_FlashTransport_QSPI flashTransport;

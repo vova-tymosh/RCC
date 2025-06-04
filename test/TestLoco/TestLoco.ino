@@ -32,7 +32,7 @@ const char *settingsKeys[settingsSize] = {
     "testvalue",    "mqtt",       "pump"};
 const char *settingsValues[settingsSize] = {
     "ON",           "RCC_Loco",   "RCC_Loco",     "RCC",         "3",
-    "192.168.20.61","1883",       "0",            "0",           "1000", 
+    "192.168.0.10", "1883",       "0",            "0",           "1000",
     "1.1",          "ON",         "0"};
 
 
@@ -157,7 +157,6 @@ void setup()
     update.start();
     
     audio.begin();
-    // loco.debugLevel = 10;
     loco.begin();
 }
 

@@ -48,12 +48,18 @@ public:
 
     void processList()
     {
-        String packet = String(NRF_LIST_VALUE_RES) + node->listValues();
-        int size = packet.length();
-        if (size > MAX_PACKET)
-            size = MAX_PACKET;
-        wireless.write(packet.c_str(), size);
-        log(String("List: ") + packet);
+        String list = node->listValues();
+        int size = list.length();
+        if (size > MAX_PACKET - 1) {
+            int lastSeparator = list.lastIndexOf(NRF_SEPARATOR, MAX_PACKET);
+            String packet1 = String(NRF_LIST_VALUE_RES) + list.substring(0, lastSeparator);
+            wireless.write(packet1.c_str(), packet1.length());
+            String packet2 = String(NRF_LIST_VALUE_RES) + list.substring(lastSeparator + 1, size);
+            wireless.write(packet2.c_str(), packet2.length());
+        } else {
+            String packet = String(NRF_LIST_VALUE_RES) + list;
+            wireless.write(packet.c_str(), size);
+        }
     }
 
     void heartbeat()

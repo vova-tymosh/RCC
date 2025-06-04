@@ -115,6 +115,13 @@ def test_mqtt_end():
     mq.waitForMessage(setValueMsg)
     return (True, 'Test MQ End')
 
-tests_mq = [test_mqtt_start, test_throttle, 
-            test_direction_1, test_direction_2, test_direction_3, test_direction_0, 
-            test_function, test_value, test_list, test_mqtt_end]
+tests_mq = [test_mqtt_start, 
+            test_throttle,
+            test_direction_1,
+            test_direction_2,
+            test_direction_3,
+            test_direction_0,
+            test_function,
+            test_value,
+            test_list,
+            test_mqtt_end]

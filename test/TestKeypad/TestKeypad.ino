@@ -81,8 +81,6 @@ void setup()
     storage.begin();
     settings.begin(padKeys, padValues, sizeof(padKeys) / sizeof(padKeys[0]));
 
-
-    keypad.debugLevel = 10;
     keypad.begin();
 }
 

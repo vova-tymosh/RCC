@@ -8,7 +8,7 @@ mq = TransportMqtt()
 
 def test_nrf_start():
     global s
-    s = SerialComm.openSerial(1)
+    s = SerialComm.openPort(1)
     if s == None:
         print('No serial port found')
         exit(1)
@@ -80,8 +80,15 @@ def test_list():
 
 def test_nrf_end():
     global s
-    s.close()
+    del s
     return (True, 'Test NRF End')
 
-tests_nrf = [test_nrf_start, test_throttle, test_direction_3, test_direction_0, 
-             test_function_set, test_function_get, test_value, test_list, test_nrf_end]
+tests_nrf = [test_nrf_start,
+             test_throttle,
+             test_direction_3,
+             test_direction_0,
+             test_function_set,
+             test_function_get,
+             test_value,
+             test_list,
+             test_nrf_end]

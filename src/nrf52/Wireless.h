@@ -10,11 +10,10 @@
  *
  *    Patch for old MacOS:
  *       pip3 install adafruit-nrfutil
- *       cd
- * /Users/XXX/Library/Arduino15/packages/Seeeduino/hardware/nrf52/1.1.8/tools/adafruit-nrfutil/macos
+ *       cd ~/Library/Arduino15/packages/Seeeduino/hardware/nrf52/1.1.8/tools/adafruit-nrfutil/macos
  *       mv adafruit-nrfutil adafruit-nrfutil.backup
  *       ln -s $(which adafruit-nrfutil)
- *
+ * 
  *    To debug radio issues try the following:
  *       printf_begin();
  *       radio.printPrettyDetails();
@@ -23,7 +22,6 @@
 #pragma once
 
 #ifdef ARDUINO_ARCH_NRF52
-#define MAX_PAYLOAD_SIZE 256
 #include <nrf_to_nrf.h>
 #define RADIO_LEVEL NRF_PA_HIGH
 #define RADIO_BW NRF_250KBPS

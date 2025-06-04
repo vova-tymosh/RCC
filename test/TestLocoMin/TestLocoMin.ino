@@ -95,8 +95,7 @@ void setup()
   
     storage.begin();
     settings.begin(settingsKeys, settingsValues, settingsSize);
-    
-    loco.debugLevel = 10;
+
     loco.begin();
     update.start();
     Serial.println("start");

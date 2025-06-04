@@ -14,8 +14,6 @@ public:
     char locoName[VALUE_LEN];
     int locoAddr;
 
-    int debugLevel;
-
     virtual int getHeartbeat()
     {
         return 1000;
