@@ -1,7 +1,7 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
-const char SEPARATOR = ' ';
+const char SEPARATOR = ',';
 
 // NRF Protocol Message codes
 const char NRF_INTRO = 'A';
