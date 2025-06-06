@@ -31,18 +31,27 @@ public:
     Transport(RCCNode *node, int heartbeatPeriod = 1000)
         : node(node), heartbeatTimer(heartbeatPeriod) {};
 
+    void heartBeatKeys()
+    {
+        String packet = String(NRF_HEARTBEAT_KEYS);
+        packet.reserve(256);
+        for (int i = 0; i < sizeofarray(Keys) - 1; i++) {
+            packet += Keys[i];
+            packet += NRF_SEPARATOR;
+        }
+        packet += Keys[sizeofarray(Keys) - 1];
+        int size = packet.length();
+        wireless.write(packet.c_str(), size);
+    }
+
     void introduce()
     {
         String packet = String(NRF_INTRO) + NRF_TYPE_LOCO + NRF_SEPARATOR +
                         node->locoAddr + NRF_SEPARATOR + node->locoName +
                         NRF_SEPARATOR + VERSION + NRF_SEPARATOR + LOCO_FORMAT;
-        for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
-            packet += NRF_SEPARATOR;
-            packet += Keys[i];
-        }
         int size = packet.length();
         wireless.write(packet.c_str(), size);
-        log(String("Intro: ") + packet);
+        heartBeatKeys();
     }
 
     void processList()

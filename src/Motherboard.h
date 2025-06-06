@@ -31,10 +31,7 @@ public:
 
     void begin()
     {
-        if (!Tca6408a::begin()) {
-            Serial.println("Failed to find TCA6408A chip");
-            return;
-        }
+        Tca6408a::begin();
         Tca6408a::setOutput(1 << pin);
     }
 

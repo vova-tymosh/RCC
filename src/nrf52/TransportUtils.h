@@ -8,7 +8,7 @@
 
 #define COMMAND_SIZE sizeof(struct Command)
 #define CODE_SIZE 1
-#define sizeofarray(x) (sizeof(x) / sizeof(x[0]))
+
 
 const int MAX_PACKET = 144;
 

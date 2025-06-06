@@ -138,7 +138,7 @@ public:
     void introduce()
     {
         String packet = String(NRF_INTRO) + NRF_TYPE_KEYPAD + NRF_SEPARATOR +
-                        node->locoAddr + NRF_SEPARATOR + "RCC_Keypad" +
+                        node->locoAddr + NRF_SEPARATOR + node->locoName +
                         NRF_SEPARATOR + VERSION;
 
         int size = packet.length();

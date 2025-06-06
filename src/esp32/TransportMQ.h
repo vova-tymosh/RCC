@@ -60,17 +60,27 @@ public:
         write(heartbeatTopic, heartbeatPayload);
     }
 
+    void heartBeatKeys()
+    {
+        String topic = topicPrefix + String(MQ_HEARTBEAT_KEYS);
+        String value;
+        value.reserve(256);
+        for (int i = 0; i < sizeofarray(Keys) - 1; i++) {
+            value += Keys[i];
+            value += MQ_SEPARATOR;
+        }
+        value += Keys[sizeofarray(Keys) - 1];
+        write(topic, value);
+    }
+
     void introduce()
     {
         String topic = topicPrefix + String(MQ_INTRO);
         String value = String(NRF_TYPE_LOCO) + NRF_SEPARATOR + node->locoAddr +
                        NRF_SEPARATOR + node->locoName + NRF_SEPARATOR +
                        VERSION + MQ_SEPARATOR + LOCO_FORMAT;
-        for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
-            value += MQ_SEPARATOR;
-            value += Keys[i];
-        }
-        write(topic, value, true);
+        write(topic, value);
+        heartBeatKeys();
     }
 
     void reconnect()

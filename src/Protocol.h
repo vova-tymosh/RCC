@@ -1,6 +1,8 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
+#define sizeofarray(x) (sizeof(x) / sizeof(x[0]))
+
 const char SEPARATOR = ',';
 
 // NRF Protocol Message codes
@@ -8,6 +10,7 @@ const char NRF_INTRO = 'A';
 const char NRF_SUB = 'B';
 const char NRF_LIST_CAB = 'C';
 const char NRF_HEARTBEAT = 'H';
+const char NRF_HEARTBEAT_KEYS = 'K';
 
 const char NRF_THROTTLE = 'T';
 const char NRF_DIRECTION = 'D';
@@ -27,6 +30,7 @@ const char NRF_SEPARATOR = SEPARATOR;
 const char *MQ_PREFIX = "cab";
 const char *MQ_INTRO = "intro";
 const char *MQ_HEARTBEAT_VALUES = "heartbeat/values";
+const char *MQ_HEARTBEAT_KEYS = "heartbeat/key";
 
 const char *MQ_SET_THROTTLE = "throttle";
 const char *MQ_SET_DIRECTION = "direction";

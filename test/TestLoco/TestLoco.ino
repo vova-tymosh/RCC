@@ -20,6 +20,8 @@ Storage storage;
 Settings settings;
 PinExt yellow(2);
 Pin blue(0);
+
+
 PowerMeter powerMeter;
 Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD);
 Timer update(1000);
@@ -53,7 +55,6 @@ void writeAllAudio(const uint8_t *data, const size_t size) {
         offset += r;
     }
 }
-
 
 class TestLoco : public RCCLoco
 {
