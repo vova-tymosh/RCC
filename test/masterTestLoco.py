@@ -40,8 +40,8 @@ if __name__ == '__main__':
         print('*** Got one port, skipping Pad tests')
     else:
         print('*** Got two ports, assigning as following:')
-        print(f'  Loco: {l[0].device} - {l[0].description}')
-        print(f'  Pad:  {l[1].device} - {l[1].description}')
+        print(f'  Pad:  {l[0].device} - {l[0].description}')
+        print(f'  Loco: {l[1].device} - {l[1].description}')
         tests += tests_nrf
     print()
 

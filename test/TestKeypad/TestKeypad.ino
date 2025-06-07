@@ -64,6 +64,9 @@ public:
         case 'S':
             processSet(value);
             break;
+        case 'N':
+            cycleSelected();
+            break;
         }
     }
 };

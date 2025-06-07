@@ -8,7 +8,7 @@ mq = TransportMqtt()
 
 def test_nrf_start():
     global s
-    s = SerialComm.openPort(1)
+    s = SerialComm.openPort(0)
     if s == None:
         print('No serial port found')
         exit(1)

@@ -8,7 +8,7 @@ testStr2 = "ABCDEFGHIJKLMNO"
 
 def test_storage_start():
     global s
-    s = SerialComm.openPort()
+    s = SerialComm.openPort(1)
     if s == None:
         print('No serial port found')
         exit(1)

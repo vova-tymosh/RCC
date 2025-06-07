@@ -37,10 +37,10 @@ public:
 
     MqttClient() : mqtt(conn), heartbeatTimer(1000) {};
 
-    void write(String topic, String message, bool retain = false)
+    void write(String topic, String message)
     {
         log(String(">") + topic + "+" + message);
-        mqtt.publish(topic.c_str(), message.c_str(), retain = retain);
+        mqtt.publish(topic.c_str(), message.c_str());
     }
 
     void heartbeat()
@@ -143,7 +143,9 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
     char *action = parseAction(topic);
     if (action == NULL)
         return;
-    if (strcmp(action, MQ_SET_THROTTLE) == 0) {
+    if (strcmp(action, MQ_INTRO_REQ) == 0) {
+        mqttClient.introduce();
+    } else if (strcmp(action, MQ_SET_THROTTLE) == 0) {
         // Throttle/speed
         int l = (length > 4) ? 4 : length;
         char throttle[5];

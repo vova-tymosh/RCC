@@ -29,6 +29,8 @@ const char NRF_SEPARATOR = SEPARATOR;
 // MQTT Protocol Message codes
 const char *MQ_PREFIX = "cab";
 const char *MQ_INTRO = "intro";
+const char *MQ_INTRO_REQ = "introreq";
+
 const char *MQ_HEARTBEAT_VALUES = "heartbeat/values";
 const char *MQ_HEARTBEAT_KEYS = "heartbeat/key";
 
