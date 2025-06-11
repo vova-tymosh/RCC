@@ -10,6 +10,10 @@
 #define PROTOCOL_H
 
 #define sizeofarray(x) (sizeof(x) / sizeof(x[0]))
+const int CONN_NRF = 1;
+const int CONN_WIFI = 2;
+const int CONN_WIFI_AP = 3;
+
 
 const char SEPARATOR = ',';
 
@@ -56,6 +60,7 @@ const char *MQ_ON = "ON";
 const char *MQ_OFF = "OFF";
 
 const char MQ_SEPARATOR = SEPARATOR;
+
 
 // Command Line Interface (CLI) Protocol Message codes
 const char CMD_THROTTLE = 'T';

@@ -19,16 +19,17 @@ class Transport
 private:
     ConfigWeb configWeb;
     TransportClient *transportClient;
-    RCCNode *loco;
+    RCCNode *node;
 
 public:
-    Transport(RCCNode *loco) : loco(loco) {}
+    Transport(RCCNode *node) : node(node) {}
 
     void wifiAP(String wifissid, String wifipwd)
     {
         WiFi.softAP(wifissid, wifipwd);
         Serial.print("[WiFi] Started as AP, SSID: ");
         Serial.println(wifissid);
+        node->onConnect(CONN_WIFI_AP);
     }
 
     void wifiConnect(String wifissid, String wifipwd)
@@ -45,6 +46,7 @@ public:
             Serial.println("Connected");
             Serial.print("[WiFi] IP: ");
             Serial.println(WiFi.localIP());
+            node->onConnect(CONN_WIFI);
         } else {
             Serial.println("Failed to connect, revert to AP");
             wifiAP(wifissid, wifipwd);
@@ -68,7 +70,7 @@ public:
         } else {
             transportClient = new WiThrottleClient();
         }
-        transportClient->setLoco(loco);
+        transportClient->setLoco(node);
 
         configWeb.begin();
         transportClient->begin();

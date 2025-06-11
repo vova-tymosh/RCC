@@ -17,13 +17,13 @@ protected:
 public:
     Pin(int pin) : pin(pin) {};
 
-    void begin()
+    virtual void begin()
     {
         pinMode(pin, OUTPUT);
         digitalWrite(pin, LOW);
     }
 
-    void apply(bool on)
+    virtual void apply(bool on)
     {
         if (on)
             digitalWrite(pin, HIGH);
@@ -32,77 +32,45 @@ public:
     }
 };
 
-/*
-class ServoBase {
-  protected:
-    int pin;
-    Servo servo;
-  public:
-    ServoBase(int pin): pin(pin) {}
-
-    void begin() {
-      pinMode(pin, OUTPUT);
-      servo.attach(pin);
-    }
-
-    virtual void apply(uint16_t value) {
-      servo.write(value);
-    }
-};
-*/
-
-// TODO: Deprecate
-class MotorDeprecated
+class StatusLed
 {
-protected:
-    const float MIN_THR = 0;
-    const int pin_back;
-    const int pin_fowd;
-
-    virtual void stop()
-    {
-        digitalWrite(pin_back, LOW);
-        digitalWrite(pin_fowd, LOW);
-    }
-
-    virtual void forward(int throttle)
-    {
-        digitalWrite(pin_back, LOW);
-        analogWrite(pin_fowd, throttle);
-    }
-
-    virtual void backward(int throttle)
-    {
-        analogWrite(pin_back, throttle);
-        digitalWrite(pin_fowd, LOW);
-    }
-
+    Pin &pin;
+    bool on = false;
+    uint8_t blinks = 0;
+    Timer timer;
 public:
-    MotorDeprecated(int pin_back, int pin_fowd)
-        : pin_back(pin_back), pin_fowd(pin_fowd)
+    StatusLed(Pin &pin, int period = 500) : pin(pin), timer(period) {}
+
+    void begin(bool _on = false)
     {
+        on = _on;
+        pin.begin();
+        pin.apply(on);
     }
 
-    virtual void begin()
+    void blink(uint8_t _blinks = 1)
     {
-        pinMode(pin_back, OUTPUT);
-        pinMode(pin_fowd, OUTPUT);
-    }
-
-    virtual void apply(int direction, int throttle)
-    {
-        throttle = map(throttle, 0, 100, MIN_THR, 255);
-        if (throttle == MIN_THR)
-            throttle = 0;
-        if (direction == 0) {
-            stop();
-        } else if (direction == 1) {
-            forward(throttle);
-        } else {
-            backward(throttle);
+        on = false;
+        blinks = _blinks;
+        pin.apply(on);
+        if (blinks > 0) {
+            timer.start();
         }
     }
-};
+
+    void loop()
+    {
+        if (timer.hasFiredOnce()) {
+            on = !on;
+            pin.apply(on);
+            if (blinks > 0) {
+                timer.start();
+                if (on)
+                    blinks--;
+            }
+        }
+    }
+}; 
 
 class Motor
 {
@@ -146,14 +114,14 @@ public:
         else
             throttle = MAX;
         if (direction == 0) {
-            analogWrite(pin_back, 0);
-            analogWrite(pin_fowd, 0);
+            analogWrite(pin_back, throttle);
+            analogWrite(pin_fowd, MAX);
         } else if (direction == 1) {
             analogWrite(pin_back, MAX);
             analogWrite(pin_fowd, throttle);
         } else {
-            analogWrite(pin_back, throttle);
-            analogWrite(pin_fowd, MAX);
+            analogWrite(pin_back, 0);
+            analogWrite(pin_fowd, 0);
         }
     }
 

@@ -22,9 +22,11 @@
 
 Storage storage;
 Settings settings;
-PinExt yellow(2);
-Pin blue(0);
+// PinExt yellow(2);
+PinExt blue(0);
 
+PinExt q(5);
+StatusLed statusLed(q, 500);
 
 PowerMeter powerMeter;
 Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD);
@@ -72,9 +74,9 @@ public:
             Serial.println(" ON");
         else
             Serial.println(" OFF");
+        // if (code == 0)
+        //     yellow.apply(value);
         if (code == 0)
-            yellow.apply(value);
-        if (code == 1)
             blue.apply(value);
     }
 
@@ -82,6 +84,11 @@ public:
     {
         Serial.print("Throttle: "); Serial.print(throttle); Serial.print(" D:"); Serial.println(direction); 
         motor.apply(direction, throttle);
+    }
+    
+    void onConnect(uint8_t connType)
+    {
+        statusLed.blink(connType);
     }
 
     void processCreate(char cmd[])
@@ -103,16 +110,19 @@ public:
     {
         switch (code) {
         case 'B':
-            Serial.println(motor.readBemf());
+            // Serial.println(motor.readBemf());
+            statusLed.blink(5);
             break;
         case 'P':
-            audio.play(audio_data, sizeof(audio_data), 2);
+            // audio.play(audio_data, sizeof(audio_data), 2);
+            q.apply(true);
             break;
         case 'Q':
-            audio.play("sound", 2);
+            // audio.play("sound", 2);
+            q.apply(false);
             break;
         case 'L':
-            audio.cycle = true;
+            // audio.cycle = true;
             break;
         case 'W':
             writeAllAudio(audio_data, sizeof(audio_data));
@@ -156,12 +166,14 @@ void setup()
     storage.begin();
     settings.begin(settingsKeys, settingsValues, settingsSize);
     motor.begin();
-    yellow.begin();
+    // yellow.begin();
     blue.begin();
     powerMeter.begin();
     update.start();
-    
     audio.begin();
+    q.begin();
+    statusLed.begin(true);
+
     loco.begin();
 }
 
@@ -169,14 +181,15 @@ void loop()
 {
     loco.loop();
     audio.loop();
+    statusLed.loop();
 
     if (update.hasFired()) {
-        loco.state.battery = powerMeter.readBattery();
-        loco.state.current = powerMeter.readCurrent();
+        loco.state.temperature = powerMeter.readBattery();
+        loco.state.psi = powerMeter.readCurrent();
         loco.state.distance = 101;
         loco.state.speed = 20;
-        loco.state.temperature = 110;
-        loco.state.psi = 35;
+        // loco.state.temperature = 110;
+        // loco.state.psi = 35;
     }
 }
 

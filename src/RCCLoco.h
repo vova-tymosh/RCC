@@ -46,6 +46,7 @@ public:
     virtual void onThrottle(uint8_t direction, uint8_t throttle) {}
     virtual void onCommand(uint8_t code, char *value, uint8_t size) {}
     virtual void onSetValue(const char *key, const char *value) {}
+    virtual void onConnect(uint8_t connType) {}
 
     virtual int getHeartbeat()
     {

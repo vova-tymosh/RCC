@@ -151,6 +151,7 @@ public:
         wireless.begin(node->locoAddr);
         introduce();
         heartbeatTimer.start();
+        node->onConnect(CONN_NRF);
     }
 
     void loop()
