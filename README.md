@@ -1,12 +1,12 @@
 # RCC
 
-Remote Command and Control (RCC) is an easy-to-use and affordable wireless solution for controlling model railroads. It was started as a project to control outdoor locomotives of a G-scale, and now it can be used for smaller trains as well. It is completely open source - all software and hardware is available to study, modify and expand. And it is free (almost, you’d have to pay to manufacture hardware).
+Remote Command and Control (RCC) is an easy-to-use, bidirectional, affordable wireless solution for controlling model railroads. It was started as a project to control outdoor locomotives of a G scale, and now it can be used for smaller trains as well. It is completely open source - all software and hardware is available to study, modify and expand. And it is free (almost, you’d have to pay to manufacture hardware).
 
 Details about locomotive decoders, throttles, turnouts and how to build them can be found on [RCC-Nodes](https://github.com/vova-tymosh/RCC-Nodes).
 
 
 ## Is RCC good for me?
-If you are happy with your current setup the answer is obviously “no”. If you are tired of cleaning rails or you don’t want to spend an arm and a leg - RCC is your friend. Think about this. An RCC decoder costs under $30. It is tiny - an inch by two inches. It can drive a motor, play sound and control all blows and whistles your locomotive has. You can build your own Throttle or you may use your phone. After all, you just throw rails on the ground and run your trains! RCC works on the simplest scenarios with a single locomotive or it can be a part of a complex layout (RCC is able to talk to JMRI).
+If you are happy with your current setup the answer is obviously “no”. If you are tired of cleaning rails or you don’t want to pay an arm and a leg - RCC is your friend. Think about this. An RCC decoder costs under $30. It is tiny - an inch by two inches. It can drive a motor, play sound and control all blows and whistles your locomotive has. You can build your own Throttle or you may use your phone. After all, you just throw rails on the ground and run your trains! RCC works on the simplest scenarios with a single locomotive or it can be a part of a complex layout (RCC is able to talk to JMRI).
 
 
 ## Does RCC use batteries?
@@ -16,11 +16,11 @@ If you don't like batteries or you already have a wired setup, you may still use
 
 ## Why do we need yet another solution?
 There are many solutions available. Some are very affordable, like DCC-EX, but still require electrical conductivity between all the rail sections and locomotive wheels. Some are wireless, but for G-scale they cost $100-$200. RCC excels in both - it is dirt cheap and it doesn’t need wires. Also it is open source. You can change it to your unique needs and desires.
-There is one more advantage, RCC is bi-directional. It sends back information about the train speed, battery voltage and power currently drawn by the motor. You can build much more sophisticated automation using this info, or you can simply look at this as the real engineer would do in the cab of a locomotive. 
+There is one more advantage, RCC is bi-directional. It sends back information about the train speed, battery voltage and power currently drawn by the motor. You can build much more sophisticated automation using this info, or you can simply monitor your locomotive vitals as the real engineer would do in the cab of a locomotive. 
 
 
 ## Do I need a degree in electrical engineering to use RCC?
-Fear not. There is nothing really complicated ahead. You’d need to do some mouse-clicking and do little soldering. Some folks are scared of this “soldering” part, but I’ll walk you through the process with videos and everything. After all, if you want a $30 decoder you have to do some work yourself. There is no magic in this world.
+Fear not. There is nothing really complicated ahead. You’d need to do some mouse-clicking and little soldering. Some folks are scared of this “soldering” part, but I’ll walk you through the process with videos and everything. After all, if you want a $30 decoder you have to do some work yourself. There is no magic in this world.
 
 
 ## What is in this repository?
