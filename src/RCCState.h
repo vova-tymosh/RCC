@@ -6,20 +6,15 @@
  * The above copyright notice shall be included in all
  * copies or substantial portions of the Software.
  */
-/*
- * Railroad communication
- *
- *
- */
 #pragma once
 
 // System version, update every time the protocol changes
-const char *VERSION = "0.7";
+const char *VERSION = "0.8";
 
 // Following structures and constants are connected and have to be kept in sync!
 //   Failure to do so will result in communication errors
 
-// Packet format for registration, look for Python Struct documentation. Has to
+// Packet format of heartbeat (in Python Struct style). Has to
 // be in the same order as LocoState
 const char *LOCO_FORMAT = "BIIIHBBBBBBB";
 
@@ -31,7 +26,7 @@ const char *Keys[] = {"Time", "Distance", "Bitstate", "Speed",
 // The LocoState structure, represent realtime state and is sent as hearbeat to
 // the Station
 //  In case of NRF24/52 the message longer than 24 bytes will be fragmented
-//  (longer delivery time) As of now it is 22
+//  (longer delivery time). As of now it is 22 bytes
 struct __attribute__((packed)) LocoState {
     uint8_t packet_type;
     uint32_t tick;

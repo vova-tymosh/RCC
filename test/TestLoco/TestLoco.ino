@@ -154,7 +154,7 @@ TestLoco loco;
 void setup()
 {
     Serial.begin(115200);
-    delay(250);
+    delay(50);
 
     // while ( !Serial ) delay(10);
     // Serial.println("Enter to any keys to continue:");
