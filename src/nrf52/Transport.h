@@ -39,7 +39,7 @@ public:
     Transport(RCCNode *node, int heartbeatPeriod = 1000)
         : node(node), heartbeatTimer(heartbeatPeriod) {};
 
-    void heartBeatKeys()
+    void heartbeatKeys()
     {
         String packet = String(NRF_HEARTBEAT_KEYS);
         packet.reserve(256);
@@ -59,7 +59,7 @@ public:
                         NRF_SEPARATOR + VERSION + NRF_SEPARATOR + LOCO_FORMAT;
         int size = packet.length();
         wireless.write(packet.c_str(), size);
-        heartBeatKeys();
+        heartbeatKeys();
     }
 
     void processList()
@@ -85,6 +85,11 @@ public:
         node->state.packet_type = NRF_HEARTBEAT;
         node->state.tick = (float)millis() / 100;
         wireless.write(&node->state, sizeof(node->state));
+    }
+
+    void write(uint8_t *payload, uint16_t size)
+    {
+        wireless.write(payload, size);
     }
 
     void received(uint8_t *payload, uint16_t size)
@@ -142,7 +147,7 @@ public:
         } else if (command->code == NRF_HEARTBEAT) {
             heartbeat();
         } else {
-            node->onCommand(command->code, (char *)payload + CODE_SIZE, size);
+            node->onCommand(command->code, (char *)payload, size);
         }
     }
 
@@ -161,9 +166,10 @@ public:
             received(payload, size);
         }
 
-        if (heartbeatTimer.hasFiredOnce()) {
+        int hb = node->getHeartbeat();
+        if (hb && heartbeatTimer.hasFiredOnce()) {
             heartbeat();
-            heartbeatTimer.start(node->getHeartbeat());
+            heartbeatTimer.start(hb);
         }
     }
 };

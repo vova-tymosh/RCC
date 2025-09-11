@@ -15,6 +15,7 @@
 
 Storage storage;
 Settings settings;
+Timer debugTimer(1000);
 
 class TestKeypad : public RCCKeypad 
 {
@@ -93,10 +94,16 @@ void setup()
     settings.begin(padKeys, padValues, sizeof(padKeys) / sizeof(padKeys[0]));
 
     keypad.begin();
+    debugTimer.start();
 }
+
 
 void loop()
 {
     keypad.loop();
+    if (debugTimer.hasFired()) {
+        Serial.print("Rate: ");
+        Serial.println(keypad.getConnSuccessRate());
+    }
 }
  

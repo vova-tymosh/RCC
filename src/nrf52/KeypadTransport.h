@@ -288,6 +288,10 @@ public:
                 payload[size - 1] = 0;
                 log("List: " + String((const char *)payload));
             }
+        } else if (command->code == NRF_PING) {
+            if (isMine(from)) {
+                send(payload, size, from);
+            }
         }
     }
 

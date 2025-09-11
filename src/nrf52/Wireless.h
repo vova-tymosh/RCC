@@ -55,8 +55,7 @@ class Wireless
 protected:
     RADIO_TYPE radio;
     RADIO_NETWORK network;
-    const int RETRY = 20;
-
+    static const int RETRY = 20;
     static const uint16_t STATION_NODE = 0;
     uint16_t node;
 

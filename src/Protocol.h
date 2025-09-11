@@ -32,6 +32,7 @@ const char NRF_SET_VALUE = 'S';
 const char NRF_GET_VALUE = 'G';
 const char NRF_LIST_VALUE_ASK = 'L';
 const char NRF_LIST_VALUE_RES = 'J';
+const char NRF_PING = '0';
 
 const char NRF_TYPE_LOCO = 'L';
 const char NRF_TYPE_KEYPAD = 'K';
