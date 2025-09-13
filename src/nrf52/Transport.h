@@ -21,7 +21,7 @@
 #if RCC_DEBUG >= 2
 #define log(msg)                                                               \
     {                                                                          \
-        Serial.println(String("[Nrf] ") + (msg));                              \
+        Serial.print("[Nrf] "); Serial.println(msg);                           \
     };
 #else
 #define log(msg)

@@ -23,7 +23,7 @@
 #if RCC_DEBUG >= 2
 #define log(msg)                                                               \
     {                                                                          \
-        Serial.println(String("[WT] ") + (msg));                               \
+        Serial.print("[WT] "); Serial.println(msg);                            \
     };
 #else
 #define log(msg)

@@ -22,7 +22,7 @@
 #if RCC_DEBUG >= 2
 #define log(msg)                                                               \
     {                                                                          \
-        Serial.println(String("[MQ] ") + (msg));                               \
+        Serial.print("[MQ] "); Serial.println(msg);                            \
     };
 #else
 #define log(msg)

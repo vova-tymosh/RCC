@@ -8,6 +8,7 @@
  */
 #define NRF_CE 19
 #define NRF_CSN 18
+#define RCC_DEBUG 2
 
 #include "Peripheral.h"
 #include "RCCLoco.h"
@@ -32,12 +33,12 @@ public:
 
     void onFunction(uint8_t code, bool value)
     {
-        Serial.print(F("F ")); Serial.print(code); Serial.print(F("/")); Serial.println(value);
+        Serial.print(F("F ")); Serial.print(code); Serial.println( value ? F(" ON") : F(" OFF"));
     }
 
     void onThrottle(uint8_t direction, uint8_t throttle)
     {
-        Serial.print(F("T ")); Serial.print(direction); Serial.print(F("/")); Serial.println(throttle);
+        Serial.print(F("T: ")); Serial.print(throttle); Serial.print(F(" D:")); Serial.println(direction);
     }
 
     void processCreate(char cmd[])
