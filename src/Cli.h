@@ -133,7 +133,8 @@ private:
         if (strlen(cmd) < 1)
             return false;
         char *key = cmd;
-        String value = loco->getValue(key);
+        char value[VALUE_LEN];
+        loco->getValue(key, value, sizeof(value));
         Serial.print(key);
         Serial.print(":");
         Serial.println(value);

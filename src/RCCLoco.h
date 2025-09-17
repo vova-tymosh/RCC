@@ -93,14 +93,9 @@ public:
 
     String getValue(const char *key)
     {
-        for (int i = 0; i < sizeof(Keys) / sizeof(char *); i++) {
-            if (strcmp(key, Keys[i]) == 0) {
-                int value = *((uint8_t *)&state + ValueOffsets[i]);
-                return String(value);
-            }
-        }
-        String value(settings.get(key));
-        return value;
+        char value[VALUE_LEN];
+        getValue(key, value, sizeof(value));
+        return String(value);
     }
 
     void getValue(const char *key, char *value, size_t size)
