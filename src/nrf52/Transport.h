@@ -19,13 +19,14 @@
 #include "Timer.h"
 
 #if RCC_DEBUG >= 2
-#define log(msg)                                                               \
-    {                                                                          \
-        Serial.print("[Nrf] "); Serial.println(msg);                           \
+#define log(msg)                                     \
+    {                                                \
+        Serial.print(msg);                           \
     };
 #else
 #define log(msg)
 #endif
+
 
 class Transport
 {
@@ -41,25 +42,32 @@ public:
 
     void heartbeatKeys()
     {
-        String packet = String(NRF_HEARTBEAT_KEYS);
-        packet.reserve(256);
+        char packet[MAX_PACKET];
+        char *p = packet;
+        p = strcatm(p, NRF_HEARTBEAT_KEYS);
         for (int i = 0; i < sizeofarray(Keys) - 1; i++) {
-            packet += Keys[i];
-            packet += NRF_SEPARATOR;
+            p = strcatm(p, Keys[i]);
+            p = strcatm(p, NRF_SEPARATOR);
         }
-        packet += Keys[sizeofarray(Keys) - 1];
-        int size = packet.length();
-        wireless.write(packet.c_str(), size);
+        p = strcatm(p, Keys[sizeofarray(Keys) - 1]);
+        write(packet, strlen(packet));
     }
 
     void introduce()
     {
-        String packet = String(NRF_INTRO) + NRF_TYPE_LOCO + NRF_SEPARATOR +
-                        node->locoAddr + NRF_SEPARATOR + node->locoName +
-                        NRF_SEPARATOR + VERSION + NRF_SEPARATOR + LOCO_FORMAT;
-        int size = packet.length();
-        wireless.write(packet.c_str(), size);
-        heartbeatKeys();
+        char packet[MAX_PACKET];
+        char *p = packet;
+        p = strcatm(p, NRF_INTRO);
+        p = strcatm(p, NRF_TYPE_LOCO);
+        p = strcatm(p, NRF_SEPARATOR);
+        p = strcatm(p, node->locoAddr);
+        p = strcatm(p, NRF_SEPARATOR);
+        p = strcatm(p, node->locoName);
+        p = strcatm(p, NRF_SEPARATOR);
+        p = strcatm(p, VERSION);
+        p = strcatm(p, NRF_SEPARATOR);
+        p = strcatm(p, LOCO_FORMAT);
+        write(packet, strlen(packet));
     }
 
     void processList()
@@ -70,13 +78,13 @@ public:
             int lastSeparator = list.lastIndexOf(NRF_SEPARATOR, MAX_PACKET);
             String packet1 =
                 String(NRF_LIST_VALUE_RES) + list.substring(0, lastSeparator);
-            wireless.write(packet1.c_str(), packet1.length());
+            write(packet1.c_str(), packet1.length());
             String packet2 = String(NRF_LIST_VALUE_RES) +
                              list.substring(lastSeparator + 1, size);
-            wireless.write(packet2.c_str(), packet2.length());
+            write(packet2.c_str(), packet2.length());
         } else {
             String packet = String(NRF_LIST_VALUE_RES) + list;
-            wireless.write(packet.c_str(), size);
+            write(packet.c_str(), size);
         }
     }
 
@@ -84,12 +92,16 @@ public:
     {
         node->state.packet_type = NRF_HEARTBEAT;
         node->state.tick = (float)millis() / 100;
-        wireless.write(&node->state, sizeof(node->state));
+        write(&node->state, sizeof(node->state));
     }
 
-    void write(uint8_t *payload, uint16_t size)
+    void write(const void *payload, uint16_t size)
     {
-        wireless.write(payload, size);
+        if (size > 0) {
+            uint8_t *p = (uint8_t *)payload;
+            log("[Nrf] > "); log((char)p[0]); log(" "); log(size); log("\n");
+            wireless.write(payload, size);
+        }
     }
 
     void received(uint8_t *payload, uint16_t size)
@@ -97,10 +109,11 @@ public:
         if (size < COMMAND_SIZE)
             return;
         struct Command *command = (struct Command *)payload;
-        log("<" + String((char)command->code) + " " + String(command->value));
+        log("[Nrf] < "); log((char)command->code); log(" "); log(command->value); log("\n");
 
         if (command->code == NRF_INTRO) {
             introduce();
+            heartbeatKeys();
         } else if (command->code == NRF_THROTTLE) {
             node->setThrottle(command->value);
         } else if (command->code == NRF_DIRECTION) {
@@ -112,7 +125,7 @@ public:
             reply.code = NRF_SET_FUNCTION;
             reply.functionId = command->functionId;
             reply.activate = node->getFunction(command->functionId);
-            wireless.write(&reply, sizeof(reply));
+            write(&reply, sizeof(reply));
         } else if (command->code == NRF_SET_VALUE) {
             if (size >= CODE_SIZE + 1) {
                 payload[size] = 0;
@@ -130,17 +143,13 @@ public:
             if (size >= CODE_SIZE + 1) {
                 payload[size] = 0;
                 char *key = (char *)(payload + CODE_SIZE);
-                String value = node->getValue(key);
                 char reply[MAX_PACKET];
                 memcpy(reply, payload, size);
+                reply[0] = NRF_SET_VALUE;
                 reply[size] = NRF_SEPARATOR;
                 size++;
-                memcpy(reply + size, value.c_str(), value.length());
-                reply[0] = NRF_SET_VALUE;
-                size += value.length();
-                if (size > MAX_PACKET)
-                    size = MAX_PACKET;
-                wireless.write(reply, size);
+                node->getValue(key, reply + size, MAX_PACKET - size);
+                write(reply, strlen(reply));
             }
         } else if (command->code == NRF_LIST_VALUE_ASK) {
             processList();
@@ -155,6 +164,7 @@ public:
     {
         wireless.begin(node->locoAddr);
         introduce();
+        heartbeatKeys();
         heartbeatTimer.start();
         node->onConnect(CONN_NRF);
     }

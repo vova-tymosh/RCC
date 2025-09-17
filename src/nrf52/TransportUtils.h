@@ -35,4 +35,26 @@ void printHex(uint8_t *payload, int size);
 
 int split(char *input, char **output, uint8_t size, char delimiter);
 
+inline char *strcatm(char* d, const char* s)
+{
+    strcat(d, s);
+    d += strlen(s);
+    return d;
+}
+
+inline char *strcatm(char* d, const char c)
+{
+    *d++ = c;
+    *d = 0;
+    return d;
+}
+
+inline char *strcatm(char* d, const int i)
+{
+    itoa(i, d, 10);
+    d += strlen(d);
+    return d;
+}
+
+
 #endif // NRF52_PROTOCOL_H
