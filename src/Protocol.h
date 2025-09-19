@@ -46,7 +46,7 @@ const char *MQ_INTRO_REQ = "introreq";
 
 const char *MQ_HEARTBEAT = "heartbeat";
 const char *MQ_HEARTBEAT_VALUES = "heartbeat/values";
-const char *MQ_HEARTBEAT_KEYS = "heartbeat/key";
+const char *MQ_HEARTBEAT_KEYS = "heartbeat/keys";
 
 const char *MQ_SET_THROTTLE = "throttle";
 const char *MQ_SET_DIRECTION = "direction";
