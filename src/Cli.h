@@ -134,6 +134,7 @@ private:
             return false;
         char *key = cmd;
         char value[VALUE_LEN];
+        value[0] = '\0';
         loco->getValue(key, value, sizeof(value));
         Serial.print(key);
         Serial.print(":");

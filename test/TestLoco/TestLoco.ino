@@ -62,6 +62,7 @@ void writeAllAudio(const uint8_t *data, const size_t size) {
     }
 }
 
+#if defined(ARDUINO_ARCH_NRF52)
 class Ping
 {
 public:
@@ -151,12 +152,13 @@ public:
         }
     }
 };
+#endif
 
 class TestLoco : public RCCLoco
 {
 public:
     using RCCLoco::RCCLoco;
-    Ping ping;
+    // Ping ping;
 
 
     void onFunction(uint8_t code, bool value)
@@ -238,14 +240,14 @@ public:
             break;
         case 'Z':
             setValue("heartbeat", "0");
-            ping.begin(transport);
+            // ping.begin(transport);
             break;
         case 'X':
             setValue("heartbeat", "1000");
-            ping.end();
+            // ping.end();
             break;
         case NRF_PING:
-            ping.receive(value, size);
+            // ping.receive(value, size);
             break;
         }
     }
@@ -285,11 +287,11 @@ void loop()
     loco.loop();
     audio.loop();
     statusLed.loop();
-    loco.ping.loop();
+    // loco.ping.loop();
 
     if (update.hasFired()) {
-        loco.state.temperature = powerMeter.readBattery();
-        loco.state.psi = powerMeter.readCurrent();
+        loco.state.temperature = 80;//powerMeter.readBattery();
+        loco.state.psi = 24;//powerMeter.readCurrent();
         loco.state.distance = 101;
         loco.state.speed = 20;
         // loco.state.temperature = 110;

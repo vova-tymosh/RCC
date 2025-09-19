@@ -201,5 +201,8 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
             mqttClient.node->setFunction(functionCode, true);
         else
             mqttClient.node->setFunction(functionCode, false);
+    } else if (strcmp(action, MQ_HEARTBEAT) == 0) {
+        // Heartbeat request
+        mqttClient.heartbeat();
     }
 }

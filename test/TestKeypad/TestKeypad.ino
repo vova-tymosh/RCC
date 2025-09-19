@@ -6,6 +6,7 @@
  * The above copyright notice shall be included in all
  * copies or substantial portions of the Software.
  */
+// #define RCC_DEBUG 2
 #include "RCCKeypad.h"
 #include "Storage.h"
 #include "Settings.h"
@@ -101,9 +102,9 @@ void setup()
 void loop()
 {
     keypad.loop();
-    if (debugTimer.hasFired()) {
-        Serial.print("Rate: ");
-        Serial.println(keypad.getConnSuccessRate());
-    }
+    // if (debugTimer.hasFired()) {
+    //     Serial.print("Rate: ");
+    //     Serial.println(keypad.getConnSuccessRate());
+    // }
 }
  

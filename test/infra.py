@@ -18,7 +18,7 @@ import paho.mqtt.client as mqtt
 from paho.mqtt.subscribeoptions import SubscribeOptions
 
 MQTT_NODE_NAME = 'RCC_Test'
-MQTT_BROKER = '192.168.20.61'
+MQTT_BROKER = '192.168.20.62'
 MQ_PREFIX = "cab"
 MQ_MESSAGE = re.compile("cab/(.*?)/(.*)")
 
