@@ -51,6 +51,18 @@ def get_unblocked_input():
         return sys.stdin.readline()
     return None
 
+def updateSettings(port):
+    data = []
+    try:
+        file = open('default.cfg')
+        data = file.read()
+        data = data.splitlines()
+    except:
+        pass
+    for i in data:
+        port.write(f'S{i}')
+        port.read(i)
+
 
 class SerialComm:
 
