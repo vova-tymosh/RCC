@@ -29,7 +29,7 @@ PinExt q(5);
 StatusLed statusLed(q, 500);
 
 PowerMeter powerMeter;
-Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD);
+Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD, -1, 40);
 Timer update(1000);
 Audio audio;
 
@@ -261,21 +261,13 @@ void setup()
     Serial.begin(115200);
     delay(50);
 
-    // while ( !Serial ) delay(10);
-    // Serial.println("Enter to any keys to continue:");
-    // while ( !Serial.available() )
-    //     delay(1);
-    // Serial.println("Start");
+//   pinMode(WIFI_ENABLE, OUTPUT); // pinMode(3, OUTPUT);
+//   digitalWrite(WIFI_ENABLE, LOW); // digitalWrite(3, LOW); // Activate RF switch control
 
-  pinMode(WIFI_ENABLE, OUTPUT); // pinMode(3, OUTPUT);
-  digitalWrite(WIFI_ENABLE, LOW); // digitalWrite(3, LOW); // Activate RF switch control
+//   delay(100);
 
-  delay(100);
-
-  pinMode(WIFI_ANT_CONFIG, OUTPUT); // pinMode(14, OUTPUT);
-  digitalWrite(WIFI_ANT_CONFIG, HIGH); // digitalWrite(14, HIGH); // Use external antenna
-
-
+//   pinMode(WIFI_ANT_CONFIG, OUTPUT); // pinMode(14, OUTPUT);
+//   digitalWrite(WIFI_ANT_CONFIG, HIGH); // digitalWrite(14, HIGH); // Use external antenna
 
 
     storage.begin();
@@ -286,8 +278,8 @@ void setup()
     powerMeter.begin();
     update.start();
     audio.begin();
-    q.begin();
-    statusLed.begin(true);
+    // q.begin();
+    // statusLed.begin(true);
 
     loco.begin();
 }
