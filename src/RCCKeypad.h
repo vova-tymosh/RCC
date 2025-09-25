@@ -139,9 +139,9 @@ public:
 
     void emergencyStop()
     {
-        for (i = 0; i < transport->getKnownLen(); i++) {
+        for (int i = 0; i < transport->getKnownLen(); i++) {
             setDirection(DIR_STOP);
-            transport->cycleSelected()
+            transport->cycleSelected();
         }
     }
 
