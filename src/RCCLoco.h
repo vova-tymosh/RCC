@@ -34,7 +34,6 @@ protected:
     SpeedControl pid;
 
 public:
-    enum { DIR_REVERSE = 0, DIR_FORWARD = 1, DIR_STOP = 2, DIR_NEUTRAL = 3 };
 
     RCCLoco() : rccCli(this), speedTimer(100)
     {

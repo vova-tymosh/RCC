@@ -137,6 +137,14 @@ public:
         transport->cycleSelected();
     }
 
+    void emergencyStop()
+    {
+        for (i = 0; i < transport->getKnownLen(); i++) {
+            setDirection(DIR_STOP);
+            transport->cycleSelected()
+        }
+    }
+
     int getConnSuccessRate()
     {
         return transport->getConnSuccessRate();

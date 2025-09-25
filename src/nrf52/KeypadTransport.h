@@ -103,11 +103,18 @@ public:
 
     void cycleSelected()
     {
+        int s = known.selected;
         if (known.selected < known.len - 1)
             known.selected++;
         else
             known.selected = 0;
-        subsribe();
+        if (s != known.selected)
+            subsribe();
+    }
+
+    int getKnownLen()
+    {
+        return known.len;
     }
 
     bool isKnown(int addr)

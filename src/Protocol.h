@@ -14,6 +14,7 @@ const int CONN_NRF = 1;
 const int CONN_WIFI = 2;
 const int CONN_WIFI_AP = 3;
 
+enum { DIR_REVERSE = 0, DIR_FORWARD = 1, DIR_STOP = 2, DIR_NEUTRAL = 3 };
 
 const char SEPARATOR = ',';
 
