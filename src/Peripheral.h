@@ -100,38 +100,24 @@ public:
     virtual void begin()
     {
     #if defined(ARDUINO_ARCH_ESP32)
-        mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, pin_back);
-        mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, pin_fowd);
-        mcpwm_config_t pwm_config = {
-            .frequency = 50000,
-            .cmpr_a = 0,
-            .cmpr_b = 0,
-            .duty_mode = MCPWM_DUTY_MODE_0,
-            .counter_mode = MCPWM_UP_COUNTER,
-        };
-        mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &pwm_config);
-        mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
-        mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B);
+        ledcAttach(pin_back, 50000, 8);
+        ledcAttach(pin_fowd, 50000, 8);
     #else
         pinMode(pin_back, OUTPUT);
         pinMode(pin_fowd, OUTPUT);
-        analogWrite(pin_back, 0);
-        analogWrite(pin_fowd, 0);
         if (pin_bemf >= 0) {
             pinMode(pin_bemf, INPUT);
             bemf_timer.start(700);
         }
     #endif
-
+        analogWrite(pin_back, 0);
+        analogWrite(pin_fowd, 0);
     }
 
     virtual void apply(int direction, int throttle)
     {
-    #if defined(ARDUINO_ARCH_ESP32)
-        const uint8_t MAX = 100;
-    #else
         const uint8_t MAX = 0xFF;
-    #endif
+
         this->direction = direction;
         this->throttle = throttle;
         if (throttle > 0)
@@ -139,31 +125,14 @@ public:
         else
             throttle = MAX;
         if (direction == 0) {
-    #if defined(ARDUINO_ARCH_ESP32)
-            mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, throttle);
-            mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, MCPWM_DUTY_MODE_0);
-            mcpwm_set_signal_high(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B);
-    #else
             analogWrite(pin_back, throttle);
             analogWrite(pin_fowd, MAX);
-    #endif
         } else if (direction == 1) {
-    #if defined(ARDUINO_ARCH_ESP32)
-            mcpwm_set_signal_high(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
-            mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B, throttle);
-            mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B, MCPWM_DUTY_MODE_0);
-    #else
             analogWrite(pin_back, MAX);
             analogWrite(pin_fowd, throttle);
-    #endif
         } else {
-    #if defined(ARDUINO_ARCH_ESP32)
-            mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
-            mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B);
-    #else
             analogWrite(pin_back, 0);
             analogWrite(pin_fowd, 0);
-    #endif
         }
     }
 
