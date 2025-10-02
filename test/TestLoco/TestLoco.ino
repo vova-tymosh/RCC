@@ -10,7 +10,9 @@
 // #define RCC_DEBUG 2
 #include "Motherboard.h"
 #include "Peripheral.h"
+#include "Settings.h"
 #include "RCCLoco.h"
+
 #include "Audio.h"
 #include "audio_data2.h"
 #include "TestStorage.h"
@@ -163,13 +165,8 @@ public:
 
     void onFunction(uint8_t code, bool value)
     {
-        Serial.print("Function: "); Serial.print(code); 
-        if (value)
-            Serial.println(" ON");
-        else
-            Serial.println(" OFF");
-        // if (code == 0)
-        //     yellow.apply(value);
+        Serial.print("Function: "); Serial.print(code); Serial.println( value ? " ON" : " OFF");
+
         if (code == 0)
             blue.apply(value);
     }
@@ -277,7 +274,7 @@ void setup()
     blue.begin();
     powerMeter.begin();
     update.start();
-    audio.begin();
+    // audio.begin();
     // q.begin();
     // statusLed.begin(true);
 
@@ -287,7 +284,7 @@ void setup()
 void loop()
 {
     loco.loop();
-    audio.loop();
+    // audio.loop();
     statusLed.loop();
     // loco.ping.loop();
 

@@ -38,13 +38,6 @@ const char *htmlPrefix = R"(
         <table>
 )";
 
-const char *htmlCheckbox = R"(
-          <tr>
-            <th>Access point mode:</th>
-            <td><input type="checkbox" name="wifiap" $wifiap$></td>
-          </tr>
-)";
-
 const char *htmlInput = R"(
           <tr>
             <th>$user_readable$:</th>
@@ -85,18 +78,11 @@ void ConfigWeb::handleRoot()
     String form = String(htmlPrefix);
     String name = storage.openFirst();
     while (!name.isEmpty()) {
-        if (name == "wifiap") {
-            String checkbox = String(htmlCheckbox);
-            String value = settings.get(name.c_str());
-            checkbox.replace("$wifiap$", (value == "ON") ? "checked" : "");
-            form += checkbox;
-        } else {
-            String inputbox = String(htmlInput);
-            inputbox.replace("$user_readable$", name);
-            inputbox.replace("$key$", name);
-            inputbox.replace("$value$", settings.get(name.c_str()));
-            form += inputbox;
-        }
+        String inputbox = String(htmlInput);
+        inputbox.replace("$user_readable$", name);
+        inputbox.replace("$key$", name);
+        inputbox.replace("$value$", settings.get(name.c_str()));
+        form += inputbox;
         name = storage.openNext();
     }
     form += htmlSuffix;
@@ -107,11 +93,7 @@ void ConfigWeb::handleSubmit()
 {
     for (int i = 0; i < server.args(); i++) {
         String name = server.argName(i);
-        if (name == "wifiap")
-            settings.put(server.argName(i).c_str(),
-                         server.arg(i) == "on" ? "ON" : "OFF");
-        else
-            settings.put(server.argName(i).c_str(), server.arg(i));
+        settings.put(server.argName(i).c_str(), server.arg(i));
     }
     server.send(200, "text/html", htmlSubmitted);
 }
