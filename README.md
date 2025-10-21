@@ -1,8 +1,26 @@
 # RCC
 
-Remote Command and Control (RCC) is an easy-to-use, bidirectional, affordable wireless solution for controlling model railroads. It was started as a project to control outdoor locomotives of a G scale, and now it can be used for smaller trains as well. It is completely open source - all software and hardware is available to study, modify and expand. And it is free (almost, you’d have to pay to manufacture hardware).
+Remote Command and Control (RCC) is an easy-to-use, bidirectional, affordable wireless solution for controlling model railroads. It has started as a project to control outdoor locomotives of a G scale, and now it can be used for smaller trains as well. It is completely open source - all software and hardware is available to study, modify and expand. And it is free (almost, you’d have to pay to manufacture hardware).
 
-Details about locomotive decoders, throttles, turnouts and how to build them can be found on [RCC-Nodes](https://github.com/vova-tymosh/RCC-Nodes).
+
+
+Here is the short overview of the RCC locomotive decoder specs and features:
+<table>
+  <tr><td><b>Category</b></td><td colspan="3"><b>Description</b></td></tr>
+  <tr><td>Power Input</td><td colspan="3">10v-24V battery, also can be hooked to DC rails via rectifier</td></tr>
+  <tr><td>Power Output</td><td colspan="3">Motor: 2A continuos, peak to 3.6A <br>Funtional outputs: five 0.5A and one 1A. Each function can drive an LED or a smoke unit or somthing similar. Only ON/OFF is supported as of now, dimming and blinking schems are coming</td></tr>
+  <tr><td>Onboard sensors</td><td colspan="3">Realtime battery level and current consumption</td></tr>
+  <tr><td>Speed/distance measurements</td><td colspan="3">External mechanical, magnetic of optical (recommended) sensor supported</td></tr>
+  <tr><td>Sound</td><td colspan="3">Output to 3W speaker</td></tr>
+  <tr><td>Live steam support</td><td colspan="3">With external board can control several servos and read temperature and pressure</td></tr>
+  <tr><td>Wireless technology</td><td>WiFi+WiThrottle. <br><i>Simplest solution, you only need an RCC locomotive and WiThrottle app on your phone</i></td><td>WiFi+MQTT. <br><i>Requires JRMI instalation</i></td><td>NRF/Thread/Matter. <br><i>This option is still in active development</i></td></tr>
+  <tr><td>Range, aprox</td><td>30m</td><td>30m</td><td>100m (with Mesh - virtually unlimited)</td></tr>
+  <tr><td>Number of simulteniously controlled locomotives</td><td>1</td><td>Unlimited</td><td>255</td></tr>
+</table>
+
+
+Details about how to build RCC locomotive decoder and install it can be found on [Loco](https://github.com/vova-tymosh/RCC-Nodes/tree/main/Loco).
+
 
 
 ## Is RCC good for me?
