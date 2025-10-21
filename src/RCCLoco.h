@@ -116,16 +116,13 @@ public:
 
     String listValues()
     {
-        String s = Keys[0];
-        for (int i = 1; i < sizeof(Keys) / sizeof(char *); i++) {
-            s += SEPARATOR;
-            s += Keys[i];
-        }
+        String s;
         String name = storage.openFirst();
         while (name.length() != 0) {
-            s += SEPARATOR;
             s += name;
             name = storage.openNext();
+            if (name.length() != 0)
+                s += SEPARATOR;
         }
         return s;
     }
