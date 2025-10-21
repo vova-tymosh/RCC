@@ -31,7 +31,7 @@ PinExt q(5);
 StatusLed statusLed(q, 500);
 
 PowerMeter powerMeter;
-Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD, -1, 40);
+Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD);
 Timer update(1000);
 Audio audio;
 
@@ -281,6 +281,16 @@ void setup()
     loco.begin();
 }
 
+
+int getRand()
+{
+    static float angle = 0;
+    float value = (sin(radians(angle)) + 1) * 50;
+    angle += 20;
+    if (angle >= 360) angle = 0;
+    return (int)value;
+}
+
 void loop()
 {
     loco.loop();
@@ -289,12 +299,16 @@ void loop()
     // loco.ping.loop();
 
     if (update.hasFired()) {
-        loco.state.temperature = 80;//powerMeter.readBattery();
-        loco.state.psi = 24;//powerMeter.readCurrent();
-        loco.state.distance = 101;
-        loco.state.speed = 20;
-        // loco.state.temperature = 110;
-        // loco.state.psi = 35;
+        static int d = 0;
+        int r = getRand();
+        loco.state.distance = d++;
+        loco.state.speed = (r + 50)/2;
+        loco.state.lost = 20;
+        loco.state.battery = r;
+        loco.state.current = (r + 30);
+        loco.state.throttle = 50;
+        loco.state.temperature = r + 20;
+        loco.state.psi = r + 10;
     }
 }
 
