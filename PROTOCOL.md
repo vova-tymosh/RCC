@@ -48,7 +48,7 @@ NRF:  D\x01
 
 ### Function
 
-Turn specific function on or off. This command has two parameters - function id ({func} below) and the {state} - ON or OFF. Function id is a number (currently from 0 to 30, but the range may increase in future). The state is {ON, OFF} for MQTT and {1, 0} for NRF/CLI. In case of NRF command argument is packed into 1 byte, where state takes highest bit and the rest 7 are allocated for the function id.
+Turn specific function on or off. This command has two parameters - function id ({func} below) and the {state} - ON or OFF. Function id can be a number (0-255) or a named function (for MQTT only). The state is {ON, OFF} for MQTT and {1, 0} for NRF/CLI. In case of NRF the command argument is packed into 1 byte, where state takes highest bit and the rest 7 are allocated for the function id.
 
 ```
 MQTT: cab/{addr}/function/{func} {ON, OFF}
@@ -56,16 +56,21 @@ CLI:  F{state}{func}
 NRF:  F{state:1}{func:7}
 ```
 
-Example, turn ON function 1 (bell):
+Example, turn ON function 1 (bell) using ID:
 ```
 MQTT: cab/3/function/1 ON
 CLI:  F11
 NRF:  F\x81
 ```
 
+Example, turn ON function using name (MQTT only):
+```
+MQTT: cab/3/function/bell ON
+```
+
 ### Get Function
 
-Retrieve the current state of a specific function. Response is the same as Set Function command.
+Retrieve the current state of a specific function. For MQTT, function can be specified by ID or name. Response is the same as Set Function command.
 
 ```
 MQTT: cab/{addr}/function/get {func}
@@ -80,10 +85,49 @@ CLI:  P1
 NRF:  P\x01
 ```
 
+Example, get state using function name (MQTT only):
+```
+MQTT: cab/3/function/get bell
+```
+
 Example response:
 ```
 MQTT: cab/3/function/1 OFF
 NRF:  P\x01
+```
+
+### Set Function Name
+
+Assign or update a name for a function ID. This creates a mapping between function numbers and human-readable names stored in the "functionNames" file.
+
+```
+MQTT: cab/{addr}/function/name/{id} {name}
+```
+
+Example, assign name "bell" to function 1:
+```
+MQTT: cab/3/function/name/1 bell
+```
+
+Example, assign name "headlight" to function 0:
+```
+MQTT: cab/3/function/name/0 headlight
+```
+
+### List Functions
+
+Get a list of all defined function names and their IDs.
+
+```
+MQTT: cab/{addr}/function/list/req
+```
+
+Response format: `{id1},{name1},{id2},{name2},...`
+
+Example:
+```
+Request:  cab/3/function/list/req
+Response: cab/3/function/list 0,headlight,1,bell,2,horn,3,coupler
 ```
 
 ### Set Value
@@ -132,14 +176,14 @@ NRF:  Sloconame,MyLoco
 Get a list of all available configuration keys.
 
 ```
-MQTT: cab/{addr}/value/list
+MQTT: cab/{addr}/value/list/req
 CLI:  L
 NRF:  L
 ```
 
 Response format uses comma separator:
 ```
-MQTT: cab/{addr}/keys {key1},{key2},{key3}...
+MQTT: cab/{addr}/value/list {key1},{key2},{key3}...
 CLI:  {key1},{key2},{key3}...
 NRF:  J{key1},{key2},{key3}...
 ```
@@ -268,9 +312,44 @@ All MQTT topics follow the pattern: `cab/{locomotive_address}/{command}`
 - `cab/{addr}/heartbeat/keys` - Heartbeat key names
 - `cab/{addr}/keys` - Response to value list request
 
+## Function Names Example
+
+Here's a complete example of setting up and using named functions:
+
+1. **Set up function names:**
+```
+MQTT: cab/3/function/name/0 headlight
+MQTT: cab/3/function/name/1 bell  
+MQTT: cab/3/function/name/2 horn
+MQTT: cab/3/function/name/3 coupler
+```
+
+2. **Control functions by name:**
+```
+MQTT: cab/3/function/headlight ON
+MQTT: cab/3/function/bell ON
+MQTT: cab/3/function/horn OFF
+```
+
+3. **Query function state by name:**
+```
+MQTT: cab/3/function/get bell
+Response: cab/3/function/bell ON
+```
+
+4. **Mix names and numbers:**
+```
+MQTT: cab/3/function/0 ON        # headlight by number
+MQTT: cab/3/function/bell OFF    # bell by name
+```
+
+The function names are stored persistently in the "functionNames" file using the Storage system, so they persist across reboots.
+
 ## Error Handling
 
 - Invalid commands are ignored
 - Out-of-range values are clamped or ignored
 - Malformed packets are discarded
 - Connection failures trigger automatic reconnection
+- Invalid function names fall back to numeric parsing
+- Function name storage failures are logged but don't affect operation

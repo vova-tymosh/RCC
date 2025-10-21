@@ -110,11 +110,70 @@ def test_value():
 
 def test_list():
     test_name = 'Test MQ List'
-    setValueMsg = f'cab/{mq.locoaddr}/{MQ_LIST_VALUE_ASK}+ '
+    setValueMsg = f'cab/{mq.locoaddr}/{MQ_LIST_VALUE_REQ}+ '
     mq.write(setValueMsg)
     mq.waitForMessage(setValueMsg)
     getValueRes = f'cab/{mq.locoaddr}/{MQ_LIST_VALUE_RES}'
     testResult = mq.waitForMessage(getValueRes)
+    return (testResult, test_name)
+
+def test_function_name():
+    test_name = 'Test MQ Function Name'
+    function_id = 1
+    function_name = 'bell'
+    
+    # Set function name
+    setNameMsg = f'cab/{mq.locoaddr}/function/name/{function_id}+{function_name}'
+    mq.write(setNameMsg)
+    mq.waitForMessage(setNameMsg)
+    
+    # Test function control by name
+    setFunctionMsg = f'cab/{mq.locoaddr}/function/{function_name}+{MQ_ON}'
+    mq.write(setFunctionMsg)
+    mq.waitForMessage(setFunctionMsg)
+    
+    # Verify function state by ID
+    getFunctionMsg = f'cab/{mq.locoaddr}/function/get+{function_id}'
+    getFunctionRes = f'cab/{mq.locoaddr}/function/{function_id}+{MQ_ON}'
+    mq.write(getFunctionMsg)
+    testResult = mq.waitForMessage(getFunctionRes)
+    
+    if not testResult:
+        return (False, f"{test_name} failed - function by name not working")
+    
+    # Test function control by name OFF
+    setFunctionMsg = f'cab/{mq.locoaddr}/function/{function_name}+{MQ_OFF}'
+    mq.write(setFunctionMsg)
+    mq.waitForMessage(setFunctionMsg)
+    
+    # Verify function state by name
+    getFunctionMsg = f'cab/{mq.locoaddr}/function/get+{function_name}'
+    getFunctionRes = f'cab/{mq.locoaddr}/function/{function_name}+{MQ_OFF}'
+    mq.write(getFunctionMsg)
+    testResult = mq.waitForMessage(getFunctionRes)
+    
+    return (testResult, test_name)
+
+def test_function_list():
+    test_name = 'Test MQ Function List'
+    
+    # Set up some function names first
+    function_names = [(0, 'headlight'), (1, 'bell'), (2, 'horn')]
+    
+    for func_id, func_name in function_names:
+        setNameMsg = f'cab/{mq.locoaddr}/function/name/{func_id}+{func_name}'
+        mq.write(setNameMsg)
+        mq.waitForMessage(setNameMsg)
+    
+    # Request function list
+    listReqMsg = f'cab/{mq.locoaddr}/function/list/req+ '
+    mq.write(listReqMsg)
+    mq.waitForMessage(listReqMsg)
+    
+    # Wait for function list response
+    listResMsg = f'cab/{mq.locoaddr}/function/list'
+    testResult = mq.waitForMessage(listResMsg)
+    
     return (testResult, test_name)
 
 def test_mqtt_end():
@@ -130,6 +189,8 @@ tests_mq = [test_mqtt_start,
             test_direction_3,
             test_direction_0,
             test_function,
+            test_function_name,
+            test_function_list,
             test_value,
             test_list,
             test_mqtt_end]

@@ -31,7 +31,7 @@ const char NRF_SET_FUNCTION = 'F';
 const char NRF_GET_FUNCTION = 'P';
 const char NRF_SET_VALUE = 'S';
 const char NRF_GET_VALUE = 'G';
-const char NRF_LIST_VALUE_ASK = 'L';
+const char NRF_LIST_VALUE_REQ = 'L';
 const char NRF_LIST_VALUE_RES = 'J';
 const char NRF_PING = '0';
 
@@ -53,10 +53,13 @@ const char *MQ_SET_THROTTLE = "throttle";
 const char *MQ_SET_DIRECTION = "direction";
 const char *MQ_GET_FUNCTION = "function/get";
 const char *MQ_SET_FUNCTION = "function/";
+const char *MQ_SET_FUNCTION_NAME = "function/name/";
+const char *MQ_LIST_FUNCTION_REQ = "function/list/req";
+const char *MQ_LIST_FUNCTION_RES = "function/list";
 const char *MQ_GET_VALUE = "value/get";
 const char *MQ_SET_VALUE = "value/";
-const char *MQ_LIST_VALUE_ASK = "value/list";
-const char *MQ_LIST_VALUE_RES = "keys";
+const char *MQ_LIST_VALUE_REQ = "value/list/req";
+const char *MQ_LIST_VALUE_RES = "value/list";
 
 const char *MQ_DIRECTIONS[4] = {"REVERSE", "FORWARD", "STOP", "NEUTRAL"};
 const char *MQ_ON = "ON";

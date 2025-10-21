@@ -151,7 +151,7 @@ public:
                 node->getValue(key, reply + size, MAX_PACKET - size);
                 write(reply, strlen(reply));
             }
-        } else if (command->code == NRF_LIST_VALUE_ASK) {
+        } else if (command->code == NRF_LIST_VALUE_REQ) {
             processList();
         } else if (command->code == NRF_HEARTBEAT) {
             heartbeat();

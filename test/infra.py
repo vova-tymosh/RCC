@@ -30,8 +30,8 @@ MQ_HEARTBEAT_VALUES = "heartbeat/values"
 MQ_GET_FUNCTION = "function/get"
 MQ_SET_FUNCTION = "function/"
 MQ_GET_VALUE = "value/get"
-MQ_LIST_VALUE_ASK = "value/list"
-MQ_LIST_VALUE_RES = "keys"
+MQ_LIST_VALUE_REQ = "value/list/req"
+MQ_LIST_VALUE_RES = "value/list"
 MQ_SET_VALUE = "value/"
 
 MQ_DIRECTIONS = ["REVERSE", "FORWARD", "STOP", "NEUTRAL"]
