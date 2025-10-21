@@ -5,7 +5,8 @@ if len(l) == 0:
     print('*** No serial ports found')
     exit(1)
 
-s = SerialComm.openPort(0)
+SerialComm.locoPortIndex = 0
+s = SerialComm.openPort()
 print(f'Upload settings from default.cfg (your wifi & network config) to device:  {l[0].device} - {l[0].description}')
 updateSettings(s)
 del s

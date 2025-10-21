@@ -39,8 +39,6 @@ MQ_ON = "ON"
 MQ_OFF = "OFF"
 MQ_SEPARATOR = ','
 
-ADDR = 3
-
 
 def millis():
     return round(time.time() * 1000)
@@ -59,12 +57,17 @@ def updateSettings(port):
         data = data.splitlines()
     except:
         pass
+    data += [f'loconame:RCC{LocoSetting.locoaddr}', f'locoaddr:{LocoSetting.locoaddr}']
+
     for i in data:
         port.write(f'S{i}')
         port.read(i)
 
+class LocoSetting:
+    locoaddr = 3
 
 class SerialComm:
+    locoPortIndex = 0
 
     @staticmethod
     def listPorts():
@@ -76,13 +79,15 @@ class SerialComm:
         return l
 
     @staticmethod
-    def openPort(idx = 0):
+    def openPort():
+        idx = SerialComm.locoPortIndex
         l = SerialComm.listPorts()
         if idx < len(l):
-            return SerialComm(serial.Serial(l[idx].device, 115200, timeout=1), l[idx].description)
+            return SerialComm(idx, serial.Serial(l[idx].device, 115200, timeout=1), l[idx].description)
         return None
 
-    def __init__(self, s, description):
+    def __init__(self, idx, s, description):
+        self.idx = idx
         self.s = s
         self.description = description
 
@@ -122,6 +127,8 @@ class SerialComm:
 
 
 class TransportMqtt:
+    locoaddr = 3
+
     def __init__(self):
         self.mqttClient = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, MQTT_NODE_NAME)
         self.mqttClient.on_message = self.onReceive
@@ -130,7 +137,7 @@ class TransportMqtt:
     def start(self):
         self.mqttClient.connect(MQTT_BROKER)
         options = SubscribeOptions(qos = 1, noLocal = True)
-        self.mqttClient.subscribe(f'{MQ_PREFIX}/#', options=options)
+        self.mqttClient.subscribe(f'cab/{TransportMqtt.locoaddr}/#', options=options)
 
     def waitForMessage(self, message = None):
         for i in range(5):

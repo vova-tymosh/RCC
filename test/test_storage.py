@@ -16,9 +16,9 @@ testStr2 = "ABCDEFGHIJKLMNO"
 
 def test_storage_start():
     global s
-    s = SerialComm.openPort(1)
+    s = SerialComm.openPort()
     if s == None:
-        print('No serial port found')
+        print('ERROR: No serial port found')
         exit(1)
     return (True, 'Test Storage Start')
 
@@ -69,7 +69,7 @@ def test_setting_re_write():
 def test_setting_defaults():
     test_name = 'Test Settings, reading defaults'
     s.write(f'Gloconame')
-    r2 = s.read(f'loconame:RCC')
+    r2 = s.read(f'loconame:RCC{LocoSetting.locoaddr}')
     return (r2, test_name)
 
 def test_storage_version():
