@@ -14,27 +14,27 @@
 
 #include "RCCState.h"
 #include "Settings.h"
-#include "nrf52/KeypadTransport.h"
+#include "nrf52/PadTransport.h"
 #include "Protocol.h"
 #include "Timer.h"
 #include "Cli.h"
 
-extern const char *keypadKeys[];
-extern const char *keypadValues[];
-extern const int keypadKeySize;
+extern const char *padKeys[];
+extern const char *padValues[];
+extern const int padKeySize;
 
-class RCCKeypad : public RCCNode
+class RCCPad : public RCCNode
 {
 protected:
-    KeypadTransport *transport;
+    PadTransport *transport;
     RccCli rccCli;
 
 public:
     bool update;
 
-    RCCKeypad() : rccCli(this)
+    RCCPad() : rccCli(this)
     {
-        transport = new KeypadTransport(this);
+        transport = new PadTransport(this);
     }
 
     virtual void onFunction(uint8_t code, bool activate) {}

@@ -7,7 +7,7 @@
  * copies or substantial portions of the Software.
  */
 // #define RCC_DEBUG 2
-#include "RCCKeypad.h"
+#include "RCCPad.h"
 #include "Storage.h"
 #include "Settings.h"
 #include "Timer.h"
@@ -18,7 +18,7 @@ Storage storage;
 Settings settings;
 Timer debugTimer(1000);
 
-class TestKeypad : public RCCKeypad 
+class TestPad : public RCCPad 
 {
 public:
 
@@ -108,11 +108,11 @@ public:
         }
     }
 };
-TestKeypad keypad;
+TestPad pad;
 
 
 const char *padKeys[] =   {"loconame",   "locoaddr", "testvalue"};
-const char *padValues[] = {"RCC_Keypad", "1",        "0.0"};
+const char *padValues[] = {"RCC_Pad", "1",        "0.0"};
 
 
 void setup()
@@ -122,17 +122,17 @@ void setup()
     storage.begin();
     settings.begin(padKeys, padValues, sizeof(padKeys) / sizeof(padKeys[0]));
 
-    keypad.begin();
+    pad.begin();
     debugTimer.start();
 }
 
 
 void loop()
 {
-    keypad.loop();
+    pad.loop();
     // if (debugTimer.hasFired()) {
     //     Serial.print("Rate: ");
-    //     Serial.println(keypad.getConnSuccessRate());
+    //     Serial.println(pad.getConnSuccessRate());
     // }
 }
  

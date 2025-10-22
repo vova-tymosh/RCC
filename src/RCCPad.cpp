@@ -10,13 +10,13 @@
 
 #include <Arduino.h>
 
-// extern const char *keypadKeys[];
-// const char *keypadKeys[] = {"loconame", "locoaddr"};
+// extern const char *padKeys[];
+// const char *padKeys[] = {"loconame", "locoaddr"};
 
-// extern const char *keypadValues[];
-// const char *keypadValues[] = {"RCC_Keypad", "1"};
+// extern const char *padValues[];
+// const char *padValues[] = {"RCC_Pad", "1"};
 
-// extern const int keypadKeySize;
-// const int keypadKeySize = sizeof(keypadKeys) / sizeof(keypadKeys[0]);
+// extern const int padKeySize;
+// const int padKeySize = sizeof(padKeys) / sizeof(padKeys[0]);
 
 #endif

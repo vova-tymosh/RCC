@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # RCC Build and Flash Script
-# Compiles and flashes TestLoco and TestKeypad to multiple XIAO platforms
+# Compiles and flashes TestLoco and TestPad to multiple XIAO platforms
 
 echo "=========================================="
 echo "RCC Multi-Platform Build and Flash Script"
@@ -72,21 +72,21 @@ else
 fi
 echo ""
 
-# nRF52840 - TestKeypad (usbmodem1101)
-echo "************* nRF52840 - TestKeypad *************"
-echo "Compiling TestKeypad for nRF52840..."
-arduino-cli compile --fqbn Seeeduino:nrf52:xiaonRF52840 TestKeypad
+# nRF52840 - TestPad (usbmodem1101)
+echo "************* nRF52840 - TestPad *************"
+echo "Compiling TestPad for nRF52840..."
+arduino-cli compile --fqbn Seeeduino:nrf52:xiaonRF52840 TestPad
 if [ $? -eq 0 ]; then
-    echo "✓ nRF52840 TestKeypad compilation successful"
+    echo "✓ nRF52840 TestPad compilation successful"
     echo "Flashing to nRF52840 (usbmodem1101)..."
-    arduino-cli upload -p /dev/cu.usbmodem1101 --fqbn Seeeduino:nrf52:xiaonRF52840 TestKeypad
+    arduino-cli upload -p /dev/cu.usbmodem1101 --fqbn Seeeduino:nrf52:xiaonRF52840 TestPad
     if [ $? -eq 0 ]; then
-        echo "✓ nRF52840 TestKeypad flash successful"
+        echo "✓ nRF52840 TestPad flash successful"
     else
-        echo "✗ nRF52840 TestKeypad flash failed"
+        echo "✗ nRF52840 TestPad flash failed"
     fi
 else
-    echo "✗ nRF52840 TestKeypad compilation failed"
+    echo "✗ nRF52840 TestPad compilation failed"
 fi
 
 echo ""
@@ -98,4 +98,4 @@ echo "Device Summary:"
 echo "• ESP32C3 (1401)  - TestLoco"
 echo "• ESP32C6 (1301)  - TestLoco"
 echo "• nRF52840 (1201) - TestLoco"
-echo "• nRF52840 (1101) - TestKeypad"
+echo "• nRF52840 (1101) - TestPad"

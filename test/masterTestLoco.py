@@ -38,7 +38,7 @@ def print_usage():
     print()
     print("OPTIONAL ARGUMENTS:")
     print("  --port <port_index>  USB port index for locomotive (default: 0)")
-    print("  --pad <port_index>   USB port index for keypad (enables NRF tests)")
+    print("  --pad <port_index>   USB port index for pad (enables NRF tests)")
     print("  --help, -h          Show this help message")
     print()
     print("AVAILABLE TESTS:")
@@ -49,7 +49,7 @@ def print_usage():
     print()
     print("NOTES:")
     print("  - If no test names are specified, all available tests will run")
-    print("  - NRF tests require --pad argument to specify keypad port")
+    print("  - NRF tests require --pad argument to specify pad port")
     print("  - Debug logs are captured in 'rcc_test.log'")
 
 def runTests(listOfTests, test_name=""):
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     )
     parser.add_argument('--addr', type=int, help='Locomotive address (required)')
     parser.add_argument('--port', type=int, help='USB port index for locomotive (default: 0)')
-    parser.add_argument('--pad', type=int, help='USB port index for keypad (enables NRF tests)')
+    parser.add_argument('--pad', type=int, help='USB port index for pad (enables NRF tests)')
     parser.add_argument('--help', '-h', action='store_true', help='Show help message')
     parser.add_argument('tests', nargs='*', help='Test names to run (mb, storage, mqtt, nrf)')
 

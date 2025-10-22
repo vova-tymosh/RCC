@@ -21,8 +21,6 @@
 #define MAX_LOCO 5
 #define NAME_SIZE 5
 
-// TODO: add local mode tests
-
 #if RCC_DEBUG >= 2
 #define log(msg)                                                               \
     {                                                                          \
@@ -66,7 +64,7 @@ struct Qos {
     }
 };
 
-class KeypadTransport
+class PadTransport
 {
 private:
     const char *HEARTBEAT = "heartbeat";
@@ -89,7 +87,7 @@ private:
 public:
     bool isLocal;
 
-    KeypadTransport(RCCNode *node) : node(node) {};
+    PadTransport(RCCNode *node) : node(node) {};
 
     int getConnSuccessRate()
     {
@@ -166,7 +164,7 @@ public:
 
     void introduce()
     {
-        String packet = String(NRF_INTRO) + NRF_TYPE_KEYPAD + NRF_SEPARATOR +
+        String packet = String(NRF_INTRO) + NRF_TYPE_PAD + NRF_SEPARATOR +
                         node->locoAddr + NRF_SEPARATOR + node->locoName +
                         NRF_SEPARATOR + VERSION;
 

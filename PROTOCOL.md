@@ -191,7 +191,7 @@ NRF:  J{key1},{key2},{key3}...
 ### Introduction
 
 Device introduction message sent when connecting or requested. Without arguments it is a request from central station, with the rguments - response from a loco. The fields are the following: 
- - type: node tyoe, can be L for locomotive and K for Keypad
+ - type: node tyoe, can be L for locomotive and K for Pad
  - addr: locomotive unique address
  - name: locomotive name
  - version: RCC version
@@ -256,7 +256,7 @@ CLI: Z{filename}
 CLI: E
 ```
 
-### Next/Select Locomotive (Keypad Only)
+### Next/Select Locomotive (Pad Only)
 ```
 CLI: N[address]
 ```
