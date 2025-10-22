@@ -67,7 +67,6 @@ const char *MQ_OFF = "OFF";
 
 const char MQ_SEPARATOR = SEPARATOR;
 
-
 // Command Line Interface (CLI) Protocol Message codes
 const char CMD_THROTTLE = 'T';
 const char CMD_DIRECTION = 'D';

@@ -30,8 +30,7 @@ private:
 
 public:
     SpeedSensor(int pin, float distance_per_click, int update_period = 500)
-        : pin(pin), distance_per_click(distance_per_click),
-          update_period(update_period)
+        : pin(pin), distance_per_click(distance_per_click), update_period(update_period)
     {
     }
 
@@ -47,8 +46,7 @@ public:
     {
         if (timer.hasFired()) {
             unsigned long now = millis();
-            speed = (float)(distance - last_disatnce) /
-                    ((float)(now - last_time) / 1000);
+            speed = (float)(distance - last_disatnce) / ((float)(now - last_time) / 1000);
             last_disatnce = distance;
             last_time = now;
         }

@@ -48,8 +48,7 @@ void Storage::clear()
         Serial.println("[FS] Can't create folder");
 }
 
-int Storage::read(const char *filename, void *buffer, size_t size,
-                  size_t offset)
+int Storage::read(const char *filename, void *buffer, size_t size, size_t offset)
 {
     int r = 0;
     File file = LittleFS.open(filename);
@@ -61,12 +60,10 @@ int Storage::read(const char *filename, void *buffer, size_t size,
     return r;
 }
 
-int Storage::write(const char *filename, const void *buffer, size_t size,
-                   bool append)
+int Storage::write(const char *filename, const void *buffer, size_t size, bool append)
 {
     int r = 0;
-    File file =
-        LittleFS.open(filename, (append) ? RCC_FILE_APPEND : RCC_FILE_WRITE);
+    File file = LittleFS.open(filename, (append) ? RCC_FILE_APPEND : RCC_FILE_WRITE);
     if (file) {
         if (!append)
             file.seek(0);

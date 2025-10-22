@@ -34,7 +34,6 @@ protected:
     SpeedControl pid;
 
 public:
-
     RCCLoco() : rccCli(this), speedTimer(100)
     {
         transport = new Transport(this);
@@ -159,8 +158,7 @@ public:
             pid.setMeasured(scaled);
             state.throttle_out = pid.read();
         }
-        if (settings.getCachedInt("acceleration") ||
-            settings.getCachedInt("managespeed")) {
+        if (settings.getCachedInt("acceleration") || settings.getCachedInt("managespeed")) {
             static uint8_t lastThrottle = 0;
             if (state.throttle_out != lastThrottle) {
                 lastThrottle = state.throttle_out;

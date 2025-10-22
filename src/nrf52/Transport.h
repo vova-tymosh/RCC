@@ -19,14 +19,13 @@
 #include "Timer.h"
 
 #if RCC_DEBUG >= 2
-#define log(msg)                                     \
-    {                                                \
-        Serial.print(msg);                           \
+#define log(msg)                                                                                   \
+    {                                                                                              \
+        Serial.print(msg);                                                                         \
     };
 #else
 #define log(msg)
 #endif
-
 
 class Transport
 {
@@ -76,11 +75,9 @@ public:
         int size = list.length();
         if (size > MAX_PACKET - 1) {
             int lastSeparator = list.lastIndexOf(NRF_SEPARATOR, MAX_PACKET);
-            String packet1 =
-                String(NRF_LIST_VALUE_RES) + list.substring(0, lastSeparator);
+            String packet1 = String(NRF_LIST_VALUE_RES) + list.substring(0, lastSeparator);
             write(packet1.c_str(), packet1.length());
-            String packet2 = String(NRF_LIST_VALUE_RES) +
-                             list.substring(lastSeparator + 1, size);
+            String packet2 = String(NRF_LIST_VALUE_RES) + list.substring(lastSeparator + 1, size);
             write(packet2.c_str(), packet2.length());
         } else {
             String packet = String(NRF_LIST_VALUE_RES) + list;
@@ -99,7 +96,11 @@ public:
     {
         if (size > 0) {
             uint8_t *p = (uint8_t *)payload;
-            log("[Nrf] > "); log((char)p[0]); log(" "); log(size); log("\n");
+            log("[Nrf] > ");
+            log((char)p[0]);
+            log(" ");
+            log(size);
+            log("\n");
             wireless.write(payload, size);
         }
     }
@@ -109,7 +110,11 @@ public:
         if (size < COMMAND_SIZE)
             return;
         struct Command *command = (struct Command *)payload;
-        log("[Nrf] < "); log((char)command->code); log(" "); log(command->value); log("\n");
+        log("[Nrf] < ");
+        log((char)command->code);
+        log(" ");
+        log(command->value);
+        log("\n");
 
         if (command->code == NRF_INTRO) {
             introduce();
@@ -130,9 +135,8 @@ public:
             if (size >= CODE_SIZE + 1) {
                 payload[size] = 0;
                 char *buffer[2];
-                int tokens =
-                    split((char *)payload + CODE_SIZE, (char **)&buffer,
-                          sizeofarray(buffer), NRF_SEPARATOR);
+                int tokens = split((char *)payload + CODE_SIZE, (char **)&buffer,
+                                   sizeofarray(buffer), NRF_SEPARATOR);
                 if (tokens >= 2) {
                     char *key = buffer[0];
                     char *value = buffer[1];

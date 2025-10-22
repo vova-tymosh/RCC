@@ -21,9 +21,10 @@
 //
 
 #if RCC_DEBUG >= 2
-#define log(msg)                                                               \
-    {                                                                          \
-        Serial.print("[MQ] "); Serial.println(msg);                            \
+#define log(msg)                                                                                   \
+    {                                                                                              \
+        Serial.print("[MQ] ");                                                                     \
+        Serial.println(msg);                                                                       \
     };
 #else
 #define log(msg)
@@ -59,14 +60,12 @@ public:
         s->tick = (float)millis() / 100;
         String heartbeatPayload;
         heartbeatPayload.reserve(64);
-        heartbeatPayload =
-            String(s->tick) + MQ_SEPARATOR + String(s->distance) +
-            MQ_SEPARATOR + String(s->bitstate) + MQ_SEPARATOR +
-            String(s->speed) + MQ_SEPARATOR + String(s->lost) + MQ_SEPARATOR +
-            String(s->throttle) + MQ_SEPARATOR + String(s->throttle_out) +
-            MQ_SEPARATOR + String(s->battery) + MQ_SEPARATOR +
-            String(s->temperature) + MQ_SEPARATOR + String(s->psi) +
-            MQ_SEPARATOR + String(s->current);
+        heartbeatPayload = String(s->tick) + MQ_SEPARATOR + String(s->distance) + MQ_SEPARATOR +
+                           String(s->bitstate) + MQ_SEPARATOR + String(s->speed) + MQ_SEPARATOR +
+                           String(s->lost) + MQ_SEPARATOR + String(s->throttle) + MQ_SEPARATOR +
+                           String(s->throttle_out) + MQ_SEPARATOR + String(s->battery) +
+                           MQ_SEPARATOR + String(s->temperature) + MQ_SEPARATOR + String(s->psi) +
+                           MQ_SEPARATOR + String(s->current);
         write(heartbeatTopic, heartbeatPayload);
     }
 
@@ -86,9 +85,8 @@ public:
     void introduce()
     {
         String topic = topicPrefix + String(MQ_INTRO);
-        String value = String(NRF_TYPE_LOCO) + NRF_SEPARATOR + node->locoAddr +
-                       NRF_SEPARATOR + node->locoName + NRF_SEPARATOR +
-                       VERSION + MQ_SEPARATOR + LOCO_FORMAT;
+        String value = String(NRF_TYPE_LOCO) + NRF_SEPARATOR + node->locoAddr + NRF_SEPARATOR +
+                       node->locoName + NRF_SEPARATOR + VERSION + MQ_SEPARATOR + LOCO_FORMAT;
         write(topic, value);
         heartBeatKeys();
     }
@@ -166,8 +164,7 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
     } else if (strcmp(action, MQ_SET_DIRECTION) == 0) {
         // Direction
         for (int i = 0; i < 4; i++) {
-            if ((strncmp(value, MQ_DIRECTIONS[i], length) == 0) ||
-                (value[0] == '0' + i)) {
+            if ((strncmp(value, MQ_DIRECTIONS[i], length) == 0) || (value[0] == '0' + i)) {
                 mqttClient.node->setDirection(i);
                 break;
             }

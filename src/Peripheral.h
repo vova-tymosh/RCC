@@ -41,6 +41,7 @@ class StatusLed
     bool on = false;
     uint8_t blinks = 0;
     Timer timer;
+
 public:
     StatusLed(Pin &pin, int period = 500) : pin(pin), timer(period) {}
 
@@ -73,7 +74,7 @@ public:
             }
         }
     }
-}; 
+};
 
 class Motor
 {
@@ -90,26 +91,25 @@ protected:
 public:
     int bemf;
 
-    Motor(int pin_back, int pin_fowd, int pin_bemf = -1, int min_thr = 20,
-          int cool_down_us = 40)
-        : pin_back(pin_back), pin_fowd(pin_fowd), pin_bemf(pin_bemf),
-          min_thr(min_thr), cool_down(cool_down_us)
+    Motor(int pin_back, int pin_fowd, int pin_bemf = -1, int min_thr = 20, int cool_down_us = 40)
+        : pin_back(pin_back), pin_fowd(pin_fowd), pin_bemf(pin_bemf), min_thr(min_thr),
+          cool_down(cool_down_us)
     {
     }
 
     virtual void begin()
     {
-    #if defined(ARDUINO_ARCH_ESP32)
+#if defined(ARDUINO_ARCH_ESP32)
         ledcAttach(pin_back, 50000, 8);
         ledcAttach(pin_fowd, 50000, 8);
-    #else
+#else
         pinMode(pin_back, OUTPUT);
         pinMode(pin_fowd, OUTPUT);
         if (pin_bemf >= 0) {
             pinMode(pin_bemf, INPUT);
             bemf_timer.start(700);
         }
-    #endif
+#endif
         analogWrite(pin_back, 0);
         analogWrite(pin_fowd, 0);
     }

@@ -24,11 +24,9 @@ public:
 
     void clear();
 
-    int read(const char *filename, void *buffer, size_t size,
-             size_t offset = 0);
+    int read(const char *filename, void *buffer, size_t size, size_t offset = 0);
 
-    int write(const char *filename, const void *buffer, size_t size,
-              bool append = false);
+    int write(const char *filename, const void *buffer, size_t size, bool append = false);
 
     int append(const char *filename, const void *buffer, size_t size);
 

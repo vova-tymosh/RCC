@@ -22,9 +22,9 @@
 #define NAME_SIZE 5
 
 #if RCC_DEBUG >= 2
-#define log(msg)                                                               \
-    {                                                                          \
-        Serial.println(String("[Nrf] ") + (msg));                              \
+#define log(msg)                                                                                   \
+    {                                                                                              \
+        Serial.println(String("[Nrf] ") + (msg));                                                  \
     };
 #else
 #define log(msg)
@@ -150,8 +150,7 @@ public:
     {
         payload[size] = 0;
         char *buffer[5];
-        int tokens = split(payload + 1, (char **)&buffer, sizeofarray(buffer),
-                           NRF_SEPARATOR);
+        int tokens = split(payload + 1, (char **)&buffer, sizeofarray(buffer), NRF_SEPARATOR);
 
         if (tokens > 3) {
             known.nodes[known.len].addr = atoi(buffer[1]);
@@ -164,9 +163,8 @@ public:
 
     void introduce()
     {
-        String packet = String(NRF_INTRO) + NRF_TYPE_PAD + NRF_SEPARATOR +
-                        node->locoAddr + NRF_SEPARATOR + node->locoName +
-                        NRF_SEPARATOR + VERSION;
+        String packet = String(NRF_INTRO) + NRF_TYPE_PAD + NRF_SEPARATOR + node->locoAddr +
+                        NRF_SEPARATOR + node->locoName + NRF_SEPARATOR + VERSION;
 
         int size = packet.length();
         send((uint8_t *)packet.c_str(), size);
@@ -196,8 +194,7 @@ public:
         packet[size] = 0;
         int index = 0;
         char *buffer[10 * 3];
-        int tokens = split(packet + 1, (char **)&buffer, sizeofarray(buffer),
-                           NRF_SEPARATOR);
+        int tokens = split(packet + 1, (char **)&buffer, sizeofarray(buffer), NRF_SEPARATOR);
         for (int i = 0; i < tokens / 3; i++) {
             if (buffer[i * 3][0] == NRF_TYPE_LOCO) {
                 known.nodes[index].addr = atoi(buffer[i * 3 + 1]);
@@ -227,8 +224,8 @@ public:
     void processSetValue(char *payload)
     {
         char *buffer[2];
-        int tokens = split((char *)payload + CODE_SIZE, (char **)&buffer,
-                           sizeofarray(buffer), NRF_SEPARATOR);
+        int tokens = split((char *)payload + CODE_SIZE, (char **)&buffer, sizeofarray(buffer),
+                           NRF_SEPARATOR);
         if (tokens >= 2) {
             char *key = buffer[0];
             char *value = buffer[1];

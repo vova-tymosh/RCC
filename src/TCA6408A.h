@@ -42,8 +42,7 @@ private:
     }
 
 public:
-    Tca6408a(bool alternativeAddr = false)
-        : addr(alternativeAddr ? I2C_ADDR_ALT : I2C_ADDR) {};
+    Tca6408a(bool alternativeAddr = false) : addr(alternativeAddr ? I2C_ADDR_ALT : I2C_ADDR) {};
 
     bool begin()
     {

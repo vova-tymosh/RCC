@@ -34,8 +34,7 @@
 class PinExt : public Pin, protected Tca6408a
 {
 public:
-    PinExt(int pin, bool alternativeAddr = false)
-        : Pin(pin), Tca6408a(alternativeAddr) {};
+    PinExt(int pin, bool alternativeAddr = false) : Pin(pin), Tca6408a(alternativeAddr) {};
 
     void begin()
     {
@@ -54,8 +53,7 @@ class PinInputExt : protected Tca6408a
     uint8_t pin;
 
 public:
-    PinInputExt(int pin, bool alternativeAddr = false)
-        : pin(pin), Tca6408a(alternativeAddr) {};
+    PinInputExt(int pin, bool alternativeAddr = false) : pin(pin), Tca6408a(alternativeAddr) {};
 
     void begin()
     {
@@ -73,8 +71,7 @@ class PowerMeter
 private:
     bool active = false;
     const float batteryCell = 4.2;
-    const float batteryLevels[10] = {0.87, 0.88, 0.89, 0.90, 0.91,
-                                     0.92, 0.93, 0.94, 0.96, 0.98};
+    const float batteryLevels[10] = {0.87, 0.88, 0.89, 0.90, 0.91, 0.92, 0.93, 0.94, 0.96, 0.98};
 
 public:
     Adafruit_INA219 ina219;
@@ -113,8 +110,7 @@ public:
         float voltage = ina219.getBusVoltage_V();
         int cells = ceil(voltage / batteryCell);
         voltage = voltage / cells / batteryCell;
-        for (int i = 0; i < sizeof(batteryLevels) / sizeof(batteryLevels[0]);
-             i++) {
+        for (int i = 0; i < sizeof(batteryLevels) / sizeof(batteryLevels[0]); i++) {
             if (voltage < batteryLevels[i])
                 return i * 10;
         }

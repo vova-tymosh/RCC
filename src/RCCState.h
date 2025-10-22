@@ -19,9 +19,8 @@ const char *VERSION = "0.8";
 const char *LOCO_FORMAT = "BIIIHBBBBBBB";
 
 // Key names for the LocoState fields. Has to be in the same order as LocoState
-const char *Keys[] = {"Time", "Distance", "Bitstate", "Speed",
-                      "Lost", "Throttle", "ThrOut",   "Battery",
-                      "Temp", "Psi",      "Current"};
+const char *Keys[] = {"Time",   "Distance", "Bitstate", "Speed", "Lost",   "Throttle",
+                      "ThrOut", "Battery",  "Temp",     "Psi",   "Current"};
 
 // The LocoState structure, represent realtime state and is sent as hearbeat to
 // the Station
@@ -79,10 +78,9 @@ struct __attribute__((packed)) LocoState {
 
 // Offsets of the LocoState fields, used to access the fields in the LocoState
 // structure
-const size_t ValueOffsets[] = {
-    offsetof(LocoState, tick),         offsetof(LocoState, distance),
-    offsetof(LocoState, bitstate),     offsetof(LocoState, speed),
-    offsetof(LocoState, lost),         offsetof(LocoState, throttle),
-    offsetof(LocoState, throttle_out), offsetof(LocoState, battery),
-    offsetof(LocoState, temperature),  offsetof(LocoState, psi),
-    offsetof(LocoState, current)};
+const size_t ValueOffsets[] = {offsetof(LocoState, tick),         offsetof(LocoState, distance),
+                               offsetof(LocoState, bitstate),     offsetof(LocoState, speed),
+                               offsetof(LocoState, lost),         offsetof(LocoState, throttle),
+                               offsetof(LocoState, throttle_out), offsetof(LocoState, battery),
+                               offsetof(LocoState, temperature),  offsetof(LocoState, psi),
+                               offsetof(LocoState, current)};

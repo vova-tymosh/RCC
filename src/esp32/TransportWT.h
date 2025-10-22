@@ -21,9 +21,10 @@
 // TODO: fix Function names
 
 #if RCC_DEBUG >= 2
-#define log(msg)                                                               \
-    {                                                                          \
-        Serial.print("[WT] "); Serial.println(msg);                            \
+#define log(msg)                                                                                   \
+    {                                                                                              \
+        Serial.print("[WT] ");                                                                     \
+        Serial.println(msg);                                                                       \
     };
 #else
 #define log(msg)
@@ -187,8 +188,8 @@ public:
             node->setFunction(functId, state);
         }
         char stateChar = (state) ? '1' : '0';
-        reply(String("M") + throttleId + "A" + locoAddr + "<;>" + "F" +
-              stateChar + String(functId));
+        reply(String("M") + throttleId + "A" + locoAddr + "<;>" + "F" + stateChar +
+              String(functId));
     }
 
     int getThrottle()
@@ -216,8 +217,7 @@ public:
         locoAddr = String(addrType) + addr;
 
         reply("VN2.0");
-        reply(String("RL1]\\[") + node->locoName + "}|{" + addr + "}|{" +
-              addrType);
+        reply(String("RL1]\\[") + node->locoName + "}|{" + addr + "}|{" + addrType);
         reply("PPA1");
         reply("");
         reply("*" + String(heartbeatTimeout));
