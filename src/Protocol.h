@@ -21,7 +21,7 @@ const char SEPARATOR = ',';
 // NRF Protocol Message codes
 const char NRF_INTRO = 'A';
 const char NRF_SUB = 'B';
-const char NRF_LIST_CAB = 'C';
+const char NRF_LIST_NODES = 'C';
 const char NRF_HEARTBEAT = 'H';
 const char NRF_HEARTBEAT_KEYS = 'K';
 

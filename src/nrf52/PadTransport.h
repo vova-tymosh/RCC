@@ -179,9 +179,9 @@ public:
         send(&cmd, addr);
     }
 
-    void askListCabs()
+    void askListNodes()
     {
-        Command cmd = {.code = NRF_LIST_CAB, .value = 0};
+        Command cmd = {.code = NRF_LIST_NODES, .value = 0};
         send(&cmd);
     }
 
@@ -191,7 +191,7 @@ public:
         send((uint8_t *)packet.c_str(), packet.length());
     }
 
-    void processListCabs(char *packet, uint16_t size)
+    void processListNodes(char *packet, uint16_t size)
     {
         packet[size] = 0;
         int index = 0;
@@ -272,12 +272,12 @@ public:
                 // askHeartbeatPeriod();
             } else {
                 introduce();
-                askListCabs();
+                askListNodes();
             }
         } else if (isLocal && !isKnown(from)) {
             askToIntro(from);
-        } else if (command->code == NRF_LIST_CAB) {
-            processListCabs((char *)payload, size);
+        } else if (command->code == NRF_LIST_NODES) {
+            processListNodes((char *)payload, size);
             subsribe();
             askHeartbeatPeriod();
         } else if (command->code == NRF_HEARTBEAT) {
@@ -325,7 +325,7 @@ public:
             askHeartbeatPeriod();
         } else {
             introduce();
-            askListCabs();
+            askListNodes();
         }
     }
 
