@@ -144,9 +144,7 @@ if __name__ == '__main__':
         if args.pad >= len(l):
             print(f"ERROR: Pad port {args.pad} not available")
             sys.exit(1)
-        print(f"  Keypad Port: #{args.pad} {l[args.pad].device} - {l[args.pad].description}")
 
-    print(f"  Tests to run: {', '.join(test_suites)}")
     print()
 
     # Run tests

@@ -17,10 +17,15 @@ mq = TransportMqtt()
 def test_nrf_start():
     global s
     s = SerialComm.openPort()
-    if s == None:
-        print('ERROR: No serial port found')
-        exit(1)
+    s.write('!')
+    time.sleep(2)
+    del s
+    s = SerialComm.openPort()
+
     mq.start()
+    # Subscribe to the correct locomotive address using enhanced N command
+    s.write(f'CN{LocoSetting.locoaddr}')
+    time.sleep(0.5)
     mq.waitForMessage(f'cab/{LocoSetting.locoaddr}/{MQ_HEARTBEAT_VALUES}')
     return (True, 'Test NRF Start')
 

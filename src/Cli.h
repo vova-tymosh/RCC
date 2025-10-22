@@ -12,7 +12,18 @@
 #include "Settings.h"
 #include "Protocol.h"
 
-void (*reboot)(void) = 0;
+void (*hardReboot)(void) = 0;
+
+void reboot()
+{
+#if defined(ARDUINO_ARCH_NRF52)
+    NVIC_SystemReset();
+#elif defined(ARDUINO_ARCH_ESP32)
+    ESP.restart();
+#elif defined(ARDUINO_ARCH_AVR)
+    hardReboot();
+#endif
+}
 
 class RccCli
 {
