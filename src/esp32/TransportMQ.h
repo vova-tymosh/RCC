@@ -13,7 +13,6 @@
 #include "Timer.h"
 #include "Settings.h"
 #include "Protocol.h"
-#include "Functions.h"
 #include "esp32/TransportClient.h"
 
 //
@@ -44,7 +43,6 @@ private:
 public:
     PubSubClient mqtt;
     String topicPrefix;
-    Functions functions;
 
     MqttClient() : mqtt(conn), heartbeatTimer(1000) {};
 
@@ -116,7 +114,6 @@ public:
         heartbeatTopic = topicPrefix + String(MQ_HEARTBEAT_VALUES);
         nextReconnectTime = millis();
         heartbeatTimer.start();
-        functions.begin();
     }
 
     void loop()
@@ -189,7 +186,7 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
         // Function, get state.
         String key(payload, length);
         uint8_t functionCode;
-        if (mqttClient.functions.isValidFunction(key.c_str(), functionCode)) {
+        if (mqttClient.node->functions.isValidFunction(key.c_str(), functionCode)) {
             String value = mqttClient.node->getFunction(functionCode) ? MQ_ON : MQ_OFF;
             String topic = mqttClient.topicPrefix + MQ_SET_FUNCTION + key;
             mqttClient.write(topic, value);
@@ -197,19 +194,19 @@ void onMqttMessage(char *topic, byte *payload, unsigned int length)
     } else if (strcmp(action, MQ_LIST_FUNCTION_REQ) == 0) {
         // Function, list all function names.
         String topic = mqttClient.topicPrefix + MQ_LIST_FUNCTION_RES;
-        String functionList = mqttClient.functions.getFunctionList();
+        String functionList = mqttClient.node->functions.getFunctionList();
         mqttClient.write(topic, functionList);
     } else if (strncmp(action, MQ_SET_FUNCTION_NAME, strlen(MQ_SET_FUNCTION_NAME)) == 0) {
         // Function name, set name for function ID
         action += strlen(MQ_SET_FUNCTION_NAME);
         uint8_t functionId = (uint8_t)atoi(action);
         String functionName(payload, length);
-        mqttClient.functions.setFunction(functionId, functionName.c_str());
+        mqttClient.node->functions.setFunction(functionId, functionName.c_str());
     } else if (strncmp(action, MQ_SET_FUNCTION, strlen(MQ_SET_FUNCTION)) == 0) {
         // Function, set state. Must be after "get" and "name"
         action += strlen(MQ_SET_FUNCTION);
         uint8_t functionCode;
-        if (mqttClient.functions.isValidFunction(action, functionCode)) {
+        if (mqttClient.node->functions.isValidFunction(action, functionCode)) {
             if (length && strncmp(value, MQ_ON, length) == 0)
                 mqttClient.node->setFunction(functionCode, true);
             else

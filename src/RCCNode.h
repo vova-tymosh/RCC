@@ -14,6 +14,7 @@
 #pragma once
 #include "RCCState.h"
 #include "Platform.h"
+#include "Functions.h"
 
 class RCCNode
 {
@@ -21,6 +22,7 @@ public:
     LocoState state;
     char locoName[VALUE_LEN];
     int locoAddr;
+    Functions functions;
 
     virtual int getHeartbeat()
     {

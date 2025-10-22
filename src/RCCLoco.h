@@ -173,6 +173,7 @@ public:
         settings.get("locoaddr", buffer, sizeof(buffer));
         locoAddr = atoi(buffer);
         settings.get("loconame", locoName, sizeof(locoName));
+        functions.begin();
         transport->begin();
         speedTimer.start();
     }

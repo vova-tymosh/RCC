@@ -18,8 +18,6 @@
 // https://www.jmri.org/help/en/package/jmri/jmrit/withrottle/Protocol.shtml
 //
 
-// TODO: fix Function names
-
 #if RCC_DEBUG >= 2
 #define log(msg)                                                                                   \
     {                                                                                              \
@@ -127,15 +125,22 @@ public:
     {
         String prefix = String("M") + throttleId + "A" + key + "<;>";
         reply(String("M") + throttleId + "+" + key + "<;>");
-        reply(String("M") + throttleId + "L" + key +
-              "<;>]\\[Headlight]\\[Bell]\\[Whistle]\\[3]\\[4]\\[5]\\[6]\\[7]\\["
-              "8]\\[9");
-        /* ]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[]\\[");
-         */
-        for (int i = 0; i < 9; i++) {
+
+        // Build function names list for functions 0-9
+        String functionList = String("M") + throttleId + "L" + key + "<;>";
+        for (int i = 0; i <= 9; i++) {
+            functionList += "]\\[";
+            const char *functionName = node->functions.idToName(i);
+            if (functionName != nullptr) {
+                functionList += functionName;
+            }
+        }
+        reply(functionList);
+
+        for (int i = 0; i <= 9; i++) {
             bool state = node->getFunction(i);
             char stateChar = (state) ? '1' : '0';
-            reply(prefix + "F" + String(state) + i);
+            reply(prefix + "F" + String(stateChar) + i);
         }
         reply(prefix + "V" + getThrottle());
         reply(prefix + "R" + node->getDirection());
