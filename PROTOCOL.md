@@ -256,6 +256,22 @@ CLI: Z{filename}
 CLI: E
 ```
 
+### Next/Select Locomotive (Keypad Only)
+```
+CLI: N[address]
+```
+
+Cycle to next locomotive or select specific locomotive by address.
+
+Examples:
+```
+CLI: N          # Cycle to next locomotive
+CLI: N3         # Select locomotive with address 3
+CLI: N15        # Select locomotive with address 15
+```
+
+If the specified address is not found in the known locomotives list, the command is ignored.
+
 ### Custom Command
 ```
 CLI: C{command_char}{parameters}

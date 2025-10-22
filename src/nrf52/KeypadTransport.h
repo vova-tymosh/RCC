@@ -112,6 +112,20 @@ public:
             subsribe();
     }
 
+    bool selectByAddress(uint8_t addr)
+    {
+        for (int i = 0; i < known.len; i++) {
+            if (known.nodes[i].addr == addr) {
+                int s = known.selected;
+                known.selected = i;
+                if (s != known.selected)
+                    subsribe();
+                return true;
+            }
+        }
+        return false;
+    }
+
     int getKnownLen()
     {
         return known.len;

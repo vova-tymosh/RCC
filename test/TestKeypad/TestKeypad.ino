@@ -61,6 +61,34 @@ public:
         setValueLocal(key, value);
     }
 
+    void processNext(char* cmd)
+    {
+        if (strlen(cmd) == 0) {
+            // No argument - cycle to next locomotive
+            cycleSelected();
+            Serial.print("Cycled to next loco: ");
+            Serial.println(getSelectedName());
+        } else {
+            // Argument provided - try to select specific locomotive address
+            uint8_t targetAddr = (uint8_t)atoi(cmd);
+            if (selectByAddress(targetAddr)) {
+                Serial.print("Selected loco address ");
+                Serial.print(targetAddr);
+                Serial.print(": ");
+                Serial.println(getSelectedName());
+            } else {
+                Serial.print("Loco address ");
+                Serial.print(targetAddr);
+                Serial.println(" not found - ignoring command");
+            }
+        }
+    }
+
+    bool selectByAddress(uint8_t addr)
+    {
+        return selectLocoByAddress(addr);
+    }
+
     virtual void onCommand(uint8_t code, char* value, uint8_t size)
     {
         value[size] = '\0';
@@ -75,7 +103,7 @@ public:
             processSet(value);
             break;
         case 'N':
-            cycleSelected();
+            processNext(value);
             break;
         }
     }

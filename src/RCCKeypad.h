@@ -116,7 +116,7 @@ public:
 
     String listValues()
     {
-        Command cmd = {.code = NRF_LIST_VALUE_ASK, .value = 0};
+        Command cmd = {.code = NRF_LIST_VALUE_REQ, .value = 0};
         transport->send(&cmd);
         return "";
     }
@@ -135,6 +135,11 @@ public:
     void cycleSelected()
     {
         transport->cycleSelected();
+    }
+
+    bool selectLocoByAddress(uint8_t addr)
+    {
+        return transport->selectByAddress(addr);
     }
 
     void emergencyStop()
