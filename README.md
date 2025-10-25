@@ -51,4 +51,4 @@ Currently RCC supports a couple variants of loco decoders. Complete solutions fo
 ## How big is the thing, can I fit it in my loco?
 Here is the decoder, 2 inches by 1 inch:
 
-![decoder](decoder.jpg)
+![decoder](ext/decoder.jpg)
