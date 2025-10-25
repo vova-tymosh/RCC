@@ -37,18 +37,14 @@ There are many solutions available. Some are very affordable, like DCC-EX, but s
 There is one more advantage, RCC is bi-directional. It sends back information about the train speed, battery voltage and power currently drawn by the motor. You can build much more sophisticated automation using this info, or you can simply monitor your locomotive vitals as the real engineer would do in the cab of a locomotive. 
 
 
-## Do I need a degree in electrical engineering to use RCC?
-Fear not. There is nothing really complicated ahead. You’d need to do some mouse-clicking and little soldering. Some folks are scared of this “soldering” part, but I’ll walk you through the process with videos and everything. After all, if you want a $30 decoder you have to do some work yourself. There is no magic in this world.
-
-
-## What is in this repository?
-All the instructions and documentation about how to build stuff is located - on [RCC-Nodes](https://github.com/vova-tymosh/RCC-Nodes). If you are not interested in the internals of RCC you may go there right away. If you are interested or if you want to build/expand the software yourself this repository is for you. It includes an Arduino library for all the communication protocols, controlling peripherals and other essential parts of the RCC solution.  
-
-
-## What is the current status?
-Currently RCC supports a couple variants of loco decoders. Complete solutions for throttle, turnouts and other things will come soon. Details on what decoders are available and what they can do are provided on the same RCC-Nodes page.
-
 ## How big is the thing, can I fit it in my loco?
 Here is the decoder, 2 inches by 1 inch:
 
 ![decoder](ext/decoder.jpg)
+
+
+## What is a benefit of bidirectional communication?
+A picture can tell more than thouthand words. Here is how the web pega (an RCC Throttle) looks like. You can see how much current an extra car would draw, how exactly loco is slowing down on that grade.
+
+![rccweb](ext/rccweb.png)
+
