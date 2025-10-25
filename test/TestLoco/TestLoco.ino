@@ -286,7 +286,7 @@ int getRand()
 {
     static float angle = 0;
     float value = (sin(radians(angle)) + 1) * 50;
-    angle += 20;
+    angle += 70;
     if (angle >= 360) angle = 0;
     return (int)value;
 }
@@ -302,13 +302,12 @@ void loop()
         static int d = 0;
         int r = getRand();
         loco.state.distance = d++;
-        loco.state.speed = (r + 50)/2;
+        loco.state.speed = (r + 50)/3;
         loco.state.lost = 20;
         loco.state.battery = r;
-        loco.state.current = (r + 30);
-        loco.state.throttle = 50;
-        loco.state.temperature = r + 20;
-        loco.state.psi = r + 10;
+        loco.state.current = (r + 20);
+        loco.state.temperature = r + 50;
+        loco.state.psi = r + 35;
     }
 }
 
