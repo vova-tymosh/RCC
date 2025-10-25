@@ -44,7 +44,7 @@ Here is the decoder, 2 inches by 1 inch:
 
 
 ## What is a benefit of bidirectional communication?
-A picture can tell more than thouthand words. Here is how the web pega (an RCC Throttle) looks like. You can see how much current an extra car would draw, how exactly loco is slowing down on that grade.
+A picture can tell more than a thousand words. Here is how the web pega (an RCC Throttle) looks like. You can see how much current an extra car would draw or how exactly loco is slowing down on that grade. Not mentioning how much more a live steam locomotive can tell you.
 
 ![rccweb](ext/rccweb.png)
 
