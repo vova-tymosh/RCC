@@ -48,52 +48,54 @@ NRF:  D\x01
 
 ### Function
 
-Turn specific function on or off. This command has two parameters - function id ({func} below) and the {state} - ON or OFF. Function id can be a number (0-255) or a named function (for MQTT only). The state is {ON, OFF} for MQTT and {1, 0} for NRF/CLI. In case of NRF the command argument is packed into 1 byte, where state takes highest bit and the rest 7 are allocated for the function id.
+Turn specific function on or off. This command has two parameters - function id ({func} below) and the {state} - ON or OFF. Function id can be a number (0-255) or a named function. The state is {ON, OFF} for MQTT and {1, 0} for NRF/CLI.
 
 ```
 MQTT: cab/{addr}/function/{func} {ON, OFF}
 CLI:  F{state}{func}
-NRF:  F{state:1}{func:7}
+NRF:  F{func},{state}
 ```
 
 Example, turn ON function 1 (bell) using ID:
 ```
 MQTT: cab/3/function/1 ON
 CLI:  F11
-NRF:  F\x81
+NRF:  F1,1
 ```
 
-Example, turn ON function using name (MQTT only):
+Example, turn ON function using name:
 ```
 MQTT: cab/3/function/bell ON
+NRF:  Fbell,1
 ```
 
 ### Get Function
 
-Retrieve the current state of a specific function. For MQTT, function can be specified by ID or name. Response is the same as Set Function command.
+Retrieve the current state of a specific function. Function can be specified by ID or name. Response is the same as Set Function command.
 
 ```
 MQTT: cab/{addr}/function/get {func}
 CLI:  P{func}
-NRF:  P{binary_func}
+NRF:  P{func}
 ```
 
 Example, get state of function 1:
 ```
 MQTT: cab/3/function/get 1
 CLI:  P1
-NRF:  P\x01
+NRF:  P1
 ```
 
-Example, get state using function name (MQTT only):
+Example, get state using function name:
 ```
 MQTT: cab/3/function/get bell
+NRF:  Pbell
 ```
 
 Example response:
 ```
 MQTT: cab/3/function/1 OFF
-NRF:  P\x01
+NRF:  F1,0
 ```
 
 ### Set Function Name
@@ -102,16 +104,19 @@ Assign or update a name for a function ID. This creates a mapping between functi
 
 ```
 MQTT: cab/{addr}/function/name/{id} {name}
+NRF:  M{id},{name}
 ```
 
 Example, assign name "bell" to function 1:
 ```
 MQTT: cab/3/function/name/1 bell
+NRF:  M1,bell
 ```
 
 Example, assign name "headlight" to function 0:
 ```
 MQTT: cab/3/function/name/0 headlight
+NRF:  M0,headlight
 ```
 
 ### List Functions
@@ -120,14 +125,18 @@ Get a list of all defined function names and their IDs.
 
 ```
 MQTT: cab/{addr}/function/list/req
+NRF:  U
 ```
 
 Response format: `{id1},{name1},{id2},{name2},...`
 
 Example:
 ```
-Request:  cab/3/function/list/req
-Response: cab/3/function/list 0,headlight,1,bell,2,horn,3,coupler
+MQTT Request:  cab/3/function/list/req
+MQTT Response: cab/3/function/list 0,headlight,1,bell,2,horn,3,coupler
+
+NRF Request:  U
+NRF Response: V0,headlight,1,bell,2,horn,3,coupler
 ```
 
 ### Set Value

@@ -145,7 +145,7 @@ if __name__ == '__main__':
             print(f"ERROR: Pad port {args.pad} not available")
             sys.exit(1)
 
-    print()
+    print(f"\n=== Running for #{port}: {l[port].device} ===")
 
     # Run tests
     all_passed = True

@@ -156,7 +156,6 @@ void Functions::setFunction(uint8_t id, const char *name)
         mappings[mappingCount].name[MAX_NAME_LENGTH - 1] = '\0';
         mappingCount++;
     }
-
     saveToFile();
 }
 

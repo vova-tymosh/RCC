@@ -119,8 +119,8 @@ def test_list():
 
 def test_function_name():
     test_name = 'Test MQ Function Name'
-    function_id = 1
-    function_name = 'bell'
+    function_id = 20
+    function_name = 'testUniq22'
     
     # Set function name
     setNameMsg = f'cab/{mq.locoaddr}/function/name/{function_id}+{function_name}'

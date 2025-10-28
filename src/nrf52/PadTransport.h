@@ -287,12 +287,21 @@ public:
             if (isMine(from))
                 node->state.direction = command->value;
         } else if (command->code == NRF_SET_FUNCTION) {
-            if (isMine(from)) {
-                if (command->functionId < 30)
-                    if (command->activate)
-                        node->state.bitstate |= (1 << command->functionId);
-                    else
-                        node->state.bitstate &= ~(1 << command->functionId);
+            if (isMine(from) && size >= CODE_SIZE + 1) {
+                payload[size] = 0;
+                char *buffer[2];
+                int tokens = split((char *)payload + CODE_SIZE, (char **)&buffer,
+                                   sizeofarray(buffer), NRF_SEPARATOR);
+                if (tokens >= 2) {
+                    uint8_t functionCode = (uint8_t)atoi(buffer[0]);
+                    bool activate = (atoi(buffer[1]) != 0);
+                    if (functionCode < 30) {
+                        if (activate)
+                            node->state.bitstate |= (1 << functionCode);
+                        else
+                            node->state.bitstate &= ~(1 << functionCode);
+                    }
+                }
             }
         } else if (command->code == NRF_LIST_FUNCTION_RES) {
             if (isMine(from)) {

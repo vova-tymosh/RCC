@@ -67,18 +67,19 @@ public:
 
     bool getFunction(int functionId)
     {
-        Command cmd = {.code = NRF_GET_FUNCTION};
-        cmd.value = functionId;
-        transport->send(&cmd);
+        char reply[MAX_PACKET];
+        snprintf(reply, MAX_PACKET - CODE_SIZE, "%c%d", 
+                    NRF_GET_FUNCTION, functionId);
+        transport->send((uint8_t*)reply, strlen(reply));   
         return false;
     }
 
     void setFunction(int functionId, bool activate)
     {
-        Command cmd = {.code = NRF_SET_FUNCTION};
-        cmd.functionId = functionId;
-        cmd.activate = activate;
-        transport->send(&cmd);
+        char reply[MAX_PACKET];
+        snprintf(reply, MAX_PACKET - CODE_SIZE, "%c%d%c%d", 
+                    NRF_SET_FUNCTION, functionId, NRF_SEPARATOR, activate ? 1 : 0);
+        transport->send((uint8_t*)reply, strlen(reply));
     }
 
     String getValue(const char *key)

@@ -6,7 +6,7 @@
  * The above copyright notice shall be included in all
  * copies or substantial portions of the Software.
  */
-// #define RCC_DEBUG 2
+#define RCC_DEBUG 2
 #include "RCCPad.h"
 #include "Storage.h"
 #include "Settings.h"

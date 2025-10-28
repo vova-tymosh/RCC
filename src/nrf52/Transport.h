@@ -142,13 +142,33 @@ public:
         } else if (command->code == NRF_DIRECTION) {
             node->setDirection(command->value);
         } else if (command->code == NRF_SET_FUNCTION) {
-            node->setFunction(command->functionId, command->activate);
+            if (size >= CODE_SIZE + 1) {
+                payload[size] = 0;
+                char *buffer[2];
+                int tokens = split((char *)payload + CODE_SIZE, (char **)&buffer,
+                                   sizeofarray(buffer), NRF_SEPARATOR);
+                if (tokens >= 2) {
+                    bool activate = (atoi(buffer[1]) != 0);
+                    uint8_t functionCode;
+                    if (node->functions.isValidFunction(buffer[0], functionCode)) {
+                        node->setFunction(functionCode, activate);
+                    }
+                }
+            }
         } else if (command->code == NRF_GET_FUNCTION) {
-            Command reply;
-            reply.code = NRF_SET_FUNCTION;
-            reply.functionId = command->functionId;
-            reply.activate = node->getFunction(command->functionId);
-            write(&reply, sizeof(reply));
+            if (size >= CODE_SIZE + 1) {
+                payload[size] = 0;
+                char *functionIdentifier = (char *)(payload + CODE_SIZE);
+                uint8_t functionCode;
+                if (node->functions.isValidFunction(functionIdentifier, functionCode)) {
+                    char reply[MAX_PACKET];
+                    reply[0] = NRF_SET_FUNCTION;
+                    bool state = node->getFunction(functionCode);
+                    snprintf(reply + CODE_SIZE, MAX_PACKET - CODE_SIZE, "%s%c%d", 
+                             functionIdentifier, NRF_SEPARATOR, state ? 1 : 0);
+                    write(reply, strlen(reply));
+                }
+            }
         } else if (command->code == NRF_SET_FUNCTION_NAME) {
             if (size >= CODE_SIZE + 1) {
                 payload[size] = 0;
