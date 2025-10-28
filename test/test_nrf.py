@@ -16,18 +16,14 @@ mq = TransportMqtt()
 
 def test_nrf_start():
     global s
-    s = SerialComm.openPort()
-    s.write('!')
-    time.sleep(2)
-    del s
-    s = SerialComm.openPort()
-
     mq.start()
-    # Subscribe to the correct locomotive address using enhanced N command
+    s = SerialComm.openPort()
+    s.write('CO')
+    s.read(f'[Nrf] 0>C0')
     s.write(f'CN{LocoSetting.locoaddr}')
-    time.sleep(0.5)
-    mq.waitForMessage(f'cab/{LocoSetting.locoaddr}/{MQ_HEARTBEAT_VALUES}')
-    return (True, 'Test NRF Start')
+    r1 = s.read(f'Selected loco address {LocoSetting.locoaddr}: RCC{LocoSetting.locoaddr}')
+    r2 = mq.waitForMessage(f'cab/{LocoSetting.locoaddr}/{MQ_HEARTBEAT_VALUES}')
+    return (r1 and r2, 'Test NRF Start')
 
 def test_throttle():
     test_name = 'Test NRF Throttle'

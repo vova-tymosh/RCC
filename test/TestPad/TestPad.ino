@@ -105,6 +105,9 @@ public:
         case 'N':
             processNext(value);
             break;
+        case 'O':
+            transport->askListNodes();
+            break;
         }
     }
 };
