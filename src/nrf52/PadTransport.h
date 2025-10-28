@@ -294,6 +294,12 @@ public:
                     else
                         node->state.bitstate &= ~(1 << command->functionId);
             }
+        } else if (command->code == NRF_LIST_FUNCTION_RES) {
+            if (isMine(from)) {
+                payload[size] = 0;
+                log("Function List: " + String((const char *)payload + CODE_SIZE));
+                // node->onFunctionList((char *)payload + CODE_SIZE);
+            }
         } else if (command->code == NRF_SET_VALUE) {
             if ((isMine(from)) && (size >= CODE_SIZE + 1)) {
                 payload[size] = 0;

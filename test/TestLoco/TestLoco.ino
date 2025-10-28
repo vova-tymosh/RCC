@@ -7,7 +7,7 @@
  * copies or substantial portions of the Software.
  */
 
-// #define RCC_DEBUG 2
+#define RCC_DEBUG 2
 #include "Motherboard.h"
 #include "Peripheral.h"
 #include "Settings.h"

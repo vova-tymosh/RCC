@@ -85,6 +85,22 @@ public:
         }
     }
 
+    void processFunctionList()
+    {
+        String list = node->functions.getFunctionList();
+        int size = list.length();
+        if (size > MAX_PACKET - 1) {
+            int lastSeparator = list.lastIndexOf(NRF_SEPARATOR, MAX_PACKET);
+            String packet1 = String(NRF_LIST_FUNCTION_RES) + list.substring(0, lastSeparator);
+            write(packet1.c_str(), packet1.length());
+            String packet2 = String(NRF_LIST_FUNCTION_RES) + list.substring(lastSeparator + 1, size);
+            write(packet2.c_str(), packet2.length());
+        } else {
+            String packet = String(NRF_LIST_FUNCTION_RES) + list;
+            write(packet.c_str(), packet.length() + 1);
+        }
+    }
+
     void heartbeat()
     {
         node->state.packet_type = NRF_HEARTBEAT;
@@ -107,9 +123,11 @@ public:
 
     void received(uint8_t *payload, uint16_t size)
     {
-        if (size < COMMAND_SIZE)
+        if (size < CODE_SIZE)
             return;
         struct Command *command = (struct Command *)payload;
+        if (size < COMMAND_SIZE)
+            command->value = 0;
         log("[Nrf] < ");
         log((char)command->code);
         log(" ");
@@ -131,6 +149,20 @@ public:
             reply.functionId = command->functionId;
             reply.activate = node->getFunction(command->functionId);
             write(&reply, sizeof(reply));
+        } else if (command->code == NRF_SET_FUNCTION_NAME) {
+            if (size >= CODE_SIZE + 1) {
+                payload[size] = 0;
+                char *buffer[2];
+                int tokens = split((char *)payload + CODE_SIZE, (char **)&buffer,
+                                   sizeofarray(buffer), NRF_SEPARATOR);
+                if (tokens >= 2) {
+                    uint8_t functionId = (uint8_t)atoi(buffer[0]);
+                    char *functionName = buffer[1];
+                    node->functions.setFunction(functionId, functionName);
+                }
+            }
+        } else if (command->code == NRF_LIST_FUNCTION_REQ) {
+            processFunctionList();
         } else if (command->code == NRF_SET_VALUE) {
             if (size >= CODE_SIZE + 1) {
                 payload[size] = 0;

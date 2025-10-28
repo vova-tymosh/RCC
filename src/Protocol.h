@@ -29,6 +29,10 @@ const char NRF_THROTTLE = 'T';
 const char NRF_DIRECTION = 'D';
 const char NRF_SET_FUNCTION = 'F';
 const char NRF_GET_FUNCTION = 'P';
+const char NRF_SET_FUNCTION_NAME = 'M';
+const char NRF_LIST_FUNCTION_REQ = 'U';
+const char NRF_LIST_FUNCTION_RES = 'V';
+
 const char NRF_SET_VALUE = 'S';
 const char NRF_GET_VALUE = 'G';
 const char NRF_LIST_VALUE_REQ = 'L';
