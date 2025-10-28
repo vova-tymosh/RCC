@@ -111,8 +111,11 @@ public:
 TestPad pad;
 
 
-const char *padKeys[] =   {"loconame",   "locoaddr", "testvalue"};
-const char *padValues[] = {"RCC_Pad", "1",        "0.0"};
+const KeyValue padSettings[] = {
+    {"loconame",  "RCC_Pad"},
+    {"locoaddr",  "1"},
+    {"testvalue", "0.0"}
+};
 
 
 void setup()
@@ -120,7 +123,7 @@ void setup()
     Serial.begin(115200);
     Serial.println("Started");
     storage.begin();
-    settings.begin(padKeys, padValues, sizeof(padKeys) / sizeof(padKeys[0]));
+    settings.begin(padSettings, sizeofarray(padSettings));
 
     pad.begin();
     debugTimer.start();

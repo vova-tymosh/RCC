@@ -16,6 +16,7 @@
 #include "Audio.h"
 #include "audio_data2.h"
 #include "TestStorage.h"
+#include "TestPing.h"
 
 
 
@@ -35,15 +36,21 @@ Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD);
 Timer update(1000);
 Audio audio;
 
-const int settingsSize = 13;
-const char *settingsKeys[settingsSize] = {
-    "wifiap",       "wifissid",   "wifipwd",      "loconame",    "locoaddr",
-    "broker",       "brokerport", "acceleration", "managespeed", "heartbeat", 
-    "testvalue",    "mqtt",       "pump"};
-const char *settingsValues[settingsSize] = {
-    "ON",           "RCC_Loco",   "RCC_Loco",     "RCC",         "3",
-    "192.168.0.10", "1883",       "0",            "0",           "1000",
-    "1.1",          "ON",         "0"};
+const KeyValue settingsArray[] = {
+    {"wifiap",       "ON"},
+    {"wifissid",     "RCC_Loco"},
+    {"wifipwd",      "RCC_Loco"},
+    {"loconame",     "RCC"},
+    {"locoaddr",     "3"},
+    {"broker",       "192.168.0.10"},
+    {"brokerport",   "1883"},
+    {"acceleration", "0"},
+    {"managespeed",  "0"},
+    {"heartbeat",    "1000"},
+    {"testvalue",    "1.1"},
+    {"mqtt",         "ON"},
+    {"pump",         "0"}
+};
 
 
 
@@ -64,97 +71,6 @@ void writeAllAudio(const uint8_t *data, const size_t size) {
     }
 }
 
-#if defined(ARDUINO_ARCH_NRF52)
-class Ping
-{
-public:
-    struct __attribute__((packed)) Packet {
-        uint8_t code;
-        uint16_t id;
-        uint32_t ts;
-        uint8_t pad[20];
-    } packet;
-
-    bool active = false;
-    uint16_t recd = 0;
-    uint16_t sent = 0;
-    uint16_t sentLast = 0;
-    uint16_t recdLast = 0;
-    float avgTime = 0;
-    const int maxCount = 20;
-    Transport *transport;
-    Timer printTimer;
-
-    Timer shortTimer;
-    Timer longTimer;
-
-
-    void begin(Transport *transport)
-    {
-        this->transport = transport;
-        active = true;
-        sent = 0;
-        recd = 0;
-        shortTimer.start(100);
-        longTimer.start(2090);
-        printTimer.start(2090);
-    }
-
-    void end()
-    {
-        active = false;
-    }
-
-    void send()
-    {
-        packet.code = '0';
-        packet.id = ++sent;
-        packet.ts = millis();
-        transport->write((uint8_t*)&packet, sizeof(packet));
-    }
-
-    void receive(char* value, uint8_t size)
-    {
-        if (size == sizeof(Packet)) {
-            struct Packet *p = (struct Packet *)value;
-            if (sent == p->id) {
-                recd++;
-                long time = millis() - p->ts;
-                int c = (p->id > maxCount) ? maxCount : p->id;
-                avgTime = (avgTime * c + time) / (c + 1);
-                shortTimer.start();
-            }
-        }
-    }
-
-    void loop()
-    {
-        if (!active)
-            return;
-
-        if (shortTimer.hasFiredOnce()) {
-            send();
-            longTimer.start();
-        }
-
-        if (longTimer.hasFiredOnce()) {
-            send();
-            longTimer.start();
-        }
-
-        if (printTimer.hasFired()) {
-            Serial.print("Ping avg: ");
-            Serial.print(avgTime);
-            Serial.print(", rate: ");
-            Serial.print(recd - recdLast);
-            Serial.print("/");
-            Serial.println(sent - sentLast);
-            sentLast = sent;
-            recdLast = recd;
-        }
-    }
-};
-#endif
 
 class TestLoco : public RCCLoco
 {
@@ -225,7 +141,7 @@ public:
         case 'D':
             storage.begin(0);
             storage.begin();
-            settings.begin(settingsKeys, settingsValues, settingsSize);
+            settings.begin(settingsArray, sizeofarray(settingsArray));
             Serial.println("Clear");
             break;
         case 'T':
@@ -268,7 +184,7 @@ void setup()
 
 
     storage.begin();
-    settings.begin(settingsKeys, settingsValues, settingsSize);
+    settings.begin(settingsArray, sizeofarray(settingsArray));
     motor.begin();
     // yellow.begin();
     blue.begin();

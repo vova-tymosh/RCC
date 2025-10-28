@@ -10,6 +10,12 @@
 #include "Storage.h"
 #include "Platform.h"
 
+struct KeyValue {
+    const char *key;
+    const char *value;
+};
+
+
 class Settings
 {
     struct {
@@ -77,23 +83,26 @@ public:
         storage.write(filepath, (void *)value, size);
     }
 
-    void begin(const char *keys[], const char *values[], const int size)
+    void begin(const KeyValue defaults[], const int size)
     {
         for (int i = 0; i < size; i++) {
             char filepath[FILENAME_LEN];
-            storage.makeSettingsPath(keys[i], filepath, sizeof(filepath));
+            storage.makeSettingsPath(defaults[i].key, filepath, sizeof(filepath));
             if (!storage.exists(filepath)) {
-                size_t size = strlen(values[i]) + 1;
-                storage.write(filepath, (void *)values[i], size);
+                size_t valueSize = strlen(defaults[i].value) + 1;
+                storage.write(filepath, (void *)defaults[i].value, valueSize);
             }
         }
         cache.size = size;
-        cache.keys = (char **)keys;
+        cache.keys = (char **)malloc(size * sizeof(char *));
+        for (int i = 0; i < size; i++) {
+            cache.keys[i] = (char *)defaults[i].key;
+        }
         cache.values = (float *)malloc(size * sizeof(float));
 
         for (int i = 0; i < size; i++) {
             char value[VALUE_LEN];
-            get(keys[i], value, sizeof(value));
+            get(defaults[i].key, value, sizeof(value));
             cache.values[i] = atof(value);
         }
     }

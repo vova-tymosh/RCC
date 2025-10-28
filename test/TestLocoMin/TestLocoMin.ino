@@ -19,11 +19,14 @@ Settings settings;
 Pin blue(0);
 Timer update(1000);
 
-const int settingsSize = 6;
-const char *settingsKeys[settingsSize] = {
-    "loconame", "locoaddr", "acceleration", "managespeed",  "heartbeat", "testvalue"};
-const char *settingsValues[settingsSize] = {
-    "RCC",      "3",        "0",            "0",            "1000",      "0.0"}; 
+const KeyValue settingsArray[] = {
+    {"loconame",     "RCC"},
+    {"locoaddr",     "3"},
+    {"acceleration", "0"},
+    {"managespeed",  "0"},
+    {"heartbeat",    "1000"},
+    {"testvalue",    "0.0"}
+}; 
 
 
 class TestLocoMin : public RCCLoco
@@ -66,7 +69,7 @@ public:
         case 'D':
             storage.begin(0);
             storage.begin();
-            settings.begin(settingsKeys, settingsValues, settingsSize);
+            settings.begin(settingsArray, sizeofarray(settingsArray));
             Serial.println("Clear");
             break;
         case 'T':
@@ -98,7 +101,7 @@ void setup()
 
   
     storage.begin();
-    settings.begin(settingsKeys, settingsValues, settingsSize);
+    settings.begin(settingsArray, sizeofarray(settingsArray));
 
     loco.begin();
     update.start();
