@@ -39,15 +39,15 @@ void Audio::beginInternal(int sampleRate)
     running = false;
 }
 
-void Audio::playInternal(uint8_t *data, size_t size, int volumeDivider)
+void Audio::playInternal(uint8_t *data, size_t size)
 {
-    int16_t *data16 = (int16_t*)data;
-    if (volumeDivider != 1) {
-        for (int i = 0; i < size/sizeof(int16_t); i++) {
-            data16[i] /= volumeDivider;
-        }
-    }
-    i2s.write((const uint8_t *)data16, size);
+    // int16_t *data16 = (int16_t*)data;
+    // if (volumeDivider != 1) {
+    //     for (int i = 0; i < size/sizeof(int16_t); i++) {
+    //         data16[i] /= volumeDivider;
+    //     }
+    // }
+    i2s.write(data, size);
 }
 
 #endif

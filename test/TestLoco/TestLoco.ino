@@ -20,7 +20,7 @@
 
 
 // #include "toto1616.h"
-// #include "tone.h"
+#include "boom.h"
 
 
 
@@ -59,9 +59,9 @@ const KeyValue settingsArray[] = {
 
 const int PAGE_SIZE = 4096;
 uint8_t page[PAGE_SIZE];
-char soundFile1616[] = "/sound1616";
-// char soundFile168[] = "/sound168";
-char soundFileTone[] = "/soundTone";
+char soundFile1[] = "/sound1616";
+char soundFile2[] = "/soundTone";
+char soundFile3[] = "/soundBoom";
 
 void writeAllAudio(const char *filename, const uint8_t *data, const size_t size) {
     uint32_t offset = 0;
@@ -90,7 +90,7 @@ public:
 
         if (code == 0) {
             blue.apply(value);
-            audio.play(soundFile1616);
+            audio.play(soundFile1);
         }
     }
 
@@ -128,28 +128,20 @@ public:
             // Serial.println(motor.readBemf());
             statusLed.blink(5);
             break;
+        case '1':
+            audio.play(soundFile1);
+            break;
+        case '2':
+            audio.play(soundFile2);
+            break;
         case '3':
-            audio.play(soundFile1616);
+            audio.play(soundFile3);
             break;
-        case '4':
-            audio.play(soundFile1616, 3);
+        case '7':
+            Serial.print("Writing audio to disc ...");
+            writeAllAudio(soundFile3, (uint8_t*)audio_data, sizeof(audio_data));
+            Serial.println("done");
             break;
-        case '5':
-            audio.play(soundFileTone);
-            break;
-        case 'L':
-            audio.cycle = true;
-            break;
-        // case '7':
-        //     Serial.print("Writing audio to disc tone...");
-        //     writeAllAudio(soundFileTone, (uint8_t*)tone440, sizeof(tone440));
-        //     Serial.println("done");
-        //     break;
-        // case '9':
-        //     Serial.print("Writing audio to disc 1616...");
-        //     writeAllAudio(soundFile1616, (uint8_t*)audio_data1616, sizeof(audio_data1616));
-        //     Serial.println("done");
-        //     break;
         case 'C':
             processCreate(value);
             break;
