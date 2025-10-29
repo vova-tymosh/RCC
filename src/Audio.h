@@ -23,6 +23,7 @@ class Audio
         int offset;
         bool active;
         bool cycle;
+        uint8_t volume; // 0-255, where 255 is full volume
         uint8_t buffer[CHUNK_SIZE];
     };
 
@@ -69,12 +70,15 @@ class Audio
             if (samplesRead == 0)
                 samplesRead = r;
 
-            // Mix 16-bit PCM samples
+            // Mix 16-bit PCM samples with volume
             int16_t *samples = (int16_t *)channels[ch].buffer;
             int numSamples = r / 2;
+            uint8_t vol = channels[ch].volume;
 
             for (int i = 0; i < numSamples; i++) {
-                int32_t mixed = mixBuffer[i] + samples[i];
+                // Apply volume (multiply by volume/255)
+                int32_t sample = (samples[i] * vol) >> 8;
+                int32_t mixed = mixBuffer[i] + sample;
 
                 // Clamp to prevent overflow
                 if (mixed > 32767)
@@ -100,10 +104,11 @@ public:
             channels[i].active = false;
             channels[i].cycle = false;
             channels[i].offset = 0;
+            channels[i].volume = 255; // Default to full volume
         }
     }
 
-    int play(String filename, bool cycle = false)
+    int play(String filename, uint8_t volume = 255, bool cycle = false)
     {
         // Find available channel
         for (int i = 0; i < MAX_CHANNELS; i++) {
@@ -112,11 +117,19 @@ public:
                 channels[i].offset = 0;
                 channels[i].active = true;
                 channels[i].cycle = cycle;
+                channels[i].volume = volume;
                 running = true;
                 return i;
             }
         }
         return -1; // No available channel
+    }
+
+    void setVolume(int channel, uint8_t volume)
+    {
+        if (channel >= 0 && channel < MAX_CHANNELS) {
+            channels[channel].volume = volume;
+        }
     }
 
     void stop(int channel)

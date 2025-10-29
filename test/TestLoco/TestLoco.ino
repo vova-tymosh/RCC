@@ -129,13 +129,13 @@ public:
             statusLed.blink(5);
             break;
         case '1':
-            audio.play(soundFile1);
+            audio.play(soundFile1, 128);
             break;
         case '2':
-            audio.play(soundFile2);
+            audio.play(soundFile2, 128);
             break;
         case '3':
-            audio.play(soundFile3);
+            audio.play(soundFile3, 128);
             break;
         case '7':
             Serial.print("Writing audio to disc ...");
