@@ -26,16 +26,16 @@ class Audio
     int volumeDivider;
     bool running;
 
-    void beginInternal();
+    void beginInternal(int sampleRate);
 
     void playInternal(uint8_t *data, size_t size, int volumeDivider = 1);
 
 public:
     bool cycle;
 
-    void begin()
+    void begin(int sampleRate)
     {
-        beginInternal();
+        beginInternal(sampleRate);
         running = false;
         cycle = false;
     }

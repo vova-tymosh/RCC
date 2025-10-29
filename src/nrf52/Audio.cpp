@@ -14,16 +14,18 @@
 
 AutoAnalog aaAudio;
 
-void Audio::beginInternal()
+void Audio::beginInternal(int sampleRate)
 {
     aaAudio.I2S_PIN_LRCK = PIN_AUDIO_LRC;
     aaAudio.I2S_PIN_SCK = PIN_AUDIO_BCK;
     aaAudio.I2S_PIN_SDOUT = PIN_AUDIO_OUT;
 
     aaAudio.autoAdjust = 0;
-    aaAudio.begin(0, 1, 1);
+    //aaAudio.begin(0 - ADC disabled, 2  - DAC in I2S mode);
+    aaAudio.begin(0, 2);
+    //aaAudio and/or NRF52 doesn't support 16bit DAC, so we use 8bit only
     aaAudio.dacBitsPerSample = 8;
-    aaAudio.setSampleRate(16000);
+    aaAudio.setSampleRate(sampleRate);
 }
 
 void Audio::playInternal(uint8_t *data, size_t size, int volumeDivider)

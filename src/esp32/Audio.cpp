@@ -15,16 +15,18 @@
 #include "Storage.h"
 #include "Motherboard.h"
 
+
+
 i2s_data_bit_width_t bps = I2S_DATA_BIT_WIDTH_16BIT;
 i2s_mode_t mode = I2S_MODE_STD;
-i2s_slot_mode_t slot = I2S_SLOT_MODE_MONO;
-// i2s_std_slot_mask_t slotMask = I2S_STD_SLOT_BOTH;
+i2s_slot_mode_t slot = I2S_SLOT_MODE_MONO; 
 
-const int sampleRate = 8000;
+//i2s_slot_mode_t slot = I2S_SLOT_MODE_STEREO
+//i2s_std_slot_mask_t slotMask = I2S_STD_SLOT_BOTH;
 
 I2SClass i2s;
 
-void Audio::beginInternal()
+void Audio::beginInternal(int sampleRate)
 {
     i2s.setPins(PIN_AUDIO_BCK, PIN_AUDIO_LRC, PIN_AUDIO_OUT);
 
@@ -39,12 +41,13 @@ void Audio::beginInternal()
 
 void Audio::playInternal(uint8_t *data, size_t size, int volumeDivider)
 {
+    int16_t *data16 = (int16_t*)data;
     if (volumeDivider != 1) {
-        for (int i = 0; i < size; i++) {
-            data[i] /= volumeDivider;
+        for (int i = 0; i < size/sizeof(int16_t); i++) {
+            data16[i] /= volumeDivider;
         }
     }
-    i2s.write((const uint8_t *)data, size);
+    i2s.write((const uint8_t *)data16, size);
 }
 
 #endif
