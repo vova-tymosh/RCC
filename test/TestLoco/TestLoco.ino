@@ -76,6 +76,7 @@ class TestLoco : public RCCLoco
 public:
     using RCCLoco::RCCLoco;
     // Ping ping;
+    uint8_t volume;
 
 
     void onFunction(uint8_t code, bool value)
@@ -115,6 +116,20 @@ public:
         Serial.println(value);
     }
 
+    void processPlay(char* cmd)
+    {
+        char *fileName = cmd;
+        String path = storage.addFolder(SOUNDS_PATH, fileName);
+        if (storage.exists(path.c_str())) {
+            Serial.print("Play ");
+            Serial.println(path);
+            audio.play(path.c_str(), volume);
+        } else {
+            Serial.print("No file ");
+            Serial.println(path);
+        }
+    }
+
     void onCommand(uint8_t code, char* value, uint8_t size)
     {
         switch (code) {
@@ -122,20 +137,12 @@ public:
             // Serial.println(motor.readBemf());
             statusLed.blink(5);
             break;
-        case '1':
-            audio.play(soundFile1, 128);
+        case 'P':
+            processPlay(value);
             break;
-        case '2':
-            audio.play(soundFile2, 128);
+        case 'V':
+            volume = atoi(value);
             break;
-        case '3':
-            audio.play(soundFile3, 128);
-            break;
-        // case '7':
-        //     Serial.print("Writing audio to disc ...");
-        //     writeAllAudio(soundFile3, (uint8_t*)audio_data, sizeof(audio_data));
-        //     Serial.println("done");
-        //     break;
         case 'C':
             processCreate(value);
             break;

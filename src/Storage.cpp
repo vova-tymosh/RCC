@@ -129,3 +129,10 @@ char *Storage::addFolder(char *buffer, const char *folder, const char *filename,
     strncat(buffer, filename, size - strlen(buffer) - 1);
     return buffer;
 }
+
+String Storage::addFolder(const char *folder, const char *filename)
+{
+    String path = String(folder);
+    path += filename;
+    return path;
+}

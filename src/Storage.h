@@ -35,6 +35,7 @@ public:
     size_t size(const char *filename);
 
     char *addFolder(char *buffer, const char *folder, const char *filename, size_t size);
+    String addFolder(const char *folder, const char *filename);
 
     String openFirst(const char *folder);
 

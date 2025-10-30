@@ -13,7 +13,7 @@
 #define FILENAME_LEN 256
 #define VALUE_LEN 256
 #define SETTINGS_PATH "/settings/"
-#define SOUND_PATH "/sounds/"
+#define SOUNDS_PATH "/sounds/"
 
 #else
 
