@@ -36,7 +36,7 @@ public:
     {
         char filepath[FILENAME_LEN];
         value[0] = 0;
-        storage.makeSettingsPath(key, filepath, sizeof(filepath));
+        storage.addFolder(filepath, SETTINGS_PATH, key, sizeof(filepath));
         storage.read(filepath, value, size);
     }
 
@@ -62,7 +62,7 @@ public:
     void put(const char *key, const char *value)
     {
         char filepath[FILENAME_LEN];
-        storage.makeSettingsPath(key, filepath, sizeof(filepath));
+        storage.addFolder(filepath, SETTINGS_PATH, key, sizeof(filepath));
         if (storage.exists(filepath)) {
             storage.write(filepath, (void *)value, strlen(value) + 1);
             for (int i = 0; i < cache.size; i++) {
@@ -78,7 +78,7 @@ public:
     void create(const char *key, const char *value)
     {
         char filepath[FILENAME_LEN];
-        storage.makeSettingsPath(key, filepath, sizeof(filepath));
+        storage.addFolder(filepath, SETTINGS_PATH, key, sizeof(filepath));
         size_t size = strlen(value) + 1;
         storage.write(filepath, (void *)value, size);
     }
@@ -87,7 +87,7 @@ public:
     {
         for (int i = 0; i < size; i++) {
             char filepath[FILENAME_LEN];
-            storage.makeSettingsPath(defaults[i].key, filepath, sizeof(filepath));
+            storage.addFolder(filepath, SETTINGS_PATH, defaults[i].key, sizeof(filepath));
             if (!storage.exists(filepath)) {
                 size_t valueSize = strlen(defaults[i].value) + 1;
                 storage.write(filepath, (void *)defaults[i].value, valueSize);

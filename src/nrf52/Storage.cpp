@@ -138,12 +138,4 @@ void Storage::deleteFiles()
     Serial.println("[FS] All deleted");
 }
 
-char *Storage::makeSettingsPath(const char *filename, char *buffer, size_t size)
-{
-    const char *const prefix = "/settings/";
-    strcpy(buffer, prefix);
-    strncat(buffer, filename, size - strlen(prefix) - 1);
-    return buffer;
-}
-
 #endif

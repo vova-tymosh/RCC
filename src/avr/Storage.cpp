@@ -141,11 +141,4 @@ void Storage::deleteFiles()
     EEPROM.put(0, mr);
 }
 
-char *Storage::makeSettingsPath(const char *filename, char *buffer, size_t size)
-{
-    strncpy(buffer, filename, size);
-    buffer[size - 1] = 0;
-    return buffer;
-}
-
 #endif

@@ -8,20 +8,18 @@
  */
 #pragma once
 
-#if defined(ARDUINO_ARCH_NRF52)
+#if defined(ARDUINO_ARCH_NRF52) || defined(ARDUINO_ARCH_ESP32)
 
 #define FILENAME_LEN 256
 #define VALUE_LEN 256
-
-#elif defined(ARDUINO_ARCH_ESP32)
-
-#define FILENAME_LEN 256
-#define VALUE_LEN 256
+#define SETTINGS_PATH "/settings/"
+#define SOUND_PATH "/sounds/"
 
 #else
 
 #warning Assuming low memory platform
 #define FILENAME_LEN 12
 #define VALUE_LEN 32
+#define SETTINGS_PATH ""
 
 #endif

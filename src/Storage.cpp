@@ -43,7 +43,7 @@ void Storage::clear()
     write(validationFile, (void *)&validation, sizeof(validation));
 
     char filepath[FILENAME_LEN];
-    makeSettingsPath("", filepath, sizeof(filepath));
+    addFolder(filepath, SETTINGS_PATH, "", sizeof(filepath));
     if (!LittleFS.mkdir(filepath))
         Serial.println("[FS] Can't create folder");
 }
@@ -102,7 +102,7 @@ File fileListRoot = BUILD_FILE();
 String Storage::openFirst()
 {
     char filepath[FILENAME_LEN];
-    makeSettingsPath("", filepath, sizeof(filepath));
+    addFolder(filepath, SETTINGS_PATH, "", sizeof(filepath));
     fileListRoot = LittleFS.open(filepath);
     return openNext();
 }
@@ -117,4 +117,12 @@ String Storage::openNext()
             fileListRoot.close();
     }
     return String();
+}
+
+char *Storage::addFolder(char *buffer, const char *folder, const char *filename, size_t size)
+{
+    strncpy(buffer, folder, size);
+    buffer[size - 1] = 0;
+    strncat(buffer, filename, size - strlen(buffer) - 1);
+    return buffer;
 }

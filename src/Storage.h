@@ -34,7 +34,7 @@ public:
 
     size_t size(const char *filename);
 
-    char *makeSettingsPath(const char *filename, char *buffer, size_t size);
+    char *addFolder(char *buffer, const char *folder, const char *filename, size_t size);
 
     String openFirst();
 
