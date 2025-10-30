@@ -6,7 +6,6 @@
  * The above copyright notice shall be included in all
  * copies or substantial portions of the Software.
  */
-
 // #define RCC_DEBUG 2
 #include "Motherboard.h"
 #include "Peripheral.h"
@@ -14,13 +13,8 @@
 #include "RCCLoco.h"
 
 #include "Audio.h"
-// #include "audio_data3.h"
 #include "TestStorage.h"
 #include "TestPing.h"
-
-
-// #include "toto1616.h"
-#include "boom.h"
 
 
 
@@ -137,11 +131,11 @@ public:
         case '3':
             audio.play(soundFile3, 128);
             break;
-        case '7':
-            Serial.print("Writing audio to disc ...");
-            writeAllAudio(soundFile3, (uint8_t*)audio_data, sizeof(audio_data));
-            Serial.println("done");
-            break;
+        // case '7':
+        //     Serial.print("Writing audio to disc ...");
+        //     writeAllAudio(soundFile3, (uint8_t*)audio_data, sizeof(audio_data));
+        //     Serial.println("done");
+        //     break;
         case 'C':
             processCreate(value);
             break;
@@ -227,10 +221,10 @@ void loop()
         loco.state.distance = d++;
         loco.state.speed = (r + 50)/3;
         loco.state.lost = 20;
-        loco.state.battery = r;
-        loco.state.current = (r + 20);
-        loco.state.temperature = r + 50;
-        loco.state.psi = r + 35;
+        loco.state.battery = powerMeter.readVoltage();
+        loco.state.current = powerMeter.readCurrent();
+        loco.state.temperature = 0;
+        loco.state.psi = 0;
     }
 }
 

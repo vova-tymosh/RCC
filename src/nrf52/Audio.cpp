@@ -28,15 +28,9 @@ void Audio::beginInternal(int sampleRate)
     aaAudio.setSampleRate(sampleRate);
 }
 
-void Audio::playInternal(uint8_t *data, size_t size, int volumeDivider)
+void Audio::playInternal(uint8_t *data, size_t size)
 {
-    if (volumeDivider != 1) {
-        for (int i = 0; i < size; i++) {
-            aaAudio.dacBuffer[i] = data[i] / volumeDivider;
-        }
-    } else {
-        memcpy(aaAudio.dacBuffer, data, size);
-    }
+    memcpy(aaAudio.dacBuffer, data, size);
     aaAudio.feedDAC(0, size);
 }
 
