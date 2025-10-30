@@ -45,7 +45,10 @@ void Storage::clear()
     char filepath[FILENAME_LEN];
     addFolder(filepath, SETTINGS_PATH, "", sizeof(filepath));
     if (!LittleFS.mkdir(filepath))
-        Serial.println("[FS] Can't create folder");
+        Serial.println("[FS] Can't create settings folder");
+    addFolder(filepath, SOUNDS_PATH, "", sizeof(filepath));
+    if (!LittleFS.mkdir(filepath))
+        Serial.println("[FS] Can't create sounds folder");
 }
 
 int Storage::read(const char *filename, void *buffer, size_t size, size_t offset)
@@ -99,10 +102,10 @@ size_t Storage::size(const char *filename)
 
 File fileListRoot = BUILD_FILE();
 
-String Storage::openFirst()
+String Storage::openFirst(const char *folder)
 {
     char filepath[FILENAME_LEN];
-    addFolder(filepath, SETTINGS_PATH, "", sizeof(filepath));
+    addFolder(filepath, folder, "", sizeof(filepath));
     fileListRoot = LittleFS.open(filepath);
     return openNext();
 }

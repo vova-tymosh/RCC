@@ -76,7 +76,7 @@ WebServer ConfigWeb::server(80);
 void ConfigWeb::handleRoot()
 {
     String form = String(htmlPrefix);
-    String name = storage.openFirst();
+    String name = storage.openFirst(SETTINGS_PATH);
     while (!name.isEmpty()) {
         String inputbox = String(htmlInput);
         inputbox.replace("$user_readable$", name);

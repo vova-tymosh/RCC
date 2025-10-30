@@ -116,7 +116,7 @@ public:
     String listValues()
     {
         String s;
-        String name = storage.openFirst();
+        String name = storage.openFirst(SETTINGS_PATH);
         while (name.length() != 0) {
             s += name;
             name = storage.openNext();

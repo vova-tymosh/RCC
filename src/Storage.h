@@ -36,7 +36,7 @@ public:
 
     char *addFolder(char *buffer, const char *folder, const char *filename, size_t size);
 
-    String openFirst();
+    String openFirst(const char *folder);
 
     String openNext();
 };
