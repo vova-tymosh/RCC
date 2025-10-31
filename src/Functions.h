@@ -37,7 +37,7 @@ public:
     // Convert function name to ID, returns -1 if not found
     int nameToId(const char *name);
 
-    // Convert function ID to name, returns nullptr if not found
+    // Convert function ID to name, returns NULL if not found
     const char *idToName(uint8_t id);
 
     // Add or update function mapping

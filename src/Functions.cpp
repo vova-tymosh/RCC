@@ -26,7 +26,7 @@ void Functions::begin()
     size_t fileSize = storage.size(FUNCTION_NAMES_FILE);
     if (fileSize > 0) {
         char *buffer = (char *)malloc(fileSize + 1);
-        if (buffer != nullptr) {
+        if (buffer != NULL) {
             size_t bytesRead = storage.read(FUNCTION_NAMES_FILE, buffer, fileSize);
             buffer[bytesRead] = '\0';
             parseFile(buffer, bytesRead);
@@ -41,7 +41,7 @@ void Functions::parseFile(const char *data, size_t size)
         return;
 
     char *buffer = (char *)malloc(size + 1);
-    if (buffer == nullptr)
+    if (buffer == NULL)
         return;
 
     memcpy(buffer, data, size);
@@ -49,19 +49,19 @@ void Functions::parseFile(const char *data, size_t size)
 
     char *token = strtok(buffer, ",");
 
-    while (token != nullptr && mappingCount < MAX_FUNCTIONS) {
+    while (token != NULL && mappingCount < MAX_FUNCTIONS) {
         // Parse ID
         uint8_t id = (uint8_t)atoi(token);
-        token = strtok(nullptr, ",");
+        token = strtok(NULL, ",");
 
-        if (token != nullptr) {
+        if (token != NULL) {
             // Parse name
             mappings[mappingCount].id = id;
             strncpy(mappings[mappingCount].name, token, MAX_NAME_LENGTH - 1);
             mappings[mappingCount].name[MAX_NAME_LENGTH - 1] = '\0';
             mappingCount++;
 
-            token = strtok(nullptr, ",");
+            token = strtok(NULL, ",");
         } else {
             break;
         }
@@ -86,7 +86,7 @@ void Functions::saveToFile()
     }
 
     char *buffer = (char *)malloc(bufferSize);
-    if (buffer == nullptr)
+    if (buffer == NULL)
         return;
 
     buffer[0] = '\0';
@@ -134,12 +134,12 @@ int Functions::nameToId(const char *name)
 const char *Functions::idToName(uint8_t id)
 {
     int index = findMappingById(id);
-    return (index >= 0) ? mappings[index].name : nullptr;
+    return (index >= 0) ? mappings[index].name : NULL;
 }
 
 void Functions::setFunction(uint8_t id, const char *name)
 {
-    if (name == nullptr || strlen(name) == 0)
+    if (name == NULL || strlen(name) == 0)
         return;
 
     // Check if ID already exists
@@ -161,7 +161,7 @@ void Functions::setFunction(uint8_t id, const char *name)
 
 bool Functions::isValidFunction(const char *identifier, uint8_t &outId)
 {
-    if (identifier == nullptr || strlen(identifier) == 0) {
+    if (identifier == NULL || strlen(identifier) == 0) {
         return false;
     }
 
@@ -190,7 +190,7 @@ const Functions::FunctionMapping *Functions::getMapping(int index) const
     if (index >= 0 && index < mappingCount) {
         return &mappings[index];
     }
-    return nullptr;
+    return NULL;
 }
 
 String Functions::getFunctionList() const

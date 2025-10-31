@@ -131,7 +131,7 @@ public:
         for (int i = 0; i <= 9; i++) {
             functionList += "]\\[";
             const char *functionName = node->functions.idToName(i);
-            if (functionName != nullptr) {
+            if (functionName != NULL) {
                 functionList += functionName;
             }
         }

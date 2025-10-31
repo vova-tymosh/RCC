@@ -21,16 +21,8 @@ const int MAX_PACKET = 144;
 
 struct __attribute__((packed)) Command {
     uint8_t code;
-    union {
-        uint8_t value;
-        struct {
-            uint8_t functionId : 7;
-            uint8_t activate   : 1;
-        };
-    };
+    uint8_t value;
 };
-
-void printHex(uint8_t *payload, int size);
 
 inline char *strcatm(char *d, const char *s)
 {
