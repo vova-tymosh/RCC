@@ -41,11 +41,12 @@ public:
     void onFunction(uint8_t code, bool value)
     {
         Serial.print("Function: "); Serial.print(code); Serial.println( value ? " ON" : " OFF");
-
         if (code == 0) {
             blue.apply(value);
-            audio.play(soundFile1);
         }
+
+        const char *fname = functions.idToName(code);
+        processPlay(fname);
     }
 
     void onThrottle(uint8_t direction, uint8_t throttle)
@@ -75,9 +76,9 @@ public:
         Serial.println(value);
     }
 
-    void processPlay(char* cmd)
+    void processPlay(const char* cmd)
     {
-        char *fileName = cmd;
+        const char *fileName = cmd;
         String path = storage.addFolder(SOUNDS_PATH, fileName);
         if (storage.exists(path.c_str())) {
             Serial.print("Play ");
