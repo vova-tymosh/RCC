@@ -6,7 +6,7 @@
  * The above copyright notice shall be included in all
  * copies or substantial portions of the Software.
  */
-// #define RCC_DEBUG 2
+#define RCC_DEBUG 2
 #include "Motherboard.h"
 #include "Peripheral.h"
 #include "Settings.h"
@@ -15,60 +15,19 @@
 #include "Audio.h"
 #include "TestStorage.h"
 #include "TestPing.h"
+#include "Defaults.h"
 
 
-
-// defined(CONFIG_IDF_TARGET_ESP32C3)
-// defined(CONFIG_IDF_TARGET_ESP32C6)
 
 Storage storage;
 Settings settings;
-// PinExt yellow(2);
 PinExt blue(0);
-
 PinExt q(5);
 StatusLed statusLed(q, 500);
-
 PowerMeter powerMeter;
 Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD);
-Timer update(1000);
 Audio audio;
-
-const KeyValue settingsArray[] = {
-    {"wifiap",       "ON"},
-    {"wifissid",     "RCC_Loco"},
-    {"wifipwd",      "RCC_Loco"},
-    {"loconame",     "RCC"},
-    {"locoaddr",     "3"},
-    {"broker",       "192.168.0.10"},
-    {"brokerport",   "1883"},
-    {"acceleration", "0"},
-    {"managespeed",  "0"},
-    {"heartbeat",    "1000"},
-    {"testvalue",    "1.1"},
-    {"mqtt",         "ON"},
-    {"pump",         "0"}
-};
-
-
-const int PAGE_SIZE = 4096;
-uint8_t page[PAGE_SIZE];
-char soundFile1[] = "/sound1616";
-char soundFile2[] = "/soundTone";
-char soundFile3[] = "/soundBoom";
-
-void writeAllAudio(const char *filename, const uint8_t *data, const size_t size) {
-    uint32_t offset = 0;
-
-    while (offset < size) {
-        uint32_t s = size - offset;
-        if (s > sizeof(page))
-            s = sizeof(page);
-        memcpy(page, data + offset, s);
-        int r = storage.write(filename, page, s, offset);
-        offset += r;
-    }
-}
+Timer update(1000);
 
 
 class TestLoco : public RCCLoco
@@ -182,19 +141,9 @@ void setup()
     Serial.begin(115200);
     delay(50);
 
-//   pinMode(WIFI_ENABLE, OUTPUT); // pinMode(3, OUTPUT);
-//   digitalWrite(WIFI_ENABLE, LOW); // digitalWrite(3, LOW); // Activate RF switch control
-
-//   delay(100);
-
-//   pinMode(WIFI_ANT_CONFIG, OUTPUT); // pinMode(14, OUTPUT);
-//   digitalWrite(WIFI_ANT_CONFIG, HIGH); // digitalWrite(14, HIGH); // Use external antenna
-
-
     storage.begin();
     settings.begin(settingsArray, sizeofarray(settingsArray));
     motor.begin();
-    // yellow.begin();
     blue.begin();
     powerMeter.begin();
     update.start();
@@ -236,3 +185,22 @@ void loop()
     }
 }
 
+
+
+/* For future use, maybe */
+
+/*
+// defined(CONFIG_IDF_TARGET_ESP32C3)
+// defined(CONFIG_IDF_TARGET_ESP32C6)
+
+//   pinMode(WIFI_ENABLE, OUTPUT); // pinMode(3, OUTPUT);
+//   digitalWrite(WIFI_ENABLE, LOW); // digitalWrite(3, LOW); // Activate RF switch control
+
+//   delay(100);
+
+//   pinMode(WIFI_ANT_CONFIG, OUTPUT); // pinMode(14, OUTPUT);
+//   digitalWrite(WIFI_ANT_CONFIG, HIGH); // digitalWrite(14, HIGH); // Use external antenna
+
+
+
+*/

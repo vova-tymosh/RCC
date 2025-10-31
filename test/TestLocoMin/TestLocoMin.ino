@@ -19,15 +19,7 @@ Settings settings;
 Pin blue(0);
 Timer update(1000);
 
-const KeyValue settingsArray[] = {
-    {"loconame",     "RCC"},
-    {"locoaddr",     "3"},
-    {"acceleration", "0"},
-    {"managespeed",  "0"},
-    {"heartbeat",    "1000"},
-    {"testvalue",    "0.0"}
-}; 
-
+#include "Defaults.h"
 
 class TestLocoMin : public RCCLoco
 {

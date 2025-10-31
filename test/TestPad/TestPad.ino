@@ -113,13 +113,7 @@ public:
 };
 TestPad pad;
 
-
-const KeyValue padSettings[] = {
-    {"loconame",  "RCC_Pad"},
-    {"locoaddr",  "1"},
-    {"testvalue", "0.0"}
-};
-
+#include "Defaults.h"
 
 void setup()
 {
