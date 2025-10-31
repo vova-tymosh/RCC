@@ -17,6 +17,7 @@ const int CONN_WIFI_AP = 3;
 enum { DIR_REVERSE = 0, DIR_FORWARD = 1, DIR_STOP = 2, DIR_NEUTRAL = 3 };
 
 const char SEPARATOR = ',';
+const char *SEPARATOR_STR = ",";
 
 // NRF Protocol Message codes
 const char NRF_INTRO = 'A';

@@ -26,6 +26,7 @@ MQ_PREFIX = "cab"
 MQ_INTRO = "intro"
 MQ_SET_THROTTLE = "throttle";
 MQ_SET_DIRECTION = "direction";
+MQ_HEARTBEAT = "heartbeat"
 MQ_HEARTBEAT_VALUES = "heartbeat/values"
 MQ_GET_FUNCTION = "function/get"
 MQ_SET_FUNCTION = "function/"
@@ -108,11 +109,14 @@ class SerialComm:
         buffer = ''
         for i in range(5):
             b = self.s.readline().decode('utf-8').strip()
-            logging.info(f"Read <: '{b}' Need: '{msg}'")
             if msg:
                 if msg == b:
+                    logging.info(f"Read <: '{b}'. Ack")
                     return True
+                else:
+                    logging.info(f"Read <: '{b}', but need: '{msg}'")
             elif b:
+                logging.info(f"Read <: '{b}', no validation")
                 return b
         return False
 

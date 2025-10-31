@@ -32,8 +32,6 @@ struct __attribute__((packed)) Command {
 
 void printHex(uint8_t *payload, int size);
 
-int split(char *input, char **output, uint8_t size, char delimiter);
-
 inline char *strcatm(char *d, const char *s)
 {
     strcat(d, s);

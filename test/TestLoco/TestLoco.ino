@@ -203,6 +203,7 @@ void setup()
     // statusLed.begin(true);
 
     loco.begin();
+    loco.volume = 255;
 }
 
 

@@ -125,14 +125,10 @@ public:
     {
         if (size < CODE_SIZE)
             return;
+        payload[size] = 0;
+        char *data = (char *)payload + CODE_SIZE;
         struct Command *command = (struct Command *)payload;
-        if (size < COMMAND_SIZE)
-            command->value = 0;
-        log("[Nrf] < ");
-        log((char)command->code);
-        log(" ");
-        log(command->value);
-        log("\n");
+        log("[Nrf] < "); log((char)command->code); log("\n");
 
         if (command->code == NRF_INTRO) {
             introduce();
@@ -141,76 +137,55 @@ public:
             node->setThrottle(command->value);
         } else if (command->code == NRF_DIRECTION) {
             node->setDirection(command->value);
+        } else if (command->code == NRF_LIST_VALUE_REQ) {
+            processList();
+        } else if (command->code == NRF_LIST_FUNCTION_REQ) {
+            processFunctionList();
+        } else if (command->code == NRF_HEARTBEAT) {
+            heartbeat();
         } else if (command->code == NRF_SET_FUNCTION) {
-            if (size >= CODE_SIZE + 1) {
-                payload[size] = 0;
-                char *buffer[2];
-                int tokens = split((char *)payload + CODE_SIZE, (char **)&buffer,
-                                   sizeofarray(buffer), NRF_SEPARATOR);
-                if (tokens >= 2) {
-                    bool activate = (atoi(buffer[1]) != 0);
-                    uint8_t functionCode;
-                    if (node->functions.isValidFunction(buffer[0], functionCode)) {
-                        node->setFunction(functionCode, activate);
-                    }
+            char *sep = strchr(data, NRF_SEPARATOR);
+            if (sep) {
+                *sep = 0;
+                uint8_t functionCode;
+                if (node->functions.isValidFunction(data, functionCode)) {
+                    bool activate = (atoi(sep + 1) != 0);
+                    node->setFunction(functionCode, activate);
                 }
             }
         } else if (command->code == NRF_GET_FUNCTION) {
-            if (size >= CODE_SIZE + 1) {
-                payload[size] = 0;
-                char *functionIdentifier = (char *)(payload + CODE_SIZE);
-                uint8_t functionCode;
-                if (node->functions.isValidFunction(functionIdentifier, functionCode)) {
-                    char reply[MAX_PACKET];
-                    reply[0] = NRF_SET_FUNCTION;
-                    bool state = node->getFunction(functionCode);
-                    snprintf(reply + CODE_SIZE, MAX_PACKET - CODE_SIZE, "%s%c%d", 
-                             functionIdentifier, NRF_SEPARATOR, state ? 1 : 0);
-                    write(reply, strlen(reply));
-                }
+            uint8_t functionCode;
+            if (node->functions.isValidFunction(data, functionCode)) {
+                char reply[MAX_PACKET];
+                reply[0] = NRF_SET_FUNCTION;
+                bool state = node->getFunction(functionCode);
+                snprintf(reply + CODE_SIZE, MAX_PACKET - CODE_SIZE, "%s%c%d",
+                            data, NRF_SEPARATOR, state ? 1 : 0);
+                write(reply, strlen(reply));
             }
         } else if (command->code == NRF_SET_FUNCTION_NAME) {
-            if (size >= CODE_SIZE + 1) {
-                payload[size] = 0;
-                char *buffer[2];
-                int tokens = split((char *)payload + CODE_SIZE, (char **)&buffer,
-                                   sizeofarray(buffer), NRF_SEPARATOR);
-                if (tokens >= 2) {
-                    uint8_t functionId = (uint8_t)atoi(buffer[0]);
-                    char *functionName = buffer[1];
-                    node->functions.setFunction(functionId, functionName);
-                }
+            char *sep = strchr(data, NRF_SEPARATOR);
+            if (sep) {
+                *sep = 0;
+                uint8_t functionId = (uint8_t)atoi(data);
+                node->functions.setFunction(functionId, sep + 1);
             }
-        } else if (command->code == NRF_LIST_FUNCTION_REQ) {
-            processFunctionList();
         } else if (command->code == NRF_SET_VALUE) {
-            if (size >= CODE_SIZE + 1) {
-                payload[size] = 0;
-                char *buffer[2];
-                int tokens = split((char *)payload + CODE_SIZE, (char **)&buffer,
-                                   sizeofarray(buffer), NRF_SEPARATOR);
-                if (tokens >= 2) {
-                    char *key = buffer[0];
-                    char *value = buffer[1];
-                    node->setValue(key, value);
-                }
+            char *sep = strchr(data, NRF_SEPARATOR);
+            if (sep) {
+                *sep = 0;
+                node->setValue(data, sep + 1);
             }
         } else if (command->code == NRF_GET_VALUE) {
             if (size >= CODE_SIZE + 1) {
-                payload[size] = 0;
-                char *key = (char *)(payload + CODE_SIZE);
                 char reply[MAX_PACKET];
                 memcpy(reply, payload, size);
                 reply[0] = NRF_SET_VALUE;
                 reply[size] = NRF_SEPARATOR;
                 size++;
-                node->getValue(key, reply + size, MAX_PACKET - size);
+                node->getValue(data, reply + size, MAX_PACKET - size);
                 write(reply, strlen(reply));
             }
-        } else if (command->code == NRF_LIST_VALUE_REQ) {
-            processList();
-        } else if (command->code == NRF_HEARTBEAT) {
-            heartbeat();
         } else {
             node->onCommand(command->code, (char *)payload, size);
         }

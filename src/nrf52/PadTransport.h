@@ -19,7 +19,7 @@
 #include "Timer.h"
 
 #define MAX_LOCO 5
-#define NAME_SIZE 5
+#define NAME_SIZE 4
 
 #if RCC_DEBUG >= 2
 #define log(msg)                                                                                   \
@@ -75,7 +75,7 @@ private:
 
     struct Node {
         uint8_t addr;
-        char name[NAME_SIZE];
+        char name[NAME_SIZE + 1];
     };
 
     struct Known {
@@ -83,6 +83,25 @@ private:
         int selected;
         int len;
     } known;
+
+    bool introToKnown(char *payload)
+    {
+        char *type = strtok(payload, SEPARATOR_STR);
+        char *addr = strtok(NULL, SEPARATOR_STR);
+        char *name = strtok(NULL, SEPARATOR_STR);
+        if (type && addr && name) {
+            if (type[0] == NRF_TYPE_LOCO) {
+                Node *n = &known.nodes[known.len];
+                n->addr = atoi(addr);
+                strncpy(n->name, name, NAME_SIZE);
+                n->name[NAME_SIZE] = '\0';
+                // log("New node: " + String(known.len) + " " + String(n->addr) + " " + String(n->name));
+                known.len++;
+            }
+            return true;
+        }
+        return false;
+    }
 
 public:
     bool isLocal;
@@ -146,18 +165,11 @@ public:
             return true;
     }
 
-    void processLocalIntro(char *payload, uint16_t size, int from)
+    void processLocalIntro(char *packet, int from)
     {
-        payload[size] = 0;
-        char *buffer[5];
-        int tokens = split(payload + 1, (char **)&buffer, sizeofarray(buffer), NRF_SEPARATOR);
-
-        if (tokens > 3) {
-            known.nodes[known.len].addr = atoi(buffer[1]);
-            memset(known.nodes[known.len].name, 0, NAME_SIZE);
-            strncpy(known.nodes[known.len].name, buffer[2], NAME_SIZE - 1);
-            log("Local Intro: " + String(known.nodes[known.len].addr));
-            known.len++;
+        if (known.len < MAX_LOCO) {
+            introToKnown(packet);
+            log("Local Intro: " + known.nodes[known.len].addr);
         }
     }
 
@@ -189,20 +201,17 @@ public:
         send((uint8_t *)packet.c_str(), packet.length());
     }
 
-    void processListNodes(char *packet, uint16_t size)
+    void processListNodes(char *packet)
     {
-        packet[size] = 0;
-        int index = 0;
-        char *buffer[10 * 3];
-        int tokens = split(packet + 1, (char **)&buffer, sizeofarray(buffer), NRF_SEPARATOR);
-        for (int i = 0; i < tokens / 3; i++) {
-            if (buffer[i * 3][0] == NRF_TYPE_LOCO) {
-                known.nodes[index].addr = atoi(buffer[i * 3 + 1]);
-                strncpy(known.nodes[index].name, buffer[i * 3 + 2], NAME_SIZE);
-                index++;
-            }
+        known.len = 0;
+        char *token = packet;
+        bool isThereMore = true;
+        while (known.len < MAX_LOCO && isThereMore) {
+            isThereMore = introToKnown(token);
+            token = NULL;
         }
-        known.len = index;
+        log("Updated lits of nodes, count:");
+        log(known.len);
     }
 
     void subsribe()
@@ -221,19 +230,17 @@ public:
         qos.heartbeatAct++;
     }
 
-    void processSetValue(char *payload)
+    void processSetValue(char *data, uint16_t size)
     {
-        char *buffer[2];
-        int tokens = split((char *)payload + CODE_SIZE, (char **)&buffer, sizeofarray(buffer),
-                           NRF_SEPARATOR);
-        if (tokens >= 2) {
-            char *key = buffer[0];
-            char *value = buffer[1];
-            if (strcmp(key, HEARTBEAT) == 0) {
-                qos.heartbeatPeriod = atoi(value);
+        payload[size] = 0;
+        char *sep = strchr(data, NRF_SEPARATOR);
+        if (sep) {
+            *sep = 0;
+            if (strcmp(data, HEARTBEAT) == 0) {
+                qos.heartbeatPeriod = atoi(sep + 1);
             }
-            log("Set value: " + String(key) + " " + String(value));
-            node->onSetValue(key, value);
+            log("Set value: " + String(data) + " " + String(sep + 1));
+            node->onSetValue(data, sep + 1);
         }
     }
 
@@ -260,12 +267,14 @@ public:
     {
         if (size < COMMAND_SIZE)
             return;
+        payload[size] = 0;
+        char *data = (char *)payload + CODE_SIZE;
         struct Command *command = (struct Command *)payload;
         log("<" + String((char)command->code) + " " + String(command->value));
 
         if (command->code == NRF_INTRO) {
             if (isLocal) {
-                processLocalIntro((char *)payload, size, from);
+                processLocalIntro(data, from);
                 // askHeartbeatPeriod();
             } else {
                 introduce();
@@ -274,7 +283,7 @@ public:
         } else if (isLocal && !isKnown(from)) {
             askToIntro(from);
         } else if (command->code == NRF_LIST_NODES) {
-            processListNodes((char *)payload, size);
+            processListNodes(data);
             subsribe();
             askHeartbeatPeriod();
         } else if (command->code == NRF_HEARTBEAT) {
@@ -287,14 +296,12 @@ public:
             if (isMine(from))
                 node->state.direction = command->value;
         } else if (command->code == NRF_SET_FUNCTION) {
-            if (isMine(from) && size >= CODE_SIZE + 1) {
-                payload[size] = 0;
-                char *buffer[2];
-                int tokens = split((char *)payload + CODE_SIZE, (char **)&buffer,
-                                   sizeofarray(buffer), NRF_SEPARATOR);
-                if (tokens >= 2) {
-                    uint8_t functionCode = (uint8_t)atoi(buffer[0]);
-                    bool activate = (atoi(buffer[1]) != 0);
+            if (isMine(from)) {
+                char *sep = strchr(data, NRF_SEPARATOR);
+                if (sep) {
+                    *sep = 0;
+                    uint8_t functionCode = (uint8_t)atoi(data);
+                    bool activate = (atoi(sep + 1) != 0);
                     if (functionCode < 30) {
                         if (activate)
                             node->state.bitstate |= (1 << functionCode);
@@ -305,19 +312,15 @@ public:
             }
         } else if (command->code == NRF_LIST_FUNCTION_RES) {
             if (isMine(from)) {
-                payload[size] = 0;
-                log("Function List: " + String((const char *)payload + CODE_SIZE));
-                // node->onFunctionList((char *)payload + CODE_SIZE);
+                log("Function List: " + String(data));
             }
         } else if (command->code == NRF_SET_VALUE) {
             if ((isMine(from)) && (size >= CODE_SIZE + 1)) {
-                payload[size] = 0;
-                processSetValue((char *)payload);
+                processSetValue(data, size);
             }
         } else if (command->code == NRF_LIST_VALUE_RES) {
             if (isMine(from)) {
-                payload[size - 1] = 0;
-                log("List: " + String((const char *)payload));
+                log("List: " + String(data));
             }
         } else if (command->code == NRF_PING) {
             if (isMine(from)) {
