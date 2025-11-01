@@ -60,7 +60,8 @@ public:
         String wifipwd = settings.get("wifipwd");
         String mqtt = settings.get("mqtt");
 
-        if (wifiap == "ON")
+        if (wifiap != "OFF")
+            // If wifiap is ON or it is not defined, the system goes AP
             wifiAP(wifissid, wifipwd);
         else
             wifiConnect(wifissid, wifipwd);

@@ -40,6 +40,8 @@ public:
     String openFirst(const char *folder);
 
     String openNext();
+
+    void list();
 };
 
 extern Storage storage;

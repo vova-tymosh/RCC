@@ -108,6 +108,35 @@ bool RccFS::begin(bool format)
     return r;
 }
 
+void listDirectory(const char *dirname)
+{
+    char path[256];
+    File root = LittleFS.open(dirname);
+    File file = root.openNextFile();
+    while (file) {
+        strcpy(path, dirname);
+        if (path[strlen(path) - 1] != '/') {
+            strcat(path, "/");
+        }
+        strcat(path, file.name());
+        bool isDir = file.isDirectory();
+        file = root.openNextFile();
+        if (isDir) {
+            Serial.print("d ");
+            Serial.println(path);
+            listDirectory(path);
+        } else {
+            Serial.print("f ");
+            Serial.println(path);
+        }
+    }
+}
+
+void Storage::list()
+{
+    listDirectory("/");
+}
+
 void deleteDirectory(const char *dirname)
 {
     char path[256];

@@ -65,6 +65,8 @@ private:
                 return processAppend(cmd);
             case CMD_SIZE_FILE:
                 return processSize(cmd);
+            case CMD_LIST_FILES:
+                return processListFiles(cmd);
             case CMD_ERASE:
                 return processErase(cmd);
             case CMD_REBOOT:
@@ -225,6 +227,12 @@ private:
         Serial.print(filename);
         Serial.print(": ");
         Serial.println(size);
+        return true;
+    }
+
+    bool processListFiles(char cmd[])
+    {
+        storage.list();
         return true;
     }
 

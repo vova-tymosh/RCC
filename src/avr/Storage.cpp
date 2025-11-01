@@ -141,4 +141,9 @@ void Storage::deleteFiles()
     EEPROM.put(0, mr);
 }
 
+void Storage::list()
+{
+}
+
+
 #endif

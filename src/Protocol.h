@@ -84,6 +84,7 @@ const char CMD_READ_FILE = 'R';
 const char CMD_WRITE_FILE = 'W';
 const char CMD_APPEND_FILE = 'A';
 const char CMD_SIZE_FILE = 'Z';
+const char CMD_LIST_FILES = 'I';
 const char CMD_ERASE = 'E';
 
 const char CMD_CMD = 'C';
