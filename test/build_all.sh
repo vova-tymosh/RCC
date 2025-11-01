@@ -1,101 +1,28 @@
 #!/bin/bash
 
-# RCC Build and Flash Script
-# Compiles and flashes TestLoco and TestPad to multiple XIAO platforms
-
-echo "=========================================="
-echo "RCC Multi-Platform Build and Flash Script"
-echo "=========================================="
+# RCC Build Script - Compiles all platforms
+# Stops on first failure
+set -e
 
 # Copy library to Arduino libraries folder
-echo "Copying RCC library to Arduino libraries..."
-cd .. && cp -r * ../libraries/RCC && cd -
-echo "✓ Library copied"
+cd .. && cp -r * ../libraries/RCC && cd - >/dev/null
 
-echo ""
-echo "Building and flashing all platforms..."
-echo ""
+# ESP32C3 - TestLoco
+echo -n "Building ESP32C3...		"
+arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32C3 --build-path build/esp32c3 TestLoco >/dev/null
+echo "✓"
 
-# ESP32C3 - TestLoco (usbmodem1401)
-echo "************* ESP32C3 - TestLoco *************"
-echo "Compiling for ESP32C3..."
-arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32C3 TestLoco
+# ESP32C6 - TestLoco
+echo -n "Building ESP32C6...		"
+arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32C6 --build-path build/esp32c6 TestLoco >/dev/null
+echo "✓"
 
-if [ $? -eq 0 ]; then
-    echo "✓ ESP32C3 compilation successful"
-    echo "Flashing to ESP32C3 (usbmodem1401)..."
-    arduino-cli upload -p /dev/cu.usbmodem1401 --fqbn esp32:esp32:XIAO_ESP32C3 TestLoco
-    if [ $? -eq 0 ]; then
-        echo "✓ ESP32C3 flash successful"
-    else
-        echo "✗ ESP32C3 flash failed"
-    fi
-else
-    echo "✗ ESP32C3 compilation failed"
-fi
-echo ""
+# nRF52840 - TestLoco
+echo -n "Building nRF-Loco...		"
+arduino-cli compile --fqbn Seeeduino:nrf52:xiaonRF52840 --build-path build/nrf52L TestLoco >/dev/null
+echo "✓"
 
-
-# ESP32C6 - TestLoco (usbmodem1301)
-echo "************* ESP32C6 - TestLoco *************"
-echo "Compiling for ESP32C6..."
-arduino-cli compile --fqbn esp32:esp32:XIAO_ESP32C6 TestLoco
-if [ $? -eq 0 ]; then
-    echo "✓ ESP32C6 compilation successful"
-    echo "Flashing to ESP32C6 (usbmodem1301)..."
-    arduino-cli upload -p /dev/cu.usbmodem1301 --fqbn esp32:esp32:XIAO_ESP32C6 TestLoco
-    if [ $? -eq 0 ]; then
-        echo "✓ ESP32C6 flash successful"
-    else
-        echo "✗ ESP32C6 flash failed"
-    fi
-else
-    echo "✗ ESP32C6 compilation failed"
-fi
-echo ""
-
-# nRF52840 - TestLoco (usbmodem1201)
-echo "************* nRF52840 - TestLoco *************"
-echo "Compiling TestLoco for nRF52840..."
-arduino-cli compile --fqbn Seeeduino:nrf52:xiaonRF52840 TestLoco
-if [ $? -eq 0 ]; then
-    echo "✓ nRF52840 TestLoco compilation successful"
-    echo "Flashing to nRF52840 (usbmodem1201)..."
-    arduino-cli upload -p /dev/cu.usbmodem1201 --fqbn Seeeduino:nrf52:xiaonRF52840 TestLoco
-    if [ $? -eq 0 ]; then
-        echo "✓ nRF52840 TestLoco flash successful"
-    else
-        echo "✗ nRF52840 TestLoco flash failed"
-    fi
-else
-    echo "✗ nRF52840 TestLoco compilation failed"
-fi
-echo ""
-
-# nRF52840 - TestPad (usbmodem1101)
-echo "************* nRF52840 - TestPad *************"
-echo "Compiling TestPad for nRF52840..."
-arduino-cli compile --fqbn Seeeduino:nrf52:xiaonRF52840 TestPad
-if [ $? -eq 0 ]; then
-    echo "✓ nRF52840 TestPad compilation successful"
-    echo "Flashing to nRF52840 (usbmodem1101)..."
-    arduino-cli upload -p /dev/cu.usbmodem1101 --fqbn Seeeduino:nrf52:xiaonRF52840 TestPad
-    if [ $? -eq 0 ]; then
-        echo "✓ nRF52840 TestPad flash successful"
-    else
-        echo "✗ nRF52840 TestPad flash failed"
-    fi
-else
-    echo "✗ nRF52840 TestPad compilation failed"
-fi
-
-echo ""
-echo "=========================================="
-echo "Build and flash process completed!"
-echo "=========================================="
-echo ""
-echo "Device Summary:"
-echo "• ESP32C3 (1401)  - TestLoco"
-echo "• ESP32C6 (1301)  - TestLoco"
-echo "• nRF52840 (1201) - TestLoco"
-echo "• nRF52840 (1101) - TestPad"
+# nRF52840 - TestPad
+echo -n "Building nRF-Pad...		"
+arduino-cli compile --fqbn Seeeduino:nrf52:xiaonRF52840 --build-path build/nrf52P TestPad >/dev/null
+echo "✓"
