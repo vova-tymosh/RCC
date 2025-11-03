@@ -35,9 +35,9 @@ public:
     void get(const char *key, char *value, size_t size)
     {
         char filepath[FILENAME_LEN];
-        value[0] = 0;
         storage.addFolder(filepath, SETTINGS_PATH, key, sizeof(filepath));
-        storage.read(filepath, value, size);
+        int r = storage.read(filepath, value, size);
+        value[r] = '\0';
     }
 
     float getCachedFloat(const char *key)
@@ -64,7 +64,7 @@ public:
         char filepath[FILENAME_LEN];
         storage.addFolder(filepath, SETTINGS_PATH, key, sizeof(filepath));
         if (storage.exists(filepath)) {
-            storage.write(filepath, (void *)value, strlen(value) + 1);
+            storage.write(filepath, (void *)value, strlen(value));
             for (int i = 0; i < cache.size; i++) {
                 if (strcmp(cache.keys[i], key) == 0) {
                     cache.values[i] = atof(value);
@@ -79,7 +79,7 @@ public:
     {
         char filepath[FILENAME_LEN];
         storage.addFolder(filepath, SETTINGS_PATH, key, sizeof(filepath));
-        size_t size = strlen(value) + 1;
+        size_t size = strlen(value);
         storage.write(filepath, (void *)value, size);
     }
 
@@ -89,7 +89,7 @@ public:
             char filepath[FILENAME_LEN];
             storage.addFolder(filepath, SETTINGS_PATH, defaults[i].key, sizeof(filepath));
             if (!storage.exists(filepath)) {
-                size_t valueSize = strlen(defaults[i].value) + 1;
+                size_t valueSize = strlen(defaults[i].value);
                 storage.write(filepath, (void *)defaults[i].value, valueSize);
             }
         }

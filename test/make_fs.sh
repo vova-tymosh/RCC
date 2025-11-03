@@ -79,10 +79,10 @@ while IFS=: read -r key value; do
     
     # Handle special cases
     if [ "$key" = "functionNames" ]; then
-        echo -ne "${value}\x00" > $BUILD_PATH/data/functionNames
+        echo -ne "${value}" > $BUILD_PATH/data/functionNames
     else
         # Regular settings
-        echo -ne "${value}\x00" > $BUILD_PATH/data/settings/$key
+        echo -ne "${value}" > $BUILD_PATH/data/settings/$key
     fi
 done < "$CONFIG_FILE"
 

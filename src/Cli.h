@@ -167,7 +167,8 @@ private:
             return false;
         char *filename = cmd;
         char value[INPUT_LEN_MAX];
-        storage.read(filename, value, sizeof(value));
+        int r = storage.read(filename, value, sizeof(value));
+        value[r] = '\0';
         Serial.print(filename);
         Serial.print(":");
         Serial.println(value);
