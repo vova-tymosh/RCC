@@ -2,5 +2,5 @@
 .vscode/
 build/
 *.log
-default.cfg
+custom.cfg
 
