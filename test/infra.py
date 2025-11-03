@@ -12,7 +12,7 @@ import serial.tools.list_ports
 import time
 import queue
 import select
-import sys
+import sys, os
 import logging
 import paho.mqtt.client as mqtt
 from paho.mqtt.subscribeoptions import SubscribeOptions
@@ -53,16 +53,29 @@ def get_unblocked_input():
 def updateSettings(port):
     data = []
     try:
-        file = open('default.cfg')
+        if os.path.exists('custom.cfg'):
+            file = open('custom.cfg')
+        else:
+            file = open('default.cfg')
         data = file.read()
         data = data.splitlines()
     except:
         pass
-    data += [f'loconame:RCC{LocoSetting.locoaddr}', f'locoaddr:{LocoSetting.locoaddr}']
 
+    rightLine = re.compile('\s*(?P<key>[a-zA-Z0-9_-]+):(?P<value>[a-zA-Z0-9_-]+\s*)')
     for i in data:
-        port.write(f'S{i}')
-        port.read(i)
+        m = rightLine.match(i)
+        if m:
+            line = i
+            key = m.group("key")
+            if key == "functionNames":
+                continue
+            if key == "loconame":
+                line = f'loconame:RCC{LocoSetting.locoaddr}'
+            elif key == "locoaddr":
+                line = f'locoaddr:{LocoSetting.locoaddr}'
+            port.write(f'S{line}')
+            port.read(f'{line}')
 
 class LocoSetting:
     locoaddr = 3

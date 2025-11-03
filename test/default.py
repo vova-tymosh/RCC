@@ -7,6 +7,6 @@ if len(l) == 0:
 
 SerialComm.locoPortIndex = 0
 s = SerialComm.openPort()
-print(f'Upload settings from default.cfg (your wifi & network config) to device:  {l[0].device} - {l[0].description}')
+print(f'Upload settings to device:  {l[0].device} - {l[0].description}')
 updateSettings(s)
 del s
