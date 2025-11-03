@@ -35,7 +35,7 @@ public:
     void wifiConnect(String wifissid, String wifipwd)
     {
         WiFi.begin(wifissid, wifipwd);
-        Serial.print("[WiFi] Connecting");
+        Serial.print("[WiFi] Connecting to " + wifissid);
         for (int i = 0; i < 600; i++) {
             if (WiFi.status() == WL_CONNECTED)
                 break;
@@ -48,7 +48,8 @@ public:
             Serial.println(WiFi.localIP());
             node->onConnect(CONN_WIFI);
         } else {
-            Serial.println("Failed to connect, revert to AP");
+            Serial.println("\nFailed to connect, check credentials and if this is 2.4GHz wifi");
+            Serial.println("Revert to AP");
             wifiAP(wifissid, wifipwd);
         }
     }
