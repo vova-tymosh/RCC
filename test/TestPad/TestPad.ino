@@ -117,7 +117,7 @@ TestPad pad;
 
 void setup()
 {
-    Serial.begin(115200);
+    Serial.begin(921600);
     Serial.println("Started");
     storage.begin();
     settings.begin(padSettings, sizeofarray(padSettings));

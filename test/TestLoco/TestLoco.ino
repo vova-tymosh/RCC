@@ -21,13 +21,20 @@
 
 Storage storage;
 Settings settings;
-PinExt blue(0);
+PowerMeter powerMeter;
+Audio audio;
+Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD);
+Timer update(1000);
+
 PinExt q(5);
 StatusLed statusLed(q, 500);
-PowerMeter powerMeter;
-Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD);
-Audio audio;
-Timer update(1000);
+PinExt p0(0);
+PinExt p1(1);
+PinExt p2(2);
+PinExt p3(3);
+PinExt p4(4);
+Pin    p5(D10);
+Pin *pins[] = {&p0, &p1, &p2, &p3, &p4, &p5};
 
 
 class TestLoco : public RCCLoco
@@ -50,8 +57,9 @@ public:
         int action = settings.getCachedInt(actionName);
         int pin = action & 0x07;
         Serial.print("  Pin: "); Serial.println(pin);
-        bool loop = (action & 0x10) != 0;
+        pins[pin]->apply(value);
 
+        bool loop = (action & 0x10) != 0;
         const char *fname = functions.idToName(code);
         if (loop) {
             if (value) {
@@ -113,7 +121,6 @@ public:
 
     void stopSound(uint8_t functionCode)
     {
-        // Find and stop the channel playing this function
         for (int i = 0; i < MAX_CHANNELS; i++) {
             if (channels[i] == functionCode) {
                 Serial.print("Stop channel ");
@@ -173,13 +180,12 @@ TestLoco loco;
 
 void setup()
 {
-    Serial.begin(115200);
+    Serial.begin(921600);
     delay(50);
 
     storage.begin();
     settings.begin(settingsArray, sizeofarray(settingsArray));
     motor.begin();
-    blue.begin();
     powerMeter.begin();
     update.start();
     audio.begin(16000);
@@ -189,7 +195,6 @@ void setup()
     loco.begin();
     loco.volume = 255;
 
-    // Initialize function channel tracking
     for (int i = 0; i < TestLoco::MAX_CHANNELS; i++) {
         loco.channels[i] = -1;
     }

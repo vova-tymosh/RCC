@@ -97,7 +97,7 @@ class SerialComm:
         idx = SerialComm.locoPortIndex
         l = SerialComm.listPorts()
         if idx < len(l):
-            return SerialComm(idx, serial.Serial(l[idx].device, 115200, timeout=1), l[idx].description)
+            return SerialComm(idx, serial.Serial(l[idx].device, 921600, timeout=1), l[idx].description)
         return None
 
     def __init__(self, idx, s, description):
