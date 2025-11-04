@@ -72,6 +72,7 @@ else
 fi
 
 # Read config file and create files
+echo "Creating setting..."
 while IFS=: read -r key value; do
     # Skip comments and empty lines
     [[ "$key" =~ ^#.*$ ]] && continue
@@ -85,6 +86,16 @@ while IFS=: read -r key value; do
         echo -ne "${value}" > $BUILD_PATH/data/settings/$key
     fi
 done < "$CONFIG_FILE"
+
+# Convert WAV files to sound data
+if [ -d "sounds" ]; then
+    echo "Converting sound files..."
+    for wav_file in sounds/*.wav; do
+        if [ -f "$wav_file" ]; then
+            python3 wav2sound.py "$wav_file" "$BUILD_PATH/data/sounds"
+        fi
+    done
+fi
 
 # Create filesystem image
 ~/Library/Arduino15/packages/esp32/tools/mklittlefs/*/mklittlefs \
