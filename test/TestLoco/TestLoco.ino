@@ -6,7 +6,7 @@
  * The above copyright notice shall be included in all
  * copies or substantial portions of the Software.
  */
-#define RCC_DEBUG 2
+#define RCC_DEBUG 1
 #include "Motherboard.h"
 #include "Peripheral.h"
 #include "Settings.h"
@@ -34,19 +34,34 @@ class TestLoco : public RCCLoco
 {
 public:
     using RCCLoco::RCCLoco;
+    static const int MAX_CHANNELS = Audio::MAX_CHANNELS;
+
     // Ping ping;
     uint8_t volume;
 
+    uint8_t channels[MAX_CHANNELS];
 
     void onFunction(uint8_t code, bool value)
     {
         Serial.print("Function: "); Serial.print(code); Serial.println( value ? " ON" : " OFF");
-        if (code == 0) {
-            blue.apply(value);
-        }
+
+        char actionName[4];
+        snprintf(actionName, 4, "%d", code);
+        int action = settings.getCachedInt(actionName);
+        int pin = action & 0x07;
+        Serial.print("  Pin: "); Serial.println(pin);
+        bool loop = (action & 0x10) != 0;
 
         const char *fname = functions.idToName(code);
-        processPlay(fname);
+        if (loop) {
+            if (value) {
+                processPlay(fname, true, code);
+            } else {
+                stopSound(code);
+            }
+        } else {
+            processPlay(fname, false);
+        }
     }
 
     void onThrottle(uint8_t direction, uint8_t throttle)
@@ -76,17 +91,36 @@ public:
         Serial.println(value);
     }
 
-    void processPlay(const char* cmd)
+    int processPlay(const char* cmd, bool loop = false, uint8_t functionCode = 255)
     {
+        int channel = -1;
         const char *fileName = cmd;
         String path = storage.addFolder(SOUNDS_PATH, fileName);
         if (storage.exists(path.c_str())) {
             Serial.print("Play ");
             Serial.println(path);
-            audio.play(path.c_str(), volume);
+            channel = audio.play(path, volume, loop);
+
+            if (channel >= 0 && functionCode != 255) {
+                channels[channel] = functionCode;
+            }
         } else {
             Serial.print("No file ");
             Serial.println(path);
+        }
+        return channel;
+    }
+
+    void stopSound(uint8_t functionCode)
+    {
+        // Find and stop the channel playing this function
+        for (int i = 0; i < MAX_CHANNELS; i++) {
+            if (channels[i] == functionCode) {
+                Serial.print("Stop channel ");
+                Serial.println(channels[i]);
+                audio.stop(i);
+                channels[i] = -1;
+            }
         }
     }
 
@@ -154,6 +188,11 @@ void setup()
 
     loco.begin();
     loco.volume = 255;
+
+    // Initialize function channel tracking
+    for (int i = 0; i < TestLoco::MAX_CHANNELS; i++) {
+        loco.channels[i] = -1;
+    }
 }
 
 

@@ -15,8 +15,11 @@
 
 class Audio
 {
-    static const int CHUNK_SIZE = 2048;
+public:
     static const int MAX_CHANNELS = 4;
+
+private:
+    static const int CHUNK_SIZE = 2048;
 
     struct Channel {
         String filename;

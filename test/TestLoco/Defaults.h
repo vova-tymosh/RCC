@@ -21,5 +21,8 @@ const KeyValue settingsArray[] = {
     {"heartbeat",    "1000"},
     {"testvalue",    "1.1"},
     {"mqtt",         "ON"},
-    {"pump",         "0"}
+    {"pump",         "0"},
+    {"0",            "0"},
+    {"1",            "0"},
+    {"2",            "0"},
 };

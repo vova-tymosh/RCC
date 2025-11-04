@@ -25,9 +25,24 @@
         Serial.print("[MQ] ");                                                                     \
         Serial.println(msg);                                                                       \
     };
+
+inline void logIncoming(const char *topic, const char *payload, int size)
+{
+    const int maxLog = 128;
+    char logLine[maxLog];
+    int l = size < maxLog ? size : maxLog;
+    strncpy(logLine, payload, l);
+    logLine[l] = '\0';
+    Serial.print("[MQ] <");
+    Serial.print(topic);
+    Serial.print("+");
+    Serial.println(logLine);
+}
 #else
 #define log(msg)
+#define logIncoming(topic, payload, size)
 #endif
+
 
 void onMqttMessage(char *topic, byte *payload, unsigned int length);
 
@@ -101,7 +116,7 @@ public:
                 mqtt.subscribe(topic.c_str());
                 introduce();
             } else {
-                log("Failed to connect");
+                Serial.println("[MQ] Failed to connect");
                 nextReconnectTime = millis() + 2000;
             }
         }
@@ -146,6 +161,8 @@ char *parseAction(char *topic)
 void onMqttMessage(char *topic, byte *payload, unsigned int length)
 {
     char *value = (char *)payload;
+    logIncoming(topic, value, length);
+
     char *action = parseAction(topic);
     if (action == NULL)
         return;
