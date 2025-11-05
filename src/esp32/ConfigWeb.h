@@ -16,6 +16,10 @@ private:
     static void handleRoot();
 
     static void handleSubmit();
+    
+    static void handleUpload();
+    
+    static void handleUploadComplete();
 
 public:
     static WebServer server;
