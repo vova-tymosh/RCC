@@ -20,6 +20,10 @@ private:
     static void handleUpload();
     
     static void handleUploadComplete();
+    
+    static void handleFirmwareUpload();
+    
+    static void handleFirmwareComplete();
 
 public:
     static WebServer server;

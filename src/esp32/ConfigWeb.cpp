@@ -10,6 +10,7 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
+#include <Update.h>
 #include "ConfigWeb.h"
 #include "Settings.h"
 
@@ -20,7 +21,6 @@ const char *htmlPrefix = R"(
 <style>
 body{font-family:Arial,sans-serif;background:#f5f5f5;padding:5px;margin:0}
 .c{max-width:800px;margin:0 auto;background:#fff;border-radius:8px;padding:12px;box-shadow:0 2px 4px rgba(0,0,0,.1)}
-h1{font-size:18px;margin-bottom:8px}
 h2{font-size:15px;margin:12px 0 6px;border-bottom:2px solid #3498db;padding-bottom:2px}
 table{width:100%;border-collapse:collapse}
 td{padding:2px 6px}
@@ -34,12 +34,12 @@ input[type="text"]:focus{outline:none;border-color:#3498db}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000}
 .modal-content{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,.2);min-width:250px;text-align:center}
 .modal-content h3{margin:0 0 12px;font-size:16px;color:#333}
-.modal-content .btn{margin-top:12px}
+.modal-content .btn{margin-top:12px;margin-left:8px}
 </style>
 </head>
 <body>
 <div class="c">
-<h1>RCC Configuration</h1>
+<h2>RCC Configuration</h2>
 <form method="POST" action="/submit">
 <table>
 )";
@@ -59,14 +59,26 @@ const char *htmlSuffix = R"raw(
 <button type="submit" class="btn" id="b">Upload</button>
 <span id="s" style="color:#666;font-size:14px">No file</span>
 </form>
-<div id="modal" class="modal"><div class="modal-content"><h3 id="modal-msg"></h3><button class="btn" onclick="closeModal()">OK</button></div></div>
+<h2>Firmware Update</h2>
+<form method="POST" action="/firmware" enctype="multipart/form-data" id="fw">
+<input type="file" name="firmware" accept=".bin" id="fwi" style="display:none">
+<label for="fwi" class="btn">Choose</label>
+<button type="submit" class="btn" id="fwb">Update</button>
+<span id="fws" style="color:#666;font-size:14px">No file</span>
+</form>
+<div id="modal" class="modal"><div class="modal-content"><h3 id="modal-msg"></h3><div id="modal-btns"><button class="btn" onclick="closeModal()">OK</button></div></div></div>
 <script>
-function showModal(msg){document.getElementById("modal-msg").textContent=msg;document.getElementById("modal").style.display="block"}
-function closeModal(){document.getElementById("modal").style.display="none"}
+var confirmCallback=null;
+function showModal(msg,isConfirm,callback){document.getElementById("modal-msg").textContent=msg;var btns=document.getElementById("modal-btns");if(isConfirm){confirmCallback=callback;btns.innerHTML='<button class="btn" onclick="confirmYes()">Yes</button><button class="btn" onclick="closeModal()">No</button>'}else{btns.innerHTML='<button class="btn" onclick="closeModal()">OK</button>'}document.getElementById("modal").style.display="block"}
+function closeModal(){document.getElementById("modal").style.display="none";confirmCallback=null}
+function confirmYes(){var cb=confirmCallback;closeModal();if(cb)cb()}
 var i=document.getElementById("i"),s=document.getElementById("s"),b=document.getElementById("b");
+var fwi=document.getElementById("fwi"),fws=document.getElementById("fws"),fwb=document.getElementById("fwb");
 i.onchange=function(){s.textContent=this.files.length?this.files.length==1?this.files[0].name:this.files.length+" files":"No file";s.style.color=this.files.length?"#333":"#666"};
-document.querySelector("form[action=\"/submit\"]").onsubmit=function(e){e.preventDefault();var d=new FormData(this);fetch("/submit",{method:"POST",body:d}).then(function(r){return r.text()}).then(function(){showModal("Settings saved successfully");setTimeout(function(){location.reload()},1500)}).catch(function(){showModal("Failed to save settings")})};
-document.getElementById("f").onsubmit=function(e){e.preventDefault();if(!i.files.length){showModal("Please select a file");return}b.disabled=true;s.textContent="Uploading...";s.style.color="#3498db";var d=new FormData(this);fetch("/upload",{method:"POST",body:d}).then(function(r){if(r.ok)return r.text();throw new Error("Upload failed")}).then(function(){showModal("Upload successful");b.disabled=false;s.textContent="No file";s.style.color="#666";i.value=""}).catch(function(e){showModal("Upload failed");b.disabled=false;s.textContent="No file";s.style.color="#666";i.value=""})};
+fwi.onchange=function(){fws.textContent=this.files.length?this.files[0].name:"No file";fws.style.color=this.files.length?"#333":"#666"};
+document.querySelector("form[action=\"/submit\"]").onsubmit=function(e){e.preventDefault();var d=new FormData(this);fetch("/submit",{method:"POST",body:d}).then(function(r){return r.text()}).then(function(){showModal("Settings saved successfully",false);setTimeout(function(){location.reload()},1500)}).catch(function(){showModal("Failed to save settings",false)})};
+document.getElementById("f").onsubmit=function(e){e.preventDefault();if(!i.files.length){showModal("Please select a file",false);return}b.disabled=true;s.textContent="Uploading...";s.style.color="#3498db";var d=new FormData(this);fetch("/upload",{method:"POST",body:d}).then(function(r){if(r.ok)return r.text();throw new Error("Upload failed")}).then(function(){showModal("Upload successful",false);b.disabled=false;s.textContent="No file";s.style.color="#666";i.value=""}).catch(function(e){showModal("Upload failed",false);b.disabled=false;s.textContent="No file";s.style.color="#666";i.value=""})};
+document.getElementById("fw").onsubmit=function(e){e.preventDefault();if(!fwi.files.length){showModal("Please select a firmware file",false);return}showModal("Update firmware? Device will reboot.",true,function(){fwb.disabled=true;fws.textContent="Updating...";fws.style.color="#3498db";var d=new FormData(document.getElementById("fw"));fetch("/firmware",{method:"POST",body:d}).then(function(r){if(r.ok)return r.text();throw new Error("Update failed")}).then(function(){showModal("Firmware updated! Device rebooting...",false);setTimeout(function(){location.reload()},10000)}).catch(function(e){showModal("Firmware update failed",false);fwb.disabled=false;fws.textContent="No file";fws.style.color="#666";fwi.value=""})})};
 </script>
 </div>
 </body>
@@ -206,14 +218,46 @@ void ConfigWeb::handleUploadComplete()
     }
 }
 
+void ConfigWeb::handleFirmwareUpload()
+{
+    HTTPUpload& upload = server.upload();
+
+    if (upload.status == UPLOAD_FILE_START) {
+        Serial.printf("[Web] Firmware update: %s\n", upload.filename.c_str());
+        uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+        if (!Update.begin(maxSketchSpace, U_FLASH)) {
+            Update.printError(Serial);
+        }
+    } else if (upload.status == UPLOAD_FILE_WRITE) {
+        if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+            Update.printError(Serial);
+        }
+    } else if (upload.status == UPLOAD_FILE_END) {
+        if (Update.end(true)) {
+            Serial.printf("[Web] Update Success: %u bytes\nRebooting...\n", upload.totalSize);
+        } else {
+            Update.printError(Serial);
+        }
+    }
+}
+
+void ConfigWeb::handleFirmwareComplete()
+{
+    if (Update.hasError()) {
+        server.send(400, "text/plain", "ERROR");
+    } else {
+        server.send(200, "text/plain", "OK");
+        delay(100);
+        ESP.restart();
+    }
+}
+
 void ConfigWeb::begin()
 {
-    // if (WiFi.status() != WL_CONNECTED)
-    //     return;
-
     server.on("/", HTTP_GET, handleRoot);
     server.on("/submit", HTTP_POST, handleSubmit);
     server.on("/upload", HTTP_POST, handleUploadComplete, handleUpload);
+    server.on("/firmware", HTTP_POST, handleFirmwareComplete, handleFirmwareUpload);
 
     server.begin();
     Serial.println("[Web] Server started");
