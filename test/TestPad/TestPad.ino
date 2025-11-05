@@ -11,6 +11,7 @@
 #include "Storage.h"
 #include "Settings.h"
 #include "Timer.h"
+#include "Defaults.h"
 
 
 
@@ -113,7 +114,6 @@ public:
 };
 TestPad pad;
 
-#include "Defaults.h"
 
 void setup()
 {
