@@ -110,7 +110,7 @@ public:
 
     void setValue(const char *key, const char *value)
     {
-        settings.put(key, value);
+        settings.set(key, value);
     }
 
     String listValues()

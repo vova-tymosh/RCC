@@ -113,7 +113,7 @@ void ConfigWeb::handleSubmit()
 {
     for (int i = 0; i < server.args(); i++) {
         String name = server.argName(i);
-        settings.put(server.argName(i).c_str(), server.arg(i));
+        settings.set(server.argName(i).c_str(), server.arg(i));
     }
     server.send(200, "text/plain", htmlSubmitted);
 }

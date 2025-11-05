@@ -75,7 +75,7 @@ void test02()
 void test03()
 {
     // Test cache
-    settings.put("testvalue", "101.1");
+    settings.set("testvalue", "101.1");
     const int c = 10000;
     long start = millis();
     float r = 0;

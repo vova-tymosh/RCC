@@ -128,7 +128,8 @@ public:
         payload[size] = 0;
         char *data = (char *)payload + CODE_SIZE;
         struct Command *command = (struct Command *)payload;
-        log("[Nrf] < "); log((char)command->code); log("\n");
+        log("[Nrf] < "); log((char)command->code);
+        log((const char*)payload);log("\n");
 
         if (command->code == NRF_INTRO) {
             introduce();

@@ -19,7 +19,8 @@ struct KeyValue {
 class Settings
 {
     struct {
-        char **keys;
+        char *keyBuffer;      // Single buffer for all key strings
+        char **keys;          // Pointers into keyBuffer
         float *values;
         int size;
     } cache;
@@ -54,12 +55,12 @@ public:
         return (int)getCachedFloat(key);
     }
 
-    void put(const char *key, String value)
+    void set(const char *key, String value)
     {
-        put(key, value.c_str());
+        set(key, value.c_str());
     }
 
-    void put(const char *key, const char *value)
+    void set(const char *key, const char *value)
     {
         char filepath[FILENAME_LEN];
         storage.addFolder(filepath, SETTINGS_PATH, key, sizeof(filepath));
@@ -93,19 +94,58 @@ public:
                 storage.write(filepath, (void *)defaults[i].value, valueSize);
             }
         }
-        cache.size = size;
-        cache.keys = (char **)malloc(size * sizeof(char *));
-        for (int i = 0; i < size; i++) {
-            cache.keys[i] = (char *)defaults[i].key;
-        }
-        cache.values = (float *)malloc(size * sizeof(float));
+        buildCache();
+    }
 
-        for (int i = 0; i < size; i++) {
+    void begin()
+    {
+        buildCache();
+    }
+
+private:
+    void buildCache()
+    {
+        // Count files and calculate total key length
+        cache.size = 0;
+        size_t totalKeyLength = 0;
+        String name = storage.openFirst(SETTINGS_PATH);
+        while (name.length() > 0) {
+            cache.size++;
+            totalKeyLength += name.length() + 1;  // +1 for null terminator
+            name = storage.openNext();
+        }
+
+        if (cache.size == 0)
+            return;
+
+        // Three allocations: key buffer, key pointers, values
+        cache.keyBuffer = (char *)malloc(totalKeyLength);
+        cache.keys = (char **)malloc(cache.size * sizeof(char *));
+        cache.values = (float *)malloc(cache.size * sizeof(float));
+
+        // Populate cache
+        int i = 0;
+        size_t offset = 0;
+        name = storage.openFirst(SETTINGS_PATH);
+        while (name.length() > 0) {
+            // Point to position in buffer
+            cache.keys[i] = cache.keyBuffer + offset;
+
+            // Copy key string
+            strcpy(cache.keys[i], name.c_str());
+            offset += name.length() + 1;
+
+            // Read and cache value
             char value[VALUE_LEN];
-            get(defaults[i].key, value, sizeof(value));
+            get(cache.keys[i], value, sizeof(value));
             cache.values[i] = atof(value);
+
+            i++;
+            name = storage.openNext();
         }
     }
+
+public:
 };
 
 extern Settings settings;

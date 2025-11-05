@@ -112,7 +112,7 @@ public:
     void setValueLocal(const char *key, const char *value)
     {
         // Serial.println("setValueLoc: " + String(key) + "/" + String(value));
-        settings.put(key, value);
+        settings.set(key, value);
     }
 
     String listValues()

@@ -157,6 +157,7 @@ class TransportMqtt:
         self.mqttClient.subscribe(f'cab/{TransportMqtt.locoaddr}/#', options=options)
 
     def waitForMessage(self, message = None):
+        logging.info(f"[MQ] Waiting for {message}")
         for i in range(5):
             self.mqttClient.loop(timeout=1.0)
             if message:

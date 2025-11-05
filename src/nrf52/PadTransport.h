@@ -210,7 +210,7 @@ public:
             isThereMore = introToKnown(token);
             token = NULL;
         }
-        log("Updated lits of nodes, count:");
+        log("Updated list of nodes, count:");
         log(known.len);
     }
 
