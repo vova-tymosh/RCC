@@ -13,6 +13,7 @@
  *
  */
 #include "Timer.h"
+#include "Settings.h"
 
 void speedHandler();
 
@@ -20,8 +21,8 @@ class SpeedSensor
 {
 private:
     const int update_period;
-    const float distance_per_click;
     const int pin;
+    float distance_per_click;
     Timer timer;
     float distance;
     float last_disatnce;
@@ -29,13 +30,18 @@ private:
     float speed;
 
 public:
-    SpeedSensor(int pin, float distance_per_click, int update_period = 500)
-        : pin(pin), distance_per_click(distance_per_click), update_period(update_period)
+    SpeedSensor(int pin, int update_period = 500)
+        : pin(pin), update_period(update_period)
     {
     }
 
     void begin()
     {
+        char buffer[VALUE_LEN];
+        settings.get("distancePerClick", buffer, sizeof(buffer));
+        distance_per_click = atof(buffer);
+        if (distance_per_click == 0)
+            distance_per_click = 1;
         pinMode(pin, INPUT);
         attachInterrupt(digitalPinToInterrupt(pin), speedHandler, RISING);
         last_time = millis();

@@ -21,6 +21,17 @@ private:
     TransportClient *transportClient;
     RCCNode *node;
 
+    void setWifiExt()
+    {
+#ifdef CONFIG_IDF_TARGET_ESP32C6
+        pinMode(WIFI_ENABLE, OUTPUT);
+        digitalWrite(WIFI_ENABLE, LOW); // Activate RF switch control
+        delay(100);
+        pinMode(WIFI_ANT_CONFIG, OUTPUT);
+        digitalWrite(WIFI_ANT_CONFIG, HIGH); // Use external antenna
+#endif
+    }
+
 public:
     Transport(RCCNode *node) : node(node) {}
 
@@ -56,10 +67,15 @@ public:
 
     void begin()
     {
+        String wifiext = settings.get("wifiext");
         String wifiap = settings.get("wifiap");
         String wifissid = settings.get("wifissid");
         String wifipwd = settings.get("wifipwd");
         String mqtt = settings.get("mqtt");
+
+        if (wifiext == "ON") {
+            setWifiExt();
+        }
 
         if (wifiap != "OFF")
             // If wifiap is ON or it is not defined, the system goes AP

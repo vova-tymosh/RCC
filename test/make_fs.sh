@@ -3,6 +3,7 @@
 # Parse arguments
 BUILD_PATH=""
 PORT=""
+ADDR=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -14,12 +15,16 @@ while [[ $# -gt 0 ]]; do
             PORT="$2"
             shift 2
             ;;
+        --addr)
+            ADDR="$2"
+            shift 2
+            ;;
     esac
 done
 
 if [ -z "$BUILD_PATH" ] || [ -z "$PORT" ]; then
     echo "Error: Missing required arguments"
-    echo "Usage: $0 --build-path <path> --port <port>"
+    echo "Usage: $0 --build-path <path> --port <port> [--addr <address>]"
     exit 1
 fi
 
@@ -77,6 +82,15 @@ while IFS=: read -r key value; do
     # Skip comments and empty lines
     [[ "$key" =~ ^#.*$ ]] && continue
     [[ -z "$key" ]] && continue
+    
+    # Override loconame and locoaddr if --addr is provided
+    if [ -n "$ADDR" ]; then
+        if [ "$key" = "loconame" ]; then
+            value="RCC${ADDR}"
+        elif [ "$key" = "locoaddr" ]; then
+            value="$ADDR"
+        fi
+    fi
     
     # Regular settings
     echo -ne "${value}" > $BUILD_PATH/data/settings/$key

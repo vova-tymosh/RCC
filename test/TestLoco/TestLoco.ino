@@ -11,6 +11,7 @@
 #include "Peripheral.h"
 #include "Settings.h"
 #include "RCCLoco.h"
+#include "SpeedSensor.h"
 
 #include "Audio.h"
 #include "TestStorage.h"
@@ -24,6 +25,8 @@ Settings settings;
 PowerMeter powerMeter;
 Audio audio;
 Motor motor(PIN_MOTOR_BCK, PIN_MOTOR_FWD);
+SpeedSensor speedSensor(PIN_SPEED_PIN);
+
 Timer update(1000);
 
 PinExt q(5);
@@ -80,7 +83,8 @@ public:
     
     void onConnect(uint8_t connType)
     {
-        statusLed.blink(connType);
+        if (settings.getCachedInt("statusled"))
+            statusLed.blink(connType);
     }
 
     void processCreate(char cmd[])
@@ -134,10 +138,6 @@ public:
     void onCommand(uint8_t code, char* value, uint8_t size)
     {
         switch (code) {
-        case 'B':
-            // Serial.println(motor.readBemf());
-            statusLed.blink(5);
-            break;
         case 'P':
             processPlay(value);
             break;
@@ -176,8 +176,6 @@ public:
 };
 TestLoco loco;
 
-
-
 void setup()
 {
     Serial.begin(921600);
@@ -189,8 +187,10 @@ void setup()
     powerMeter.begin();
     update.start();
     audio.begin(16000);
-    // q.begin();
-    // statusLed.begin(true);
+    if (settings.getCachedInt("statusled")) {
+        q.begin();
+        statusLed.begin(true);
+    }
 
     loco.begin();
     loco.volume = 255;
@@ -214,8 +214,10 @@ void loop()
 {
     loco.loop();
     audio.loop();
-    // statusLed.loop();
     // loco.ping.loop();
+    if (settings.getCachedInt("statusled")) {
+        statusLed.loop();
+    }
 
     if (update.hasFired()) {
         static int d = 0;
@@ -233,19 +235,5 @@ void loop()
 
 
 /* For future use, maybe */
-
-/*
 // defined(CONFIG_IDF_TARGET_ESP32C3)
 // defined(CONFIG_IDF_TARGET_ESP32C6)
-
-//   pinMode(WIFI_ENABLE, OUTPUT); // pinMode(3, OUTPUT);
-//   digitalWrite(WIFI_ENABLE, LOW); // digitalWrite(3, LOW); // Activate RF switch control
-
-//   delay(100);
-
-//   pinMode(WIFI_ANT_CONFIG, OUTPUT); // pinMode(14, OUTPUT);
-//   digitalWrite(WIFI_ANT_CONFIG, HIGH); // digitalWrite(14, HIGH); // Use external antenna
-
-
-
-*/

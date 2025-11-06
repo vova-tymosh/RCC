@@ -20,6 +20,8 @@ private:
     static const int TCA_CONFIGURATION = 0x03;
 
     uint8_t addr;
+    bool active = false;
+    bool error = false;
 
     void write(uint8_t reg, uint8_t value)
     {
@@ -33,8 +35,12 @@ private:
     {
         uint8_t value = 0;
         Wire.beginTransmission(addr);
-        Wire.write(reg);
+        int r = Wire.write(reg);
         Wire.endTransmission();
+        if (r == 0) {
+            error = true;
+            return 0;
+        }
         Wire.requestFrom(addr, 1);
         if (Wire.available())
             value = Wire.read();
@@ -47,30 +53,43 @@ public:
     bool begin()
     {
         Wire.begin();
+        error = false;
         uint8_t value = read(TCA_CONFIGURATION);
+        if (error) {
+            Serial.println("Failed to find TCA6408A chip");
+        } else {
+            active = true;
+        }
         return (value == 0xFF);
     }
 
     void setOutput(uint8_t bit)
     {
-        uint8_t value = read(TCA_CONFIGURATION);
-        value &= ~bit;
-        write(TCA_CONFIGURATION, value);
+        if (active) {
+            uint8_t value = read(TCA_CONFIGURATION);
+            value &= ~bit;
+            write(TCA_CONFIGURATION, value);
+        }
     }
 
     void setValue(uint8_t bit, bool on)
     {
-        uint8_t value = read(TCA_OUTPUT);
-        if (on)
-            value |= bit;
-        else
-            value &= ~bit;
-        write(TCA_OUTPUT, value);
+        if (active) {
+            uint8_t value = read(TCA_OUTPUT);
+            if (on)
+                value |= bit;
+            else
+                value &= ~bit;
+            write(TCA_OUTPUT, value);
+        }
     }
 
     bool getValue(uint8_t bit)
     {
-        uint8_t value = read(TCA_INPUT);
+        uint8_t value = 0;
+        if (active) {
+            value = read(TCA_INPUT);
+        }
         return (value & bit) != 0;
     }
 };
