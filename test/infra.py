@@ -68,8 +68,6 @@ def updateSettings(port):
         if m:
             line = i
             key = m.group("key")
-            if key == "functionNames":
-                continue
             if key == "loconame":
                 line = f'loconame:RCC{LocoSetting.locoaddr}'
             elif key == "locoaddr":

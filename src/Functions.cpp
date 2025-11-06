@@ -7,11 +7,10 @@
  * copies or substantial portions of the Software.
  */
 #include "Functions.h"
+#include "Settings.h"
 #include <string.h>
 #include <stdlib.h>
 #include <Arduino.h>
-
-const char *Functions::FUNCTION_NAMES_FILE = "/functionNames";
 
 Functions::Functions() : mappingCount(0)
 {
@@ -22,16 +21,10 @@ void Functions::begin()
 {
     mappingCount = 0;
 
-    // Try to read existing function names file
-    size_t fileSize = storage.size(FUNCTION_NAMES_FILE);
-    if (fileSize > 0) {
-        char *buffer = (char *)malloc(fileSize + 1);
-        if (buffer != NULL) {
-            size_t bytesRead = storage.read(FUNCTION_NAMES_FILE, buffer, fileSize);
-            buffer[bytesRead] = '\0';
-            parseFile(buffer, bytesRead);
-            free(buffer);
-        }
+    // Read function mappings from settings
+    String data = settings.get("functions");
+    if (data.length() > 0) {
+        parseFile(data.c_str(), data.length());
     }
 }
 
@@ -73,36 +66,23 @@ void Functions::parseFile(const char *data, size_t size)
 void Functions::saveToFile()
 {
     if (mappingCount == 0) {
-        // Write empty file if no mappings
-        storage.write(FUNCTION_NAMES_FILE, "", 0);
+        settings.set("functions", "");
         return;
     }
 
-    // Calculate required buffer size
-    size_t bufferSize = 0;
-    for (int i = 0; i < mappingCount; i++) {
-        bufferSize += 4;                            // ID (max 3 digits + comma)
-        bufferSize += strlen(mappings[i].name) + 1; // name + comma
-    }
-
-    char *buffer = (char *)malloc(bufferSize);
-    if (buffer == NULL)
-        return;
-
-    buffer[0] = '\0';
+    String buffer;
+    buffer.reserve(mappingCount * 20); // Estimate space needed
 
     for (int i = 0; i < mappingCount; i++) {
-        char temp[32];
-        snprintf(temp, sizeof(temp), "%d,%s", mappings[i].id, mappings[i].name);
-        strcat(buffer, temp);
-
-        if (i < mappingCount - 1) {
-            strcat(buffer, ",");
+        if (i > 0) {
+            buffer += ",";
         }
+        buffer += String(mappings[i].id);
+        buffer += ",";
+        buffer += mappings[i].name;
     }
 
-    storage.write(FUNCTION_NAMES_FILE, buffer, strlen(buffer));
-    free(buffer);
+    settings.set("functions", buffer);
 }
 
 int Functions::findMappingByName(const char *name)

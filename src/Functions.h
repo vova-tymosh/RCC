@@ -12,7 +12,6 @@
 class Functions
 {
 private:
-    static const char *FUNCTION_NAMES_FILE;
     static const int MAX_FUNCTIONS = 32;
     static const int MAX_NAME_LENGTH = 16;
 

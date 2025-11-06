@@ -78,13 +78,8 @@ while IFS=: read -r key value; do
     [[ "$key" =~ ^#.*$ ]] && continue
     [[ -z "$key" ]] && continue
     
-    # Handle special cases
-    if [ "$key" = "functionNames" ]; then
-        echo -ne "${value}" > $BUILD_PATH/data/functionNames
-    else
-        # Regular settings
-        echo -ne "${value}" > $BUILD_PATH/data/settings/$key
-    fi
+    # Regular settings
+    echo -ne "${value}" > $BUILD_PATH/data/settings/$key
 done < "$CONFIG_FILE"
 
 # Convert WAV files to sound data

@@ -9,7 +9,7 @@ cd .. && cp -r * ../libraries/RCC && cd - >/dev/null
 
 # LTO flags for size optimization (ESP32 only - nRF has linker issues with LTO)
 # Note: Serial compilation warning is harmless and expected
-ESP32_LTO='--build-property "compiler.c.extra_flags=-flto" --build-property "compiler.cpp.extra_flags=-flto" --build-property "compiler.c.elf.extra_flags=-flto"'
+# ESP32_LTO='--build-property "compiler.c.extra_flags=-flto" --build-property "compiler.cpp.extra_flags=-flto" --build-property "compiler.c.elf.extra_flags=-flto"'
 
 # ESP32C3 - TestLoco
 echo -n "Building ESP32C3...		"
