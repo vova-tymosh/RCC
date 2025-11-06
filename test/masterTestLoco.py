@@ -55,7 +55,7 @@ def print_usage():
 def runTests(listOfTests, test_name=""):
     """Run a list of tests with formatted output"""
     if test_name:
-        print(f"\n=== Running {test_name.upper()} Tests ===")
+        print(f"===  {test_name.upper()} Tests ===")
 
     w = 80
     passed = 0
@@ -72,8 +72,6 @@ def runTests(listOfTests, test_name=""):
         except Exception as e:
             print(f"ERROR in {test.__name__}: {e}")
             failed += 1
-
-    print(f"\nResults: {passed} passed, {failed} failed")
     return failed == 0
 
 def get_test_suites(test_names):
@@ -91,81 +89,74 @@ def get_test_suites(test_names):
 
     return test_names
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(message)s',
-                        filename='rcc_test.log',
-                        filemode='a')
-    logging.error('*** Test Start ***')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(message)s',
+                    filename='rcc_test.log',
+                    filemode='a')
+logging.error('*** Test Start ***')
 
-    parser = argparse.ArgumentParser(
-        description='RCC Test Suite - Remote Command and Control Testing Framework',
-        add_help=False
-    )
-    parser.add_argument('--addr', type=int, help='Locomotive address (required)')
-    parser.add_argument('--port', type=int, help='USB port index for locomotive (default: 0)')
-    parser.add_argument('--pad', type=int, help='USB port index for pad (enables NRF tests)')
-    parser.add_argument('--help', '-h', action='store_true', help='Show help message')
-    parser.add_argument('tests', nargs='*', help='Test names to run (mb, storage, mqtt, nrf)')
+parser = argparse.ArgumentParser(
+    description='RCC Test Suite - Remote Command and Control Testing Framework',
+    add_help=False
+)
+parser.add_argument('--addr', type=int, help='Locomotive address (required)')
+parser.add_argument('--port', type=int, help='USB port index for locomotive (default: 0)')
+parser.add_argument('--pad', type=int, help='USB port index for pad (enables NRF tests)')
+parser.add_argument('--help', '-h', action='store_true', help='Show help message')
+parser.add_argument('tests', nargs='*', help='Test names to run (mb, storage, mqtt, nrf)')
 
-    args = parser.parse_args()
-    if args.help:
-        print_usage()
-        sys.exit(0)
+args = parser.parse_args()
+if args.help:
+    print_usage()
+    sys.exit(0)
 
-    l = SerialComm.listPorts()
-    if len(l) == 0:
-        print('ERROR: No serial ports found')
+l = SerialComm.listPorts()
+if len(l) == 0:
+    print('ERROR: No serial ports found')
+    sys.exit(1)
+
+if not args.addr:
+    print("ERROR: --addr argument is required")
+    print("Use --help for usage information")
+    print()
+    print("Available USB ports:")
+    for i, p in enumerate(l):
+        print(f"  #{i} {p.device} - {p.description}")
+    sys.exit(1)
+
+LocoSetting.locoaddr = args.addr
+TransportMqtt.locoaddr = LocoSetting.locoaddr
+
+port = args.port if args.port is not None else 0
+if port >= len(l):
+    print(f"WARNING: Port {port} not available, using port 0")
+    port = 0
+SerialComm.locoPortIndex = port
+
+test_suites = get_test_suites(args.tests)
+if test_suites is None:
+    sys.exit(1)
+
+if args.pad is not None:
+    if args.pad >= len(l):
+        print(f"ERROR: Pad port {args.pad} not available")
         sys.exit(1)
 
-    if not args.addr:
-        print("ERROR: --addr argument is required")
-        print("Use --help for usage information")
-        print()
-        print("Available USB ports:")
-        for i, p in enumerate(l):
-            print(f"  #{i} {p.device} - {p.description}")
-        sys.exit(1)
+print(f"\n=== Running for #{port}: {l[port].device} ===")
 
-    LocoSetting.locoaddr = args.addr
-    TransportMqtt.locoaddr = LocoSetting.locoaddr
-
-    port = args.port if args.port is not None else 0
-    if port >= len(l):
-        print(f"WARNING: Port {port} not available, using port 0")
-        port = 0
-    SerialComm.locoPortIndex = port
-
-    test_suites = get_test_suites(args.tests)
-    if test_suites is None:
-        sys.exit(1)
-
-    if args.pad is not None:
-        if args.pad >= len(l):
-            print(f"ERROR: Pad port {args.pad} not available")
-            sys.exit(1)
-
-    print(f"\n=== Running for #{port}: {l[port].device} ===")
-
-    # Run tests
-    all_passed = True
-    for test_name in test_suites:
-        if test_name == 'nrf' and args.pad is None:
-            print(f"SKIPPING {test_name.upper()} tests: --pad argument required for NRF tests")
-            continue
-        if test_name == 'nrf' and args.pad is not None:
-            SerialComm.locoPortIndex = args.pad
-        else:
-            SerialComm.locoPortIndex = port
-
-        test_suite = AVAILABLE_TESTS[test_name]
-        result = runTests(test_suite, test_name)
-        all_passed = all_passed and result
-
-    print("\n" + "="*80)
-    if all_passed:
-        print("ALL TESTS PASSED!")
+# Run tests
+all_passed = True
+for test_name in test_suites:
+    if test_name == 'nrf' and args.pad is None:
+        print(f"SKIPPING {test_name.upper()} tests: --pad argument required for NRF tests")
+        continue
+    if test_name == 'nrf' and args.pad is not None:
+        SerialComm.locoPortIndex = args.pad
     else:
-        print("SOME TESTS FAILED - Check output above for details")
-    print("="*80)
+        SerialComm.locoPortIndex = port
 
+    test_suite = AVAILABLE_TESTS[test_name]
+    result = runTests(test_suite, test_name)
+    all_passed = all_passed and result
+
+sys.exit(0 if all_passed else 1)
